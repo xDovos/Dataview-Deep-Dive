@@ -4,17 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "7e094a059e081ace",
+        "id": "f496187cc4cf46f8",
         "type": "tabs",
         "children": [
           {
-            "id": "23a8b311a27e5d81",
+            "id": "e7e4d3065c26f5ad",
             "type": "leaf",
-            "pinned": true,
             "state": {
-              "type": "empty",
-              "state": {},
-              "pinned": true
+              "type": "markdown",
+              "state": {
+                "file": "README.md",
+                "mode": "source",
+                "source": false
+              }
             }
           }
         ]
@@ -91,6 +93,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "README.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -107,6 +110,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "README.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -128,7 +132,9 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {}
+              "state": {
+                "file": "README.md"
+              }
             }
           },
           {
@@ -149,22 +155,47 @@
   },
   "left-ribbon": {
     "hiddenItems": {
-      "obsidian-media-db-plugin:Add new Media DB entry": false,
       "daily-notes:Open today's daily note": false,
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
       "command-palette:Open command palette": false,
+      "obsidian-media-db-plugin:Add new Media DB entry": false,
       "darlal-switcher-plus:Open in Headings Mode": false,
       "darlal-switcher-plus:Open Symbols for the active editor": false,
       "templater-obsidian:Templater": false,
       "periodic-notes:Open today": false
     }
   },
-  "active": "23a8b311a27e5d81",
+  "active": "e7e4d3065c26f5ad",
   "lastOpenFiles": [
+    "Journal/Monthly/2023/2023-M09.md",
     "Code Modules/modulePB.js.md",
+    "Knowledge/Dataview/Progress bar.md",
+    "Knowledge/Dataview/How dataview works.md",
+    "Knowledge/Dataview/Dataview Overview.md",
+    "Templates/DQL Codeblock.md",
+    "Templates/DQL function overview.md",
+    "Templates/DVJS Codeblock.md",
+    "Templates/Movie Template.md",
+    "Templates/Template Standard Note.md",
+    "unsorted queries.md",
+    "Untitled.md",
+    "Knowledge/Persons/@Daniel @ NL.md",
+    "Knowledge/Persons",
+    "Journal/Monthly/2023/2023-M08.md",
+    "Journal/Weekly/2023/2023-W31.md",
+    "Journal/Weekly/2023/2023-W32.md",
+    "Journal/Weekly/2023/2023-W35.md",
+    "Journal/Weekly/2023/2023-W36.md",
+    "Journal/Weekly/2023/2023-W34.md",
+    "Journal/Weekly/2023/2023-W40.md",
+    "Journal/Weekly/2023/2023-W39.md",
+    "Journal/Weekly/2023/2023-W38.md",
+    "Journal/Weekly/2023/2023-W37.md",
+    "Journal/Monthly/2023/2023-M07.md",
+    "Links to docs.md",
+    "Vault.md",
     "Code Modules",
-    "Canvas/Movie Canvas/Dashboard.md",
     "Canvas/Movie Canvas/Movies.canvas",
     "Canvas/School vault setup.canvas",
     "Canvas/Movie Canvas",
@@ -179,35 +210,10 @@
     "Attachments/Query Renderings/DVJS INLINE page text filter.png",
     "Attachments/Query Renderings",
     "Attachments",
-    "Archive/1 Lottery games Script.md",
     "Archive",
-    "000 MOC/Movies.md",
     "000 MOC",
-    "Links to docs.md",
-    "Vorlagen/Vorlage Formeln.md",
-    "Vorlagen/Vorlage markdown dataview.md",
-    "Vorlagen/Vorlage Variables.md",
-    "Vorlagen/Vorlage Objects.md",
-    "Vorlagen/Vorlage Status bar setup.md",
-    "Vorlagen/Vorlage MOC.md",
-    "Vorlagen/Vorlage Concepts.md",
-    "Vorlagen/Templater testing.md",
-    "Vorlagen/Templater Harrish.md",
-    "Vorlagen/Templater CSV Table convertion.md",
-    "Vorlagen/Templater Elementar notes Restructuring.md",
-    "Vorlagen/temp.md",
-    "Vorlagen/Scipt PC sheet analyse.md",
-    "Vorlagen/Player character sheet creation .md",
     "Vorlagen",
-    "Templates/Scripts/Script JSON to YAML metadata converter.md",
-    "Templates/Periodic notes/Vorlage_Weekly_note.md",
-    "Templates/Periodic notes/Vorlage_Monthly_note.md",
-    "Templates/Periodic notes/Vorlage_Daily_Note.md",
-    "Templates/Template Standard Note.md",
-    "Templates/DQL function overview.md",
     "Templates/Scripts",
-    "Templates/Periodic notes",
-    "Templates/DVJS Codeblock.md",
     "Canvas/Setups.canvas",
     "Attachments/Pasted image 20230810194317.png"
   ]

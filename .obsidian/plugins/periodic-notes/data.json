@@ -11,13 +11,13 @@
   "weekly": {
     "format": "",
     "template": "Templates/Periodic notes/Vorlage_Weekly_note.md",
-    "folder": "",
+    "folder": "Journal/Weekly/2023",
     "enabled": true
   },
   "monthly": {
-    "format": "",
+    "format": "YYYY-[M]MM",
     "template": "Templates/Periodic notes/Vorlage_Monthly_note.md",
-    "folder": "",
+    "folder": "Journal/Monthly/2023",
     "enabled": true
   },
   "quarterly": {

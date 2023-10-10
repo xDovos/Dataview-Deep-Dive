@@ -17,7 +17,7 @@ status::  `$= const setPage = "Links to docs"; const setFilter = "Status Tasks" 
 
 ```js dataview
 Table rows.L.docs as Docs
-FROM -"Knowledge/Dataview/How dataview works" 
+FROM -"Knowledge/Dataview/How dataview works"
 Flatten file.lists as L
 where L.docs
 Group by L.section as Section
@@ -29,7 +29,7 @@ console.log(dv.current().file.outlinks)
 
 >[!info]- Rendered
 >```dataview
->Table rows.L.docs as Docs, map(rows.L.docs, (t) => elink(string(t), "Link"))
+>Table rows.L.docs as Docs
 >FROM -"Knowledge/Dataview/How dataview works" 
 >Flatten file.lists as L
 >where L.docs

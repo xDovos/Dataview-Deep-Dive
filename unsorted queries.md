@@ -2,6 +2,30 @@
 poster: "resistor_colour_code.png"
 ---
 
+## Counting an Emote inside a note
+
+hello world 
+🪙🪙🪙 stuff here
+🪙 = coin
+🪙🪙🪙🪙
+
+```dataviewjs
+// load the conent of the current note
+let note = await dv.io.load(dv.current().file.path);
+
+// regex the coin emote out of all text including this codeblock, thus -1 is needed
+const pattern = /🪙/g;
+const matches = note.match(pattern).length -1 ;
+
+// writing the rendered output.
+dv.header(2, "Coin Emoji Counter");
+dv.paragraph("<progress max = 50 value = "+ matches +"></progress>")
+dv.paragraph(matches + " coin"+ (matches >= 2 ? "s" : "") + " found" )
+
+```
+🪙🪙🪙
+
+🪙🪙🪙
 ## Gets all subfolders of the current file folder
 ```dataviewjs
 const currentFileDV = dv.current().file
@@ -265,3 +289,7 @@ dv.list([...dv.pages()]
 
 ```
 
+
+```dataviewjs
+console.log(await dv.io.load())
+```
