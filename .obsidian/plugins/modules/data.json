@@ -1,0 +1,20 @@
+{
+  "enableExternalLinks": false,
+  "errorNoticeTimeout": 0,
+  "exposeInternalModules": true,
+  "importTimeout": 10,
+  "language": "",
+  "markdownCodeBlockLanguagesToLoad": [
+    "JS",
+    "TS",
+    "JavaScript",
+    "TypeScript"
+  ],
+  "noticeTimeout": 5,
+  "openChangelogOnUpdate": true,
+  "preloadedExternalLinks": [],
+  "preloadingRules": [
+    "+/\\.m?[jt]s(?:\\.md)?$/iu"
+  ],
+  "requireName": "require"
+}

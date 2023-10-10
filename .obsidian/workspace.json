@@ -1,0 +1,214 @@
+{
+  "main": {
+    "id": "3770c28bd6ef6655",
+    "type": "split",
+    "children": [
+      {
+        "id": "7e094a059e081ace",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "23a8b311a27e5d81",
+            "type": "leaf",
+            "pinned": true,
+            "state": {
+              "type": "empty",
+              "state": {},
+              "pinned": true
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "a48da120f591aac9",
+    "type": "split",
+    "children": [
+      {
+        "id": "8b9c0d992891392a",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "6be23f01fafe8381",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "2fff4773fd245f8b",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "tag:#file/tasks",
+                "matchingCase": true,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "58720e2333c2caf3",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 331.5
+  },
+  "right": {
+    "id": "ecef1c29964ce48c",
+    "type": "split",
+    "children": [
+      {
+        "id": "cfe0d525587290a8",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "e58220468cd7ba83",
+            "type": "leaf",
+            "state": {
+              "type": "quiet-outline",
+              "state": {}
+            }
+          },
+          {
+            "id": "4c772e8617ce2923",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "9459b05449bc161d",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "4927f7473a2d4ce9",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "22cf7d2092bbb646",
+            "type": "leaf",
+            "state": {
+              "type": "file-properties",
+              "state": {}
+            }
+          },
+          {
+            "id": "141b6600385cc92a",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 369.5
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "obsidian-media-db-plugin:Add new Media DB entry": false,
+      "daily-notes:Open today's daily note": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "command-palette:Open command palette": false,
+      "darlal-switcher-plus:Open in Headings Mode": false,
+      "darlal-switcher-plus:Open Symbols for the active editor": false,
+      "templater-obsidian:Templater": false,
+      "periodic-notes:Open today": false
+    }
+  },
+  "active": "23a8b311a27e5d81",
+  "lastOpenFiles": [
+    "Code Modules/modulePB.js.md",
+    "Code Modules",
+    "Canvas/Movie Canvas/Dashboard.md",
+    "Canvas/Movie Canvas/Movies.canvas",
+    "Canvas/School vault setup.canvas",
+    "Canvas/Movie Canvas",
+    "Canvas",
+    "Attachments/Query Renderings/Weekly log Overview.png",
+    "Attachments/Query Renderings/WHERE DQL Overview.png",
+    "Attachments/Query Renderings/Weekly Habit Tracking.png",
+    "Attachments/Query Renderings/ThreeInTen_Analysis_Appearances_of_numbers.png",
+    "Attachments/Query Renderings/Query Setup explanation.png",
+    "Attachments/Query Renderings/GROUP BY DQL Overview.png",
+    "Attachments/Query Renderings/FROM DQL Overview.png",
+    "Attachments/Query Renderings/DVJS INLINE page text filter.png",
+    "Attachments/Query Renderings",
+    "Attachments",
+    "Archive/1 Lottery games Script.md",
+    "Archive",
+    "000 MOC/Movies.md",
+    "000 MOC",
+    "Links to docs.md",
+    "Vorlagen/Vorlage Formeln.md",
+    "Vorlagen/Vorlage markdown dataview.md",
+    "Vorlagen/Vorlage Variables.md",
+    "Vorlagen/Vorlage Objects.md",
+    "Vorlagen/Vorlage Status bar setup.md",
+    "Vorlagen/Vorlage MOC.md",
+    "Vorlagen/Vorlage Concepts.md",
+    "Vorlagen/Templater testing.md",
+    "Vorlagen/Templater Harrish.md",
+    "Vorlagen/Templater CSV Table convertion.md",
+    "Vorlagen/Templater Elementar notes Restructuring.md",
+    "Vorlagen/temp.md",
+    "Vorlagen/Scipt PC sheet analyse.md",
+    "Vorlagen/Player character sheet creation .md",
+    "Vorlagen",
+    "Templates/Scripts/Script JSON to YAML metadata converter.md",
+    "Templates/Periodic notes/Vorlage_Weekly_note.md",
+    "Templates/Periodic notes/Vorlage_Monthly_note.md",
+    "Templates/Periodic notes/Vorlage_Daily_Note.md",
+    "Templates/Template Standard Note.md",
+    "Templates/DQL function overview.md",
+    "Templates/Scripts",
+    "Templates/Periodic notes",
+    "Templates/DVJS Codeblock.md",
+    "Canvas/Setups.canvas",
+    "Attachments/Pasted image 20230810194317.png"
+  ]
+}

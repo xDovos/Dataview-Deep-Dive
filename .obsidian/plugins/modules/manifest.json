@@ -1,0 +1,14 @@
+{
+	"author": "polyipseity",
+	"description": "Load JavaScript and related languages like TypeScript modules from the vault and the Internet.",
+	"fundingUrl": {
+		"Buy Me a Coffee": "https://buymeacoffee.com/polyipseity",
+		"GitHub Sponsors": "https://github.com/sponsors/polyipseity"
+	},
+	"version": "2.3.0",
+	"authorUrl": "https://github.com/polyipseity",
+	"id": "modules",
+	"isDesktopOnly": false,
+	"minAppVersion": "1.2.8",
+	"name": "Modules"
+}

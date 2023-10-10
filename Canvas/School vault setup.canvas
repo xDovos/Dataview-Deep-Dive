@@ -1,0 +1,24 @@
+{
+	"nodes":[
+		{"id":"2de0dbca975d2e0e","x":640,"y":-180,"width":250,"height":60,"type":"text","text":"# At home"},
+		{"id":"88e551e74ce9e4ee","x":-300,"y":-180,"width":250,"height":60,"type":"text","text":"# At school"},
+		{"id":"7da4b0f9fe5b0f37","x":-300,"y":-60,"width":250,"height":60,"type":"text","text":"Take notes in class like the teacher expects it."},
+		{"id":"98ad9bd10ca8eedd","x":-330,"y":100,"width":311,"height":112,"type":"text","text":"Make pictures of all graphics on the board or text setups you can't easily replicate on the spot"},
+		{"id":"5665218095dff028","x":640,"y":-60,"width":250,"height":60,"type":"text","text":"Make one note per Class"},
+		{"id":"c452b839894f84b4","x":-640,"y":-60,"width":250,"height":60,"type":"text","text":"could use \"Full calendar plugin\" for the files"},
+		{"id":"0a16e789391aa258","x":140,"y":46,"width":250,"height":234,"type":"text","text":"Use the notes made inside the Class to fill out the content of the subject notes\n\nthis is also the main way of learning inside the vault."},
+		{"id":"052f9d1cdef2471d","x":560,"y":60,"width":410,"height":620,"type":"text","text":"Make one note per Subject:\nNotes are Subject atomic and not idea atomic.\n\nproperties:\n- Classes\n- important numbers/ info\n-\n\nHeaders for sub topics. can be in a Q&A style or summery and explanation.\n\n## how does a Car move?\n\na car uses a motor to create torque and uses mechanical contraptions to deliver the rotation to the wheels. and so on.\n\n## The way a car moves \n\na car works by using a motor to drive wheels and uses mechanical contraptions to link them.\n\n\n\n"},
+		{"id":"e6149b20e8f704b6","x":560,"y":740,"width":410,"height":180,"type":"text","text":"Create new notes when you notice that headers become their own subjects that need properties or get off topic of the note they are in.\nbut always remember that note length doesn't matter and that the context of the information is more important."}
+	],
+	"edges":[
+		{"id":"ee6daf80853d6566","fromNode":"88e551e74ce9e4ee","fromSide":"bottom","toNode":"7da4b0f9fe5b0f37","toSide":"top"},
+		{"id":"a484b37b2bd919ac","fromNode":"7da4b0f9fe5b0f37","fromSide":"bottom","toNode":"98ad9bd10ca8eedd","toSide":"top"},
+		{"id":"54f0fefddac5ca43","fromNode":"2de0dbca975d2e0e","fromSide":"bottom","toNode":"5665218095dff028","toSide":"top"},
+		{"id":"e403d9fe70d1fe7d","fromNode":"c452b839894f84b4","fromSide":"right","toNode":"7da4b0f9fe5b0f37","toSide":"left"},
+		{"id":"2d32fdd506d62b78","fromNode":"5665218095dff028","fromSide":"bottom","toNode":"052f9d1cdef2471d","toSide":"top"},
+		{"id":"559cf159ab6f4bb4","fromNode":"7da4b0f9fe5b0f37","fromSide":"right","toNode":"0a16e789391aa258","toSide":"left"},
+		{"id":"3f4d81909c600139","fromNode":"98ad9bd10ca8eedd","fromSide":"right","toNode":"0a16e789391aa258","toSide":"left"},
+		{"id":"97485425881a8e00","fromNode":"0a16e789391aa258","fromSide":"right","toNode":"052f9d1cdef2471d","toSide":"left"},
+		{"id":"a960ec2a1e12ff00","fromNode":"052f9d1cdef2471d","fromSide":"bottom","toNode":"e6149b20e8f704b6","toSide":"top"}
+	]
+}

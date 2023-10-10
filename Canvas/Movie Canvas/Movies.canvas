@@ -1,0 +1,15 @@
+{
+	"nodes":[
+		{"type":"group","id":"1d78fbcb43c04fe4","x":160,"y":-40,"width":923,"height":2080,"color":"6","label":"High"},
+		{"type":"group","id":"d3cbc22330e6648d","x":1160,"y":-40,"width":923,"height":2080,"color":"6","label":"Medium"},
+		{"type":"group","id":"6c4fc3efa5554ffa","x":-840,"y":-40,"width":923,"height":2080,"color":"6","label":"Low"},
+		{"type":"group","id":"2654dc782583f964","x":-1040,"y":40,"width":3179,"height":600,"color":"4","label":"Watching"},
+		{"type":"group","id":"dc0a169b61c7bd60","x":-1040,"y":720,"width":3179,"height":600,"color":"2","label":"Queued"},
+		{"type":"group","id":"bb89092aba499f21","x":-1040,"y":1400,"width":3179,"height":600,"color":"1","label":"Waiting"},
+		{"type":"file","file":"Canvas/Movie Canvas/Dashboard.md","subpath":"#To be Watched","id":"10ebe263ad846e97","x":-2880,"y":40,"width":1760,"height":1880},
+		{"type":"file","file":"Movies/Harry Potter and the Sorcerer's Stone (2001).md","id":"5886bf7f39fe4ecd","x":-760,"y":840,"width":400,"height":400},
+		{"id":"9ed9d1c346896b63","x":-1113,"y":-2523,"width":250,"height":60,"type":"text","text":"MOC note with the table"},
+		{"id":"3f270b6129bf6d51","x":-1492,"y":-2780,"width":312,"height":220,"type":"text","text":"\\---\nmoc: link\n\\---\n"}
+	],
+	"edges":[]
+}
