@@ -9,6 +9,7 @@
     "learningTask": "checkbox",
     "learningTime": "number",
     "Dataview": "date",
-    "DOB": "date"
+    "DOB": "date",
+    "Website": "multitext"
   }
 }

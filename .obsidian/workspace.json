@@ -13,7 +13,73 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Knowledge/Persons/@Daniel @NL.md",
+                "file": "Knowledge/Dataview/DQL/Functions/choice.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "a38de87c86b09615",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Knowledge/Dataview/DQL/Functions/choice.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "952a11c72ff5a273",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Knowledge/Dataview/DQL/Functions/string.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "26bbefc7f29eda32",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Knowledge/Dataview/DQL/Functions/dur.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "d8fd69ad41da58e2",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Knowledge/Dataview/DQL/Functions/date.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "9a476a77c01dfa4e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "fa425045520161ed",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Knowledge/People/@Danny Hatcher.md",
                 "mode": "source",
                 "source": false
               }
@@ -93,7 +159,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Knowledge/Persons/@Daniel @NL.md",
+                "file": "Knowledge/Dataview/DQL/Functions/choice.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -110,7 +176,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Knowledge/Persons/@Daniel @NL.md",
+                "file": "Knowledge/Dataview/DQL/Functions/choice.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -133,7 +199,7 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Knowledge/Persons/@Daniel @NL.md"
+                "file": "Knowledge/Dataview/DQL/Functions/choice.md"
               }
             }
           },
@@ -168,33 +234,33 @@
   },
   "active": "e7e4d3065c26f5ad",
   "lastOpenFiles": [
+    "Knowledge/Dataview/DQL/Functions/contains.md",
+    "Knowledge/Dataview/DQL/Functions/date.md",
+    "Knowledge/Dataview/DQL/Functions/dur.md",
+    "Knowledge/Dataview/DQL/Functions/embed.md",
+    "Knowledge/Dataview/DQL/Functions/filter.md",
+    "Knowledge/Dataview/DQL/Functions/flat.md",
+    "Knowledge/Dataview/DQL/Functions/join.md",
+    "Knowledge/Dataview/DQL/Functions/length.md",
+    "Knowledge/Dataview/DQL/Functions/string.md",
+    "Knowledge/Dataview/DQL/Functions/choice.md",
+    "000 MOC/MOC People.md",
+    "Knowledge/People/@Danny Hatcher.md",
+    "Knowledge/People/@Daniel @NL.md",
+    "Discord Support/Dataview Queries/DV DQL TABLE Birthday reminder.md",
+    "Vault.md",
     "Templates/Template People.md",
-    "Knowledge/Persons/@Daniel @NL.md",
     "Knowledge/Persons/@Daniel @ NL.md",
     "Templates/Template Standard Note.md",
     "Templates/Template Status bar setup.md",
     "Knowledge/Movies/Harry Potter 20th Anniversary - Return to Hogwarts (2022).md",
     "Knowledge/Movies/Harry Potter and the Chamber of Secrets (2002).md",
     "Raw Data/ThreeInTen Data.md",
-    "Vault.md",
     "Vorlagen/Vorlage Variables.md",
     "Vorlagen/Vorlage Objects.md",
     "Vorlagen/Vorlage MOC.md",
     "Vorlagen/Vorlage Formeln.md",
-    "Vorlagen/Vorlage markdown dataview.md",
-    "Vorlagen/Vorlage Concepts.md",
-    "Vorlagen/Templater Harrish.md",
-    "Vorlagen/Templater testing.md",
-    "Vorlagen/Templater Elementar notes Restructuring.md",
-    "Vorlagen/temp.md",
-    "Archive/Script JSON to YAML metadata converter.md",
-    "Vorlagen/Templater CSV Table convertion.md",
-    "Archive/1 Lottery games Script.md",
-    "README.md",
-    "Journal/Monthly/2023/2023-M09.md",
-    "Code Modules/modulePB.js.md",
-    "Knowledge/Dataview/Progress bar.md",
-    "Knowledge/Persons",
+    "Knowledge/People",
     "Code Modules",
     "Canvas/Movie Canvas/Movies.canvas",
     "Canvas/School vault setup.canvas",

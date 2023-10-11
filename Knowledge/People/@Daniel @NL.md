@@ -1,7 +1,7 @@
 ---
 aliases: 
 Type: Person
-DOB: 
+DOB: 2023-10-10
 Adress: 
 Country: Netherlands
 Email: 
