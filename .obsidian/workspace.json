@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "README.md",
+                "file": "Knowledge/Persons/@Daniel @NL.md",
                 "mode": "source",
                 "source": false
               }
@@ -93,7 +93,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "README.md",
+                "file": "Knowledge/Persons/@Daniel @NL.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -110,7 +110,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "README.md",
+                "file": "Knowledge/Persons/@Daniel @NL.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -133,7 +133,7 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "README.md"
+                "file": "Knowledge/Persons/@Daniel @NL.md"
               }
             }
           },
@@ -168,33 +168,33 @@
   },
   "active": "e7e4d3065c26f5ad",
   "lastOpenFiles": [
+    "Templates/Template People.md",
+    "Knowledge/Persons/@Daniel @NL.md",
+    "Knowledge/Persons/@Daniel @ NL.md",
+    "Templates/Template Standard Note.md",
+    "Templates/Template Status bar setup.md",
+    "Knowledge/Movies/Harry Potter 20th Anniversary - Return to Hogwarts (2022).md",
+    "Knowledge/Movies/Harry Potter and the Chamber of Secrets (2002).md",
+    "Raw Data/ThreeInTen Data.md",
+    "Vault.md",
+    "Vorlagen/Vorlage Variables.md",
+    "Vorlagen/Vorlage Objects.md",
+    "Vorlagen/Vorlage MOC.md",
+    "Vorlagen/Vorlage Formeln.md",
+    "Vorlagen/Vorlage markdown dataview.md",
+    "Vorlagen/Vorlage Concepts.md",
+    "Vorlagen/Templater Harrish.md",
+    "Vorlagen/Templater testing.md",
+    "Vorlagen/Templater Elementar notes Restructuring.md",
+    "Vorlagen/temp.md",
+    "Archive/Script JSON to YAML metadata converter.md",
+    "Vorlagen/Templater CSV Table convertion.md",
+    "Archive/1 Lottery games Script.md",
+    "README.md",
     "Journal/Monthly/2023/2023-M09.md",
     "Code Modules/modulePB.js.md",
     "Knowledge/Dataview/Progress bar.md",
-    "Knowledge/Dataview/How dataview works.md",
-    "Knowledge/Dataview/Dataview Overview.md",
-    "Templates/DQL Codeblock.md",
-    "Templates/DQL function overview.md",
-    "Templates/DVJS Codeblock.md",
-    "Templates/Movie Template.md",
-    "Templates/Template Standard Note.md",
-    "unsorted queries.md",
-    "Untitled.md",
-    "Knowledge/Persons/@Daniel @ NL.md",
     "Knowledge/Persons",
-    "Journal/Monthly/2023/2023-M08.md",
-    "Journal/Weekly/2023/2023-W31.md",
-    "Journal/Weekly/2023/2023-W32.md",
-    "Journal/Weekly/2023/2023-W35.md",
-    "Journal/Weekly/2023/2023-W36.md",
-    "Journal/Weekly/2023/2023-W34.md",
-    "Journal/Weekly/2023/2023-W40.md",
-    "Journal/Weekly/2023/2023-W39.md",
-    "Journal/Weekly/2023/2023-W38.md",
-    "Journal/Weekly/2023/2023-W37.md",
-    "Journal/Monthly/2023/2023-M07.md",
-    "Links to docs.md",
-    "Vault.md",
     "Code Modules",
     "Canvas/Movie Canvas/Movies.canvas",
     "Canvas/School vault setup.canvas",

@@ -8,6 +8,7 @@
     "homeworktime": "number",
     "learningTask": "checkbox",
     "learningTime": "number",
-    "Dataview": "date"
+    "Dataview": "date",
+    "DOB": "date"
   }
 }
