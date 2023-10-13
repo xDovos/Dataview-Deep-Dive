@@ -8,78 +8,12 @@
         "type": "tabs",
         "children": [
           {
-            "id": "e7e4d3065c26f5ad",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Knowledge/Dataview/DQL/Functions/choice.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "a38de87c86b09615",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Knowledge/Dataview/DQL/Functions/choice.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "952a11c72ff5a273",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Knowledge/Dataview/DQL/Functions/string.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "26bbefc7f29eda32",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Knowledge/Dataview/DQL/Functions/dur.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
             "id": "d8fd69ad41da58e2",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Knowledge/Dataview/DQL/Functions/date.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          }
-        ]
-      },
-      {
-        "id": "9a476a77c01dfa4e",
-        "type": "tabs",
-        "children": [
-          {
-            "id": "fa425045520161ed",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Knowledge/People/@Danny Hatcher.md",
+                "file": "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
                 "mode": "source",
                 "source": false
               }
@@ -159,7 +93,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Knowledge/Dataview/DQL/Functions/choice.md",
+                "file": "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -176,7 +110,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Knowledge/Dataview/DQL/Functions/choice.md",
+                "file": "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -199,7 +133,7 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Knowledge/Dataview/DQL/Functions/choice.md"
+                "file": "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md"
               }
             }
           },
@@ -232,34 +166,34 @@
       "periodic-notes:Open today": false
     }
   },
-  "active": "e7e4d3065c26f5ad",
+  "active": "d8fd69ad41da58e2",
   "lastOpenFiles": [
-    "Knowledge/Dataview/DQL/Functions/contains.md",
-    "Knowledge/Dataview/DQL/Functions/date.md",
-    "Knowledge/Dataview/DQL/Functions/dur.md",
-    "Knowledge/Dataview/DQL/Functions/embed.md",
-    "Knowledge/Dataview/DQL/Functions/filter.md",
-    "Knowledge/Dataview/DQL/Functions/flat.md",
-    "Knowledge/Dataview/DQL/Functions/join.md",
-    "Knowledge/Dataview/DQL/Functions/length.md",
-    "Knowledge/Dataview/DQL/Functions/string.md",
-    "Knowledge/Dataview/DQL/Functions/choice.md",
-    "000 MOC/MOC People.md",
-    "Knowledge/People/@Danny Hatcher.md",
-    "Knowledge/People/@Daniel @NL.md",
-    "Discord Support/Dataview Queries/DV DQL TABLE Birthday reminder.md",
-    "Vault.md",
-    "Templates/Template People.md",
-    "Knowledge/Persons/@Daniel @ NL.md",
-    "Templates/Template Standard Note.md",
+    "Templates/DQL function overview.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/TABLE.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/SORT.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/GROUP BY.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/FROM.md",
     "Templates/Template Status bar setup.md",
-    "Knowledge/Movies/Harry Potter 20th Anniversary - Return to Hogwarts (2022).md",
-    "Knowledge/Movies/Harry Potter and the Chamber of Secrets (2002).md",
-    "Raw Data/ThreeInTen Data.md",
-    "Vorlagen/Vorlage Variables.md",
-    "Vorlagen/Vorlage Objects.md",
-    "Vorlagen/Vorlage MOC.md",
-    "Vorlagen/Vorlage Formeln.md",
+    "Templates/Template People.md",
+    "Templates/Template Standard Note.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/WITHOUT ID.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/WHERE.md",
+    "unsorted queries.md",
+    "Untitled.md",
+    "Vault.md",
+    "Knowledge/000 MOC/Dataview Overview.md",
+    "Knowledge/People/@Danny Hatcher.md",
+    "Knowledge/000 MOC/MOC People.md",
+    "Knowledge/001 Dataview/DQL/Functions/date.md",
+    "Knowledge/001 Dataview/DQL/Functions/dur.md",
+    "Knowledge/001 Dataview/DQL/Functions/string.md",
+    "Knowledge/001 Dataview/DQL/Functions/choice.md",
+    "Knowledge/001 Dataview/DQL/Functions/contains.md",
+    "Knowledge/001 Dataview/DQL/Functions/embed.md",
+    "Knowledge/001 Dataview/DQL/Functions/filter.md",
+    "Knowledge/001 Dataview/DQL/Functions/flat.md",
+    "Knowledge/001 Dataview/DQL/Functions/join.md",
     "Knowledge/People",
     "Code Modules",
     "Canvas/Movie Canvas/Movies.canvas",
@@ -277,7 +211,7 @@
     "Attachments/Query Renderings",
     "Attachments",
     "Archive",
-    "000 MOC",
+    "Knowledge/000 MOC",
     "Vorlagen",
     "Templates/Scripts",
     "Canvas/Setups.canvas",

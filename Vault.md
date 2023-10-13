@@ -18,6 +18,8 @@ VaultNotesOverview:: `$=return(await self.require.import("Code Modules/modulePB.
 	- [x] [[DQL function overview]] ✅ 2023-08-13
 	- [ ] MOC notes
 	- [ ] Knowledge notes
+    	- [x] People notes ✅ 2023-10-11
+    	- [x] Movie notes ✅ 2023-10-11
 	- [ ] 
 - [ ] Create Metadata Menu Classes to speed things up
 - [ ] Create Movie notes so that we have data inside a database for analyse queries.

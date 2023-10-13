@@ -18,14 +18,16 @@ Twitter: https://twitter.com/DannyHatcher
 status::  `$=return(await self.require.import("Code Modules/modulePB.js.md")).PBSingleNoteHeader(dv, "@Danny Hatcher", "Status Tasks")`
 
 ###### Status Tasks
-- [ ] Create the Note
+- [x] Create the Note ✅ 2023-10-11
 - [ ] Fill out the Properties
 - [ ] Write interesting stuff about that person.
 
 
 # @Danny Hatcher
 
-
+```dataviewjs
+console.log(this)
+```
 
 ## Appearances
 
