@@ -4,16 +4,16 @@
     "type": "split",
     "children": [
       {
-        "id": "f496187cc4cf46f8",
+        "id": "7a649f5c3707a45a",
         "type": "tabs",
         "children": [
           {
-            "id": "d8fd69ad41da58e2",
+            "id": "6c4cdea2b4cff889",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
+                "file": "Knowledge/002 Queries/ThreeInTen Analysis.md",
                 "mode": "source",
                 "source": false
               }
@@ -93,7 +93,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
+                "file": "Knowledge/002 Queries/ThreeInTen Analysis.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -110,7 +110,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
+                "file": "Knowledge/002 Queries/ThreeInTen Analysis.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -133,7 +133,7 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md"
+                "file": "Knowledge/002 Queries/ThreeInTen Analysis.md"
               }
             }
           },
@@ -166,12 +166,20 @@
       "periodic-notes:Open today": false
     }
   },
-  "active": "d8fd69ad41da58e2",
+  "active": "6c4cdea2b4cff889",
   "lastOpenFiles": [
-    "Templates/DQL function overview.md",
+    "Knowledge/002 Queries/ThreeInTen Analysis.md",
+    "Templates/Scripts/Script JSON to YAML json metadata converter.md",
+    "Raw Data/ThreeInTen Data.md",
+    "Vault.md",
     "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/TABLE.md",
     "Knowledge/001 Dataview/DQL/Data Commands/SORT.md",
+    "Archive/1 Lottery games Script.md",
+    "Discord Support/Dataview Queries/DV DQL TABLE FLATTEN.md",
+    "Discord Support/Dataview Queries/DV DVJS TABLE map.md",
+    "Discord Support/Dataview Data/Test data/Test data 1.md",
+    "Templates/DQL function overview.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/TABLE.md",
     "Knowledge/001 Dataview/DQL/Data Commands/GROUP BY.md",
     "Knowledge/001 Dataview/DQL/Data Commands/FROM.md",
     "Templates/Template Status bar setup.md",
@@ -181,19 +189,11 @@
     "Knowledge/001 Dataview/DQL/Data Commands/WHERE.md",
     "unsorted queries.md",
     "Untitled.md",
-    "Vault.md",
     "Knowledge/000 MOC/Dataview Overview.md",
     "Knowledge/People/@Danny Hatcher.md",
     "Knowledge/000 MOC/MOC People.md",
     "Knowledge/001 Dataview/DQL/Functions/date.md",
     "Knowledge/001 Dataview/DQL/Functions/dur.md",
-    "Knowledge/001 Dataview/DQL/Functions/string.md",
-    "Knowledge/001 Dataview/DQL/Functions/choice.md",
-    "Knowledge/001 Dataview/DQL/Functions/contains.md",
-    "Knowledge/001 Dataview/DQL/Functions/embed.md",
-    "Knowledge/001 Dataview/DQL/Functions/filter.md",
-    "Knowledge/001 Dataview/DQL/Functions/flat.md",
-    "Knowledge/001 Dataview/DQL/Functions/join.md",
     "Knowledge/People",
     "Code Modules",
     "Canvas/Movie Canvas/Movies.canvas",

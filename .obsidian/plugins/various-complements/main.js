@@ -2341,9 +2341,7 @@ var tiny_segmenter_default = TinySegmenter;
 // src/tokenizer/tokenizers/JapaneseTokenizer.ts
 var segmenter = new tiny_segmenter_default();
 function pickTokensAsJapanese(content, trimPattern) {
-  return joinNumberWithSymbol(
-    content.split(trimPattern).filter((x) => x !== "").flatMap((x) => segmenter.segment(x))
-  );
+  return content.split(trimPattern).filter((x) => x !== "").flatMap((x) => joinNumberWithSymbol(segmenter.segment(x)));
 }
 var JapaneseTokenizer = class {
   tokenize(content, raw) {

@@ -7,10 +7,10 @@ MOC:
 status::  `$= const setPage = "ThreeInTen Analysis"; const setFilter = "Status Tasks" ; const value = Math.round(((dv.page(setPage).file.tasks.where(t => t.completed).where(t => String(t.section).includes(setFilter)).length) / (dv.page(setPage).file.tasks).where(t => String(t.section).includes(setFilter)).length) * 100); "<progress value='" + value + "' max='100'></progress>" + "<span style='font-size:smaller;color:var(--text-muted)'>" + value + "% &nbsp;| &nbsp;" + (dv.page(setPage).file.tasks.where(t => String(t.section).includes(setFilter)).length - dv.page(setPage).file.tasks.where(t => t.completed).where(t => String(t.section).includes(setFilter)).length) + " left</span>" `
 
 ###### Status Tasks
+- [x] create the note ✅ 2023-08-08
 - [ ] write the Intro
 - [ ] Write the YAML metadata
 - [ ] Write the query
-
 
 
 # ThreeInTen Analysis
@@ -109,6 +109,73 @@ SORT length(rows.Runs) desc
     - functions:: [[length]]
     - tags:: 
     - image:: 
+
+## Probability Analysis
+
+```dataviewjs
+
+function calculateHitProbabilities(data) {
+  let hitCounts = {};
+  data.ThreeInTen.forEach(item => {
+    if (item.hits in hitCounts) {
+      hitCounts[item.hits]++;
+    } else {
+      hitCounts[item.hits] = 1;
+    }
+  });
+  
+  let totalRounds = data.ThreeInTen.length;
+  let probabilities = {};
+  for (let hits in hitCounts) {
+    probabilities[hits] = parseFloat(Number((hitCounts[hits] / totalRounds) * 100).toFixed(2));
+  }
+  return probabilities;
+}
+
+let page = dv.page("Raw Data/ThreeInTen Data")
+let probabilities = calculateHitProbabilities(page);
+console.log(probabilities)
+let data = dv.array(probabilities).map(t=> [ "Probability",t[0], t[1], t[2], t[3]])
+dv.table(["matches", "0", "1", "2", "3"], data)
+
+```
+
+>[!info]- Rendered
+>```dataviewjs
+>
+>```
+
+
+- Query meta
+    - QueryType:: [[DVJS]]
+    - DVfunctions:: 
+    - JSfunctions:: 
+    - tags:: 
+    - image:: 
+
+## Probability Analysis DQL
+
+```dataview
+TABLE pobability
+FROM "Raw Data/ThreeInTen Data"
+FLATTEN [length(threeinten)] as TotalRounds
+FLATTEN threeinten as TIT
+group by TIT.hits as Hits 
+FLATTEN [round((length(rows.round) / rows.TotalRounds[0])*100, 2)] as pobability
+```
+
+>[!info]- Rendered
+>```dataview
+>
+>```
+
+- Query meta
+    - QueryType:: [[DQL]]
+    - dataCommands:: [[TABLE]],
+    - functions:: 
+    - tags:: 
+    - image:: 
+
 
 
 

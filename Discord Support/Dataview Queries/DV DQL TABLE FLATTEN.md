@@ -10,13 +10,15 @@ docs::
 ## DV DQL TABLE FLATTEN Combining of 2 arrays while flattening them
 
 ```dataview
-Table start,  end , L
+Table L.start,  L.end , L
 FROM "Discord Support/Dataview Data/Test data"
 where start
 
-flatten map(start, (t) => object("start", t, "end", end)) as L
+flatten map([0,1,2,3,4] , (t)=> {start: start[t], end: end[t]}) as L
+where L.start
 
 ```
+
 ### Explanation
 
 - It doesn't work

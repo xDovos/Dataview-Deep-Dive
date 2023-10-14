@@ -11663,7 +11663,7 @@ var QuickAddApi = class {
           }
           return assistantRes;
         },
-        chunkedPrompt: async (text2, promptTemplate, model, settings) => {
+        chunkedPrompt: async (text2, promptTemplate, model, settings, existingVariables) => {
           const pluginSettings = settingsStore.getState();
           const AISettings = pluginSettings.ai;
           if (pluginSettings.disableOnlineFeatures) {
@@ -11691,7 +11691,11 @@ var QuickAddApi = class {
               shouldMerge: settings?.shouldMerge ?? true
             },
             (txt, variables) => {
-              return formatter(txt, variables, false);
+              const mergedVariables = {
+                ...existingVariables,
+                ...variables
+              };
+              return formatter(txt, mergedVariables, false);
             }
           );
           if (!assistantRes) {

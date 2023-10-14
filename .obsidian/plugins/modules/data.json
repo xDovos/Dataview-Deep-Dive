@@ -1,4 +1,5 @@
 {
+  "autoReloadStartupModules": true,
   "enableExternalLinks": false,
   "errorNoticeTimeout": 0,
   "exposeInternalModules": true,
@@ -16,5 +17,6 @@
   "preloadingRules": [
     "+/\\.m?[jt]s(?:\\.md)?$/iu"
   ],
-  "requireName": "require"
+  "requireName": "require",
+  "startupModules": []
 }

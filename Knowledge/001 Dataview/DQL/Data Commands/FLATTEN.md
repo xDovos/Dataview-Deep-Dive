@@ -23,7 +23,7 @@ in short, FLATTEN is black magic. it is really powerful but really confusing if 
 in general Flatten works by using
 FLATTEN \<expression> AS \<new field name>
 
-flatten does two things. 
+flatten does multiple things. 
 1. it creates a new metadata field with the results of the expression as value.
 2. if you flatten an array then it creates a new row per value inside the array. each row is a full duplicate of the original row except for the value the flattened field has.
     1. if you don't want it to create new rows but your expression returns an array then encase the whole expression into [ ]. this won't create the additional rows because the expression then returns an array with one value that holds the other array.
@@ -31,7 +31,7 @@ flatten does two things.
 
 
 
-## DQL Overview
+## FLATTEN Overview
 
 ```js 
 TABLE flat(filter(rows.L, (t) => t.text = "Query meta").children.text), embed(filter(flat(filter(rows.L, (t) => t.text = "Query meta").children), (t2) => t2.image).image)[0]
