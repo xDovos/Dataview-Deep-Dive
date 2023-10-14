@@ -1,6 +1,6 @@
 ---
-aliases: []
-Type: 
+aliases: 
+Type: Query
 MOC:
 ---
 
@@ -11,6 +11,13 @@ status::  `$= const setPage = "ThreeInTen Analysis"; const setFilter = "Status T
 - [ ] write the Intro
 - [ ] Write the YAML metadata
 - [ ] Write the query
+    - [x] Raw Data Table ✅ 2023-10-14
+    - [x] Amount of appearances ✅ 2023-10-14
+    - [x] Drawings of the same numbers ✅ 2023-10-14
+    - [x] Probability Analysis ✅ 2023-10-14
+        - [x] dvjs ✅ 2023-10-14
+        - [x] DQL ✅ 2023-10-14
+    - [ ] 
 
 
 # ThreeInTen Analysis
@@ -19,8 +26,9 @@ status::  `$= const setPage = "ThreeInTen Analysis"; const setFilter = "Status T
 
 This note is about a simple gambling game. the game is choose 3 in 10 and works like the lottery 6 in 49
 it works by picking 3 numbers between 1 and 10 and then 3 numbers get drawn. you win when all 3 are matching.
-the goal of this note is to show the chances you have to win this game based on data collected from 500 games.
-you can find the data in [[ThreeInTen Data]]. but be warned that the note might lag you out when it is open.
+the goal of this note is to show the chances you have to win this game based on data collected from 1000 games.
+you can find the data in [[ThreeInTen Data]]. but be warned that the note might lag you out when it is open. 
+also you need to go into source mode to see the data. DON'T INTERACT WITH THE PROPERTIES UI.
 In this sample both the draws and the numbers we choose are randomly picked each round.
 
 
@@ -37,7 +45,7 @@ SORT Runs.hits desc, Runs.round asc
 ```
 
 >[!info]- Rendered
->```dataview
+>```js dataview
 >TABLE without id Runs.round, join(Runs.drawn, ", "), join(Runs.picked, ", "), Runs.hits
 >FROM "Raw Data/ThreeInTen Data"
 >FLATTEN ThreeInTen as Runs
@@ -57,8 +65,9 @@ this query shows how often each of the numbers got drawn in all 500 games.
 as you can see it is pretty evenly spread out. this suggests that it doesn't really matter which 3 numbers you choose.
 
 ```js 
-TABLE length(rows.Runs)
+TABLE length(rows.Runs) as Amount, round((length(rows.Runs) / (rows.TotalRounds[0] *3)) *100, 2) as Persentage
 FROM "Raw Data/ThreeInTen Data"
+FLATTEN [length(ThreeInTen)] as TotalRounds
 FLATTEN ThreeInTen as Runs
 FLATTEN Runs.drawn as RD
 GROUP BY RD as Number
@@ -66,8 +75,9 @@ GROUP BY RD as Number
 
 >[!info]- Rendered
 >```dataview
->TABLE length(rows.Runs)
+>TABLE length(rows.Runs) as Amount, round((length(rows.Runs) / (rows.TotalRounds[0] *3)) *100, 2) as Persentage
 >FROM "Raw Data/ThreeInTen Data"
+>FLATTEN [length(ThreeInTen)] as TotalRounds
 >FLATTEN ThreeInTen as Runs
 >FLATTEN Runs.drawn as RD
 >GROUP BY RD as Number
@@ -76,7 +86,7 @@ GROUP BY RD as Number
 - Query meta
     - QueryType:: [[DQL]]
     - dataCommands:: [[TABLE]], [[FROM]], [[FLATTEN]], [[GROUP BY]]
-    - functions:: [[length]]
+    - functions:: [[length]], [[round]]
     - tags:: 
     - image:: [[ThreeInTen_Analysis_Appearances_of_numbers.png]]
 
@@ -140,7 +150,7 @@ dv.table(["matches", "0", "1", "2", "3"], data)
 
 ```
 
->[!info]- Rendered
+>[!info]+ Rendered
 >```dataviewjs
 >
 >```
@@ -155,24 +165,29 @@ dv.table(["matches", "0", "1", "2", "3"], data)
 
 ## Probability Analysis DQL
 
-```dataview
+```js dataview
 TABLE pobability
 FROM "Raw Data/ThreeInTen Data"
 FLATTEN [length(threeinten)] as TotalRounds
 FLATTEN threeinten as TIT
-group by TIT.hits as Hits 
+GROUP BY TIT.hits as Hits 
 FLATTEN [round((length(rows.round) / rows.TotalRounds[0])*100, 2)] as pobability
 ```
 
->[!info]- Rendered
+>[!info]+ Rendered
 >```dataview
->
+>TABLE pobability
+>FROM "Raw Data/ThreeInTen Data"
+>FLATTEN [length(threeinten)] as TotalRounds
+>FLATTEN threeinten as TIT
+>GROUP BY TIT.hits as Hits 
+>FLATTEN [round((length(rows.round) / rows.TotalRounds[0])*100, 2)] as pobability
 >```
 
 - Query meta
     - QueryType:: [[DQL]]
-    - dataCommands:: [[TABLE]],
-    - functions:: 
+    - dataCommands:: [[TABLE]], [[FROM]], [[FLATTEN]], [[GROUP BY]]
+    - functions:: [[length]], [[round]]
     - tags:: 
     - image:: 
 

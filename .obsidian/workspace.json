@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Knowledge/002 Queries/ThreeInTen Analysis.md",
+                "file": "Vault.md",
                 "mode": "source",
                 "source": false
               }
@@ -48,7 +48,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "tag:#file/tasks",
+                "query": "tag:#also",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -93,7 +93,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Knowledge/002 Queries/ThreeInTen Analysis.md",
+                "file": "Vault.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -110,7 +110,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Knowledge/002 Queries/ThreeInTen Analysis.md",
+                "file": "Vault.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -133,7 +133,7 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Knowledge/002 Queries/ThreeInTen Analysis.md"
+                "file": "Vault.md"
               }
             }
           },
@@ -168,9 +168,10 @@
   },
   "active": "6c4cdea2b4cff889",
   "lastOpenFiles": [
+    "Knowledge/002 Queries/Tasks Completion date.md",
     "Knowledge/002 Queries/ThreeInTen Analysis.md",
-    "Templates/Scripts/Script JSON to YAML json metadata converter.md",
     "Raw Data/ThreeInTen Data.md",
+    "Templates/Scripts/Script JSON to YAML json metadata converter.md",
     "Vault.md",
     "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
     "Knowledge/001 Dataview/DQL/Data Commands/SORT.md",
@@ -193,7 +194,6 @@
     "Knowledge/People/@Danny Hatcher.md",
     "Knowledge/000 MOC/MOC People.md",
     "Knowledge/001 Dataview/DQL/Functions/date.md",
-    "Knowledge/001 Dataview/DQL/Functions/dur.md",
     "Knowledge/People",
     "Code Modules",
     "Canvas/Movie Canvas/Movies.canvas",

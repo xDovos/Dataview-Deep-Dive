@@ -17,16 +17,15 @@ status::  `$= const setPage = "Tasks Completion date"; const setFilter = "Status
 
 ```dataviewjs 
 let startDate = dv.date("2023-08-01");
-let endDate = dv.date("2023-08-27");
+let endDate = dv.date("today");
 
 let list = dv.pages('"Journal"')
-    .where(f => !f.file.path.includes("1"))
     .file.tasks.where(t => t.completed && t.completion >= startDate && t.completion <= endDate);
     
 let listg = list.groupBy(p => p.completion).map(t => dv.fileLink(t.key.toFormat("yyyy-MM-dd")) + " - "+ t.rows.length);
 
 dv.paragraph(listg)
-console.log(listg);
+//console.log(listg);
 ```
 
 >[!info]- Rendered
