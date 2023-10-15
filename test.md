@@ -1,8 +1,9 @@
 ---
 homeworktime: "0"
-homeworkTask: 
+homeworkTask: true
 learningTime: "0"
-learningTask:
+learningTask: 
+tags: [daily, daily]
 ---
 
 
@@ -22,10 +23,20 @@ group by file.link as File
 
 ```
 
-```dataview
+```js dataview
 TABLE length(rows), rows.file.link
 WHERE file.outlinks
 flatten file.outlinks as out
 group by out as Link
 sort length(rows) desc
+```
+
+
+
+```dataviewjs
+
+const pages = dv.pages().where(t=> t.file.frontmatter.tags?.length > 1 ).where(t=> t.tags.length != new Set(t.tags).size)
+const data = pages.map(t=> [t.file.link, t.tags])
+dv.table(["File", "Tags"], data)
+
 ```

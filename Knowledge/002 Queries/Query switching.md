@@ -44,8 +44,8 @@ if(exp){
 
 - Query meta
     - QueryType:: [[DVJS]]
-    - DVfunctions:: [[dv.span]], [[dv.current]], [[array.where]]
-    - JSfunctions:: [[array.includes]]
+    - DVfunctions:: [[dv.span]], [[dv.current]], [[DataArray.where]]
+    - JSfunctions:: [[DataArray.includes]]
     - tags:: #file/tasks , #file/tasks/completed
     - image:: 
 
@@ -70,8 +70,8 @@ exp ? dv.span("the task is completed") : dv.span("the task is not completed")
 
 - Query meta
     - QueryType:: [[DVJS]]
-    - DVfunctions:: [[dv.span]], [[dv.current]], [[array.where]]
-    - JSfunctions:: [[array.includes]]
+    - DVfunctions:: [[dv.span]], [[dv.current]], [[DataArray.where]]
+    - JSfunctions:: [[DataArray.includes]]
     - tags:: #file/tasks , #file/tasks/completed
     - image:: 
 

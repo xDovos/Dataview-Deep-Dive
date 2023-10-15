@@ -68,7 +68,7 @@ the example note for the progress bars shown in this note are in [[File Name]]
 
 - Query meta
     - QueryType:: [[DVJS]], [[INLINE]]
-    - DVfunctions:: [[dv.pages]], [[array.where]], [[html span]], [[html prgress]]
+    - DVfunctions:: [[dv.pages]], [[DataArray.where]], [[html span]], [[html prgress]]
     - JSfunctions:: [[Math.round]]
     - tags:: #file/tasks, #file/tasks/section
     - image:: [[DVJS INLINE page text filter.png]]

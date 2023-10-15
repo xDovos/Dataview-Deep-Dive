@@ -8,12 +8,12 @@
         "type": "tabs",
         "children": [
           {
-            "id": "6c4cdea2b4cff889",
+            "id": "2a028a5a5f2498a2",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Vault.md",
+                "file": "Journal/Weekly/2023/2023-W31.md",
                 "mode": "source",
                 "source": false
               }
@@ -48,7 +48,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "tag:#also",
+                "query": "distin",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -93,7 +93,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Vault.md",
+                "file": "Journal/Weekly/2023/2023-W31.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -110,7 +110,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Vault.md",
+                "file": "Journal/Weekly/2023/2023-W31.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -133,7 +133,7 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Vault.md"
+                "file": "Journal/Weekly/2023/2023-W31.md"
               }
             }
           },
@@ -146,8 +146,21 @@
                 "sortOrder": "frequency"
               }
             }
+          },
+          {
+            "id": "37c5ffe495ce75a0",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "test2.md",
+                "mode": "source",
+                "source": false
+              }
+            }
           }
-        ]
+        ],
+        "currentTab": 6
       }
     ],
     "direction": "horizontal",
@@ -166,34 +179,34 @@
       "periodic-notes:Open today": false
     }
   },
-  "active": "6c4cdea2b4cff889",
+  "active": "2a028a5a5f2498a2",
   "lastOpenFiles": [
+    "Journal/Weekly/2023/2023-W32.md",
+    "Discord Support/Dataview Queries/DV DVJS prev and next file in the folder.md",
+    "test.md",
+    "test2.md",
+    "Vault.md",
+    "Templates/Template Status bar setup.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/FROM.md",
+    "Knowledge/001 Dataview/How dataview works.md",
+    "Templates/DQL function overview.md",
+    "Knowledge/001 Dataview/DVJS/DV Functions/DataArray.where.md",
+    "Knowledge/001 Dataview/DVJS/DV Functions/DataArray.includes.md",
+    "Knowledge/001 Dataview/DVJS/DV Functions/DataArray.groupBy.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/GROUP BY.md",
     "Knowledge/002 Queries/Tasks Completion date.md",
     "Knowledge/002 Queries/ThreeInTen Analysis.md",
     "Raw Data/ThreeInTen Data.md",
     "Templates/Scripts/Script JSON to YAML json metadata converter.md",
-    "Vault.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
     "Knowledge/001 Dataview/DQL/Data Commands/SORT.md",
     "Archive/1 Lottery games Script.md",
     "Discord Support/Dataview Queries/DV DQL TABLE FLATTEN.md",
     "Discord Support/Dataview Queries/DV DVJS TABLE map.md",
     "Discord Support/Dataview Data/Test data/Test data 1.md",
-    "Templates/DQL function overview.md",
     "Knowledge/001 Dataview/DQL/Data Commands/TABLE.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/GROUP BY.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/FROM.md",
-    "Templates/Template Status bar setup.md",
     "Templates/Template People.md",
     "Templates/Template Standard Note.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/WITHOUT ID.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/WHERE.md",
-    "unsorted queries.md",
-    "Untitled.md",
-    "Knowledge/000 MOC/Dataview Overview.md",
-    "Knowledge/People/@Danny Hatcher.md",
-    "Knowledge/000 MOC/MOC People.md",
-    "Knowledge/001 Dataview/DQL/Functions/date.md",
     "Knowledge/People",
     "Code Modules",
     "Canvas/Movie Canvas/Movies.canvas",

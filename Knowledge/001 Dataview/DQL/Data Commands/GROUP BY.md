@@ -17,10 +17,11 @@ status::  `$= const setPage = "GROUP BY"; const setFilter = "Status Tasks" ; con
 - docs:: [command Group by](https://blacksmithgu.github.io/obsidian-dataview/queries/data-commands/#group-by)
 
 Group by is used when you want to group the rows together by the values of a metadata field.
-most of the time it is used in combination of [[FLATTEN]] because flatten creates rows and group by reduces them again into a managable amount.
+most of the time it is used in combination of [[FLATTEN]] because flatten creates rows and group by reduces them again into a manageable amount.
 you can use Expressions in the grouping string or just name a field.
 after you have used group by you need to use "rows." before each metadata field inside the headers and after the group by line.
 
+to read more about the background data of group by then read through the [[DataArray.groupBy]] note. it goes into more detail of what is actually happening.
 
 ## DQL Overview
 
@@ -61,27 +62,6 @@ map(file.outlinks, (t)=> choice(meta(t).subpath,
 link(meta(t).path))) as Outlinks
 where file.path = this.file.path
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

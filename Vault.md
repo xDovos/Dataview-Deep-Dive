@@ -116,7 +116,7 @@ renderHeatmapCalendar(this.container, calendarData)
 
 - Query meta
     - QueryType:: [[DVJS]], [[Plugin Heatmap Calendar]]
-    - DVfunctions:: [[dv.pages]], [[dv.span]], [[array.where]], [[array.groupBy]]
+    - DVfunctions:: [[dv.pages]], [[dv.span]], [[DataArray.where]], [[DataArray.groupBy]]
     - JSfunctions:: [[RegEx]], [[console.log]], [[await]]
     - tags:: 
     - image:: 
@@ -172,7 +172,7 @@ renderHeatmapCalendar(this.container, calendarData)
 
 - Query meta
     - QueryType:: [[DVJS]], [[Plugin Heatmap Calendar]]
-    - DVfunctions:: [[dv.pages]], [[dv.span]], [[array.where]], [[array.groupBy]]
+    - DVfunctions:: [[dv.pages]], [[dv.span]], [[DataArray.where]], [[DataArray.groupBy]]
     - JSfunctions:: [[RegEx]], [[console.log]], [[await]]
     - tags:: 
     - image:: 
