@@ -10,6 +10,7 @@
     "learningTime": "number",
     "Dataview": "date",
     "DOB": "date",
-    "Website": "multitext"
+    "Website": "multitext",
+    "Brirthday": "date"
   }
 }

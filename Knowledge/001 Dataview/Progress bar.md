@@ -60,7 +60,7 @@ the example note for the progress bars shown in this note are in [[File Name]]
 
 ```
 
->[!info]- Rendered
+>[!info]+ Rendered
 >
 >`$= const setPage = "File Name"; const setFilter = "Text Filter" ; const value = Math.round(((dv.page(setPage).file.tasks.where(t => t.completed).where(t => t.text.includes(setFilter)).length) / (dv.page(setPage).file.tasks).where(t => t.text.includes(setFilter)).length) * 100); "<progress value='" + value + "' max='100'></progress>" + "<span style='font-size:smaller;color:var(--text-muted)'>" + value + "% &nbsp;| &nbsp;" + (dv.page(setPage).file.tasks.where(t => t.text.includes(setFilter)).length - dv.page(setPage).file.tasks.where(t => t.completed).where(t => t.text.includes(setFilter)).length) + " left</span>" `
 >
@@ -82,7 +82,7 @@ TextFilter:: `$= const setPage = "File Name"; const setFilter = "Text Filter" ; 
 `$=return(await self.require.import("Code Modules/modulePB.js.md")).PBSingleNoteText(dv, "File Name", "Text Filter")`
 ```
 
->[!info]- Rendered
+>[!info]+ Rendered
 >`$=return(await self.require.import("Code Modules/modulePB.js.md")).PBSingleNoteText(dv, "File Name", "Text Filter")`
 
 
@@ -150,16 +150,25 @@ group by Project as G
 ## DQL TABLE MOC with progress bar and checking of the tasks
 
 ### old version
-```dataview
+
+```js dataview
 table status, "`$= dv.taskList(dv.page(\"" + file.name + "\").file.tasks.where((t)=> !t.completed).where((t)=> t.section.subpath == 'Status Tasks'), false)`" AS TASKS
-from "Knowledge/Dataview/DQL"
+from "Knowledge/001 Dataview/DQL"
 
 ```
 
 ### new version with callouts to hide the tasks
-```dataview
+
+```js dataview
 table status, "`$=const tasks = dv.page(\"" + file.name + "\").file.tasks.where(t=> !t.checked && t.section.subpath == 'Status Tasks');let md =  '>[!todo]- Tasks\n>'+ String.fromCharCode(96).repeat(3) + 'dataviewjs\n>let group2 = dv.array(JSON.parse('+String.fromCharCode(96);let md2 = String.fromCharCode(96)+'));\n>dv.taskList(group2, false);\n>'+ String.fromCharCode(96).repeat(3)+ '\n';dv.span(md + JSON.stringify(tasks.array()) + md2);`" AS TASKS
-from "Knowledge/Dataview/DQL"
+from "Knowledge/001 Dataview/DQL"
+```
+
+### Modules Version with callouts
+
+```js dataview
+table status, "`$=return(await self.require.import('Code Modules/moduleUtils.js.md')).UtilsTaskListCallout(dv, \""+ file.name +"\", t => !t.checked && t.section.subpath == 'Status Tasks')`" AS TASKS
+from "Knowledge/001 Dataview/DQL"
 ```
 
 

@@ -1,13 +1,14 @@
 ---
-aliases: []
-Type: 
+aliases: 
+Type: module
 MOC:
 ---
 
 status::  `$=return(await self.require.import("Code Modules/modulePB.js.md")).PBSingleNoteHeader(dv, "modulePB.js", "Status Tasks")`
 
 ###### Status Tasks
-- [ ] Write the YAML metadata
+- [x] Create the Note ✅ 2023-09-15
+- [x] Write the YAML metadata ✅ 2023-09-15
 - [ ] Write the query
 
 

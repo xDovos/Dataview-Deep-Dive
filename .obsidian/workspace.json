@@ -4,22 +4,47 @@
     "type": "split",
     "children": [
       {
-        "id": "7a649f5c3707a45a",
+        "id": "70318ff094ef843c",
         "type": "tabs",
         "children": [
           {
-            "id": "2a028a5a5f2498a2",
+            "id": "27e6b1d4c35ab073",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Journal/Weekly/2023/2023-W31.md",
+                "file": "Code Modules/modulePB.js.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "f85eb73485233a32",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Knowledge/002 Queries/unsorted queries.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "5860b8daad303a5b",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Knowledge/001 Dataview/DQL/Data Commands/FROM.md",
                 "mode": "source",
                 "source": false
               }
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -93,7 +118,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Journal/Weekly/2023/2023-W31.md",
+                "file": "Knowledge/002 Queries/unsorted queries.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -110,7 +135,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Journal/Weekly/2023/2023-W31.md",
+                "file": "Knowledge/002 Queries/unsorted queries.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -133,7 +158,7 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Journal/Weekly/2023/2023-W31.md"
+                "file": "Knowledge/002 Queries/unsorted queries.md"
               }
             }
           },
@@ -146,21 +171,9 @@
                 "sortOrder": "frequency"
               }
             }
-          },
-          {
-            "id": "37c5ffe495ce75a0",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "test2.md",
-                "mode": "source",
-                "source": false
-              }
-            }
           }
         ],
-        "currentTab": 6
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
@@ -179,34 +192,34 @@
       "periodic-notes:Open today": false
     }
   },
-  "active": "2a028a5a5f2498a2",
+  "active": "f85eb73485233a32",
   "lastOpenFiles": [
-    "Journal/Weekly/2023/2023-W32.md",
-    "Discord Support/Dataview Queries/DV DVJS prev and next file in the folder.md",
-    "test.md",
-    "test2.md",
-    "Vault.md",
-    "Templates/Template Status bar setup.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
+    "Attachments/Query Renderings/Grouping of groups in dvjs Elements.png",
+    "Knowledge/001 Dataview/Progress bar.md",
+    "Journal/Monthly/2023/2023-M08.md",
+    "Journal/Daily/2023/2023-08-01.md",
+    "Discord Support/Dataview Queries/DV DQL sum.md",
+    "Discord Support/Dataview Queries/DV DQL TABLE any contains.md",
+    "Discord Support/Dataview Queries/DV DQL TABLE filter.md",
+    "Discord Support/Dataview Queries/DV DQL Sorting.md",
+    "Discord Support/Dataview Queries/DV DQL basic Syntax.md",
+    "Archive/1 Lottery games Script broken.md",
+    "Code Modules/modulePB.js.md",
+    "Code Modules/moduleUtils.js.md",
+    "Knowledge/001 Dataview/DVJS/DVJS.md",
+    "Knowledge/001 Dataview/DVJS/DV Functions/dv.current.md",
+    "Knowledge/001 Dataview/DVJS/DV Functions/dv.pages.md",
+    "Knowledge/001 Dataview/DVJS/DV Functions/dv.span.md",
+    "Knowledge/002 Queries/Query switching.md",
+    "Knowledge/002 Queries/Query Query.md",
+    "Knowledge/002 Queries/String that tells the current date.md",
+    "Knowledge/002 Queries/Side bar query note.md",
+    "Knowledge/People/@Danny Hatcher.md",
+    "Knowledge/People/@Daniel @NL.md",
+    "Knowledge/Movies/Harry Potter and the Half-Blood Prince (2009).md",
+    "Templates/Movie Template.md",
+    "Knowledge/002 Queries/unsorted queries.md",
     "Knowledge/001 Dataview/DQL/Data Commands/FROM.md",
-    "Knowledge/001 Dataview/How dataview works.md",
-    "Templates/DQL function overview.md",
-    "Knowledge/001 Dataview/DVJS/DV Functions/DataArray.where.md",
-    "Knowledge/001 Dataview/DVJS/DV Functions/DataArray.includes.md",
-    "Knowledge/001 Dataview/DVJS/DV Functions/DataArray.groupBy.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/GROUP BY.md",
-    "Knowledge/002 Queries/Tasks Completion date.md",
-    "Knowledge/002 Queries/ThreeInTen Analysis.md",
-    "Raw Data/ThreeInTen Data.md",
-    "Templates/Scripts/Script JSON to YAML json metadata converter.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/SORT.md",
-    "Archive/1 Lottery games Script.md",
-    "Discord Support/Dataview Queries/DV DQL TABLE FLATTEN.md",
-    "Discord Support/Dataview Queries/DV DVJS TABLE map.md",
-    "Discord Support/Dataview Data/Test data/Test data 1.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/TABLE.md",
-    "Templates/Template People.md",
-    "Templates/Template Standard Note.md",
     "Knowledge/People",
     "Code Modules",
     "Canvas/Movie Canvas/Movies.canvas",
@@ -225,7 +238,7 @@
     "Attachments",
     "Archive",
     "Knowledge/000 MOC",
-    "Vorlagen",
+    "Templates Archive",
     "Templates/Scripts",
     "Canvas/Setups.canvas",
     "Attachments/Pasted image 20230810194317.png"
