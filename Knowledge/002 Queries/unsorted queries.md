@@ -6,7 +6,7 @@ tags:
 Birthday: 1999-05-07
 FirstContactDate: 2022-11-08
 ---
-
+# Unsorted Queries
 
 ## Illness tracking inside one note
 
@@ -32,6 +32,8 @@ WHERE L.illness
 
 ```dataview
 TASK
+FROM "Vault"
+where !completed
 flatten [file.link + " @ " + text] AS visual
 LIMIT 5
 ```
@@ -599,9 +601,4 @@ dv.list([...dv.pages()]
     }, [])
     .filter(({ path }) => !app.vault.getAbstractFileByPath(path)))
 
-```
-
-
-```dataviewjs
-console.log(await dv.io.load())
 ```

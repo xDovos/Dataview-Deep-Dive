@@ -42,7 +42,8 @@ VaultNotesOverview:: `$=return(await self.require.import("Code Modules/modulePB.
 - It is currently WIP and might take a while to finish. 
 - When Datacore comes out i plan to convert what i can to that plugin but that still might take until 2023-12-24
 - This vault is not a replacement for dataviews [docs](https://blacksmithgu.github.io/obsidian-dataview/) and it mostly assumes that you read and use it on the side.
-- most of the time \`\`\`dataview queries will be called [[DQL]] (DataQueryLanguage) and \`\`\`dataviewjs will be called [[DVJS]]
+- most of the time \`\`\`dataview queries will be called [[DQL]] (DataQueryLanguage) and \`\`\`dataviewjs will be called [[DVJS]]. 
+- you can find a MOC of all commands and functions in [[Dataview Overview]].
 - it might be that this vault ends up to be like the docs but that isn't the intention and only a side effect of the setup i choose, so it is most likely incomplete because i'm adding stuff as i encounter them.
 - some queries like the progress bar for the status field use the "Modules" plugin to put the query into one place in a separate note. in this case the [[modulePB.js]] note. it is a .js.md note, so you can open it with obsidian. the reason you can't see the .md from inside obsidian is because it removes that ending like for every other note/link. the progress bar queries are explained in [[Progress bar]].
 

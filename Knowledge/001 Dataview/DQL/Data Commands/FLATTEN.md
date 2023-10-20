@@ -1,5 +1,5 @@
 ---
-aliases: []
+aliases: 
 Type: DataCommand
 MOC: "[[Dataview Overview]]"
 ---

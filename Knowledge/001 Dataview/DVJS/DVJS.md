@@ -13,7 +13,7 @@ status::  `$= const setPage = "DVJS"; const setFilter = "Status Tasks" ; const v
 
 # DVJS Queries
 
-## DQL Overview
+## DVJS Overview
 
 ```js 
 TABLE flat(filter(rows.L, (t) => t.text = "Query meta").children.text), embed(filter(flat(filter(rows.L, (t) => t.text = "Query meta").children), (t2) => t2.image).image)[0]
@@ -39,7 +39,7 @@ WHERE contains(rows.L.children.QueryType, this.file.link)
     - dataCommands:: [[TABLE]], [[WHERE]], [[FLATTEN]], [[GROUP BY]]
     - functions:: [[filter]], [[flat]], [[contains]], [[embed]], [[arrow function]]
     - tags:: 
-    - image:: [[FROM DQL Overview.png]]
+    - image:: 
 
 
 
