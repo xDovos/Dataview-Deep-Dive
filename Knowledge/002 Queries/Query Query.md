@@ -18,7 +18,7 @@ status::  `$= const setPage = "Query Query"; const setFilter = "Status Tasks" ; 
 
 the filters don't work in the callout. if you want to use the query remove the "js " before the "dataviewjs" so that the codeblock is rendering.
 
- ```js dataviewjs
+ ```dataviewjs
 let input = {
   "query": `TABLE flat(filter(rows.L, (t) => t.text = "Query meta").children.text) as "metadata", embed(filter(flat(filter(rows.L, (t) => t.text = "Query meta").children), (t2) => t2.image).image)[0] as "Image"
     WHERE file.lists and contains(file.lists.text,"Query meta")

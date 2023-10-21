@@ -25,7 +25,6 @@ const pages = dv.pages('"Discord Support/Dataview Data/Test data"').where((t)=> 
 
 let temp = pages.map((t) => newRow(t.file.link, t.start, t.end)).array().flat()
 temp = dv.array(temp).sort(t => t.start, "asc")
-
 const data = temp.map(t=> [t.link, t.start, t.end])
 
 dv.table(["link", "start", "end"],data)

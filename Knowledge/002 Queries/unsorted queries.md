@@ -258,7 +258,7 @@ dv.table(["Writing Project", "Priority", "Status"],data);
 
 
 >[!note]+
->text with [key:: [[metadata]]]
+>text with [key:: [[Metadata Types]]]
 >[key2:: help]
 >and a text with frontmatter `=this.key`
 >and a text with `=this.Fkey`

@@ -54,7 +54,7 @@ SORT Runs.hits desc, Runs.round asc
 
 - Query meta
     - QueryType:: [[DQL]]
-    - dataCommands:: [[TABLE]], [[FROM]], [[FLATTEN]], [[SORT]], [[WITHOUT ID]]
+    - dataCommands:: [[TABLE]], [[FROM]], [[FLATTEN]], [[Knowledge/001 Dataview/DQL/Data Commands/SORT]], [[WITHOUT ID]]
     - functions:: [[join]]
     - tags:: 
     - image:: 
@@ -115,7 +115,7 @@ SORT length(rows.Runs) desc
 
 - Query meta
     - QueryType:: [[DQL]]
-    - dataCommands:: [[TABLE]], [[FROM]], [[FLATTEN]], [[GROUP BY]], [[SORT]]
+    - dataCommands:: [[TABLE]], [[FROM]], [[FLATTEN]], [[GROUP BY]], [[Knowledge/001 Dataview/DQL/Data Commands/SORT]]
     - functions:: [[length]]
     - tags:: 
     - image:: 

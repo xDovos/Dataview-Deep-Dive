@@ -13,13 +13,14 @@ status::  `$= const setPage = "Tasks Completion date"; const setFilter = "Status
 
 # Tasks Completion date
 
+
 ## unnamed
 
-```dataviewjs 
+```js dataviewjs 
 let startDate = dv.date("2023-08-01");
 let endDate = dv.date("today");
 
-let list = dv.pages('"Journal"')
+let list = dv.pages()
     .file.tasks.where(t => t.completed && t.completion >= startDate && t.completion <= endDate);
     
 let listg = list.groupBy(p => p.completion).map(t => dv.fileLink(t.key.toFormat("yyyy-MM-dd")) + " - "+ t.rows.length);
@@ -29,14 +30,22 @@ dv.paragraph(listg)
 ```
 
 >[!info]- Rendered
->```dataview
+>```dataviewjs 
+>let startDate = dv.date("2023-08-01");
+>let endDate = dv.date("today");
+>let list = dv.pages()
+>    .file.tasks.where(t => t.completed && t.completion >= startDate && t.completion <= endDate);
+>    
+>let listg = list.groupBy(p => p.completion).map(t => dv.fileLink(t.key.toFormat("yyyy-MM-dd")) + " - "+ t.rows.length);
 >
+>dv.paragraph(listg)
+>//console.log(listg);
 >```
 
 - Query meta
-    - QueryType:: [[DQL]]
-    - dataCommands:: [[TABLE]],
-    - functions:: 
+    - QueryType:: [[DVJS]]
+    - DVfunctions:: [[dv.pages]], [[dv.date]], [[DataArray.where]], [[DataArray.groupBy]], [[dv.paragraph]]. [[date.toFormat]], 
+    - JSfunctions:: 
     - tags:: 
     - image:: 
 

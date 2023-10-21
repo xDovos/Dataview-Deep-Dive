@@ -1,22 +1,22 @@
 ---
 aliases: []
-Type: function
-MOC: "[[Dataview Overview]]"
+Type: 
+MOC:
 ---
 
-status::  `$= const setPage = "filter"; const setFilter = "Status Tasks" ; const value = Math.round(((dv.page(setPage).file.tasks.where(t => t.completed).where(t => String(t.section).includes(setFilter)).length) / (dv.page(setPage).file.tasks).where(t => String(t.section).includes(setFilter)).length) * 100); "<progress value='" + value + "' max='100'></progress>" + "<span style='font-size:smaller;color:var(--text-muted)'>" + value + "% &nbsp;| &nbsp;" + (dv.page(setPage).file.tasks.where(t => String(t.section).includes(setFilter)).length - dv.page(setPage).file.tasks.where(t => t.completed).where(t => String(t.section).includes(setFilter)).length) + " left</span>" `
+status:: `$=return(await self.require.import("Code Modules/modulePB.js.md")).PBSingleNoteHeader(dv, "object", "Status Tasks")`
 
 ###### Status Tasks
-- [x] Create the Note ✅ 2023-10-11
+- [x] Create the Note ✅ 2023-10-21
 - [ ] Write the YAML metadata
 - [ ] Write the query
 
 
-# filter
+# object
 
-## DQL Overview
+## object Overview
 
-```js dataview
+```js 
 TABLE flat(filter(rows.L, (t) => t.text = "Query meta").children.text) as Metadata, embed(filter(flat(filter(rows.L, (t) => t.text = "Query meta").children), (t2) => t2.image).image)[0] as Image
 WHERE file.lists and contains(file.lists.text,"Query meta")
 FLATTEN file.lists as L
@@ -27,7 +27,7 @@ WHERE contains(rows.L.children.functions, this.file.link)
 
 >[!info]- Rendered
 >```dataview
->TABLE flat(filter(rows.L, (t) => t.text = "Query meta").children.text), embed(filter(flat(filter(rows.L, (t) => t.text = "Query meta").children), (t2) => t2.image).image)[0]
+>TABLE flat(filter(rows.L, (t) => t.text = "Query meta").children.text) as Metadata, embed(filter(flat(filter(rows.L, (t) => t.text = "Query meta").children), (t2) => t2.image).image)[0] as Image
 >WHERE file.lists and contains(file.lists.text,"Query meta")
 >FLATTEN file.lists as L
 >WHERE !L.task

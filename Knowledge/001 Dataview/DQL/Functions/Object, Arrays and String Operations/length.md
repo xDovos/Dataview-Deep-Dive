@@ -16,11 +16,10 @@ status::  `$= const setPage = "length"; const setFilter = "Status Tasks" ; const
 length() returns the length of an array or string and has many usecases.
 it works on a cell level so you can't use it to get the length or the table or list.
 
-
-## DQL Overview
+## length Overview
 
 ```js 
-TABLE flat(filter(rows.L, (t) => t.text = "Query meta").children.text), embed(filter(flat(filter(rows.L, (t) => t.text = "Query meta").children), (t2) => t2.image).image)[0]
+TABLE flat(filter(rows.L, (t) => t.text = "Query meta").children.text) as Metadata, embed(filter(flat(filter(rows.L, (t) => t.text = "Query meta").children), (t2) => t2.image).image)[0] as Image
 WHERE file.lists and contains(file.lists.text,"Query meta")
 FLATTEN file.lists as L
 WHERE !L.task
@@ -30,7 +29,7 @@ WHERE contains(rows.L.children.functions, this.file.link)
 
 >[!info]- Rendered
 >```dataview
->TABLE flat(filter(rows.L, (t) => t.text = "Query meta").children.text), embed(filter(flat(filter(rows.L, (t) => t.text = "Query meta").children), (t2) => t2.image).image)[0]
+>TABLE flat(filter(rows.L, (t) => t.text = "Query meta").children.text) as Metadata, embed(filter(flat(filter(rows.L, (t) => t.text = "Query meta").children), (t2) => t2.image).image)[0] as Image
 >WHERE file.lists and contains(file.lists.text,"Query meta")
 >FLATTEN file.lists as L
 >WHERE !L.task
@@ -44,6 +43,7 @@ WHERE contains(rows.L.children.functions, this.file.link)
     - functions:: [[filter]], [[flat]], [[contains]], [[embed]], [[arrow function]]
     - tags:: 
     - image:: [[FROM DQL Overview.png]]
+
 
 
 ## Appearances

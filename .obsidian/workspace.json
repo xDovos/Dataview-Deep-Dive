@@ -4,11 +4,23 @@
     "type": "split",
     "children": [
       {
-        "id": "33f7540f40246153",
+        "id": "7a34f736b83d1ca3",
         "type": "tabs",
         "children": [
           {
-            "id": "8ba551ce5c5bff47",
+            "id": "09af9ba2761fbd83",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Knowledge/002 Queries/unsorted queries.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "e4f7d3408c2735d5",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -20,42 +32,19 @@
             }
           },
           {
-            "id": "718e5450bf8dfa15",
+            "id": "3e30381c652369c4",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Knowledge/001 Dataview/DQL/DQL.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "7b642cd69e38f286",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Knowledge/000 MOC/Dataview Overview.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "67cab8413a0b5ef3",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
+                "file": "Templates/DQL function overview.md",
                 "mode": "source",
                 "source": false
               }
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -175,7 +164,8 @@
               }
             }
           }
-        ]
+        ],
+        "currentTab": 2
       }
     ],
     "direction": "horizontal",
@@ -194,35 +184,40 @@
       "periodic-notes:Open today": false
     }
   },
-  "active": "8ba551ce5c5bff47",
+  "active": "e4f7d3408c2735d5",
   "lastOpenFiles": [
-    "Knowledge/000 MOC/MOC People.md",
-    "Vault.md",
-    "Knowledge/000 MOC/Dataview Overview.md",
-    "Knowledge/001 Dataview/DVJS/JS functions/arrow function.md",
-    "Knowledge/001 Dataview/DQL/Functions/choice.md",
-    "Knowledge/001 Dataview/DQL/Functions/contains.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
-    "Knowledge/001 Dataview/DQL/DQL.md",
-    "Knowledge/001 Dataview/DVJS/DVJS.md",
-    "Knowledge/002 Queries/unsorted queries.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/FROM.md",
-    "Code Modules/modulePB.js.md",
-    "Discord Support/Dataview Queries/DV DVJS TABLE Word counting.md",
-    "Discord Support/Obsidian Plugins/Markdown Syntax.md",
+    "Knowledge/001 Dataview/DQL/Functions/Utility/striptime.md",
+    "Knowledge/001 Dataview/DQL/Functions/Utility/meta.md",
+    "Knowledge/001 Dataview/DQL/Functions/Utility/localtime.md",
+    "Knowledge/001 Dataview/DQL/Functions/Utility/durationformat.md",
+    "Knowledge/001 Dataview/DQL/Functions/Utility/default.md",
+    "Knowledge/001 Dataview/DQL/Functions/Utility/dateformat.md",
+    "Knowledge/001 Dataview/DQL/Functions/Utility/choice.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/upper.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/truncate.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/substring.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/startswith.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/split.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/replace.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/regex.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/lower.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/padleft.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/padright.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/endswith.md",
+    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/sort.md",
+    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/reverse.md",
+    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/nonnull.md",
+    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/none.md",
+    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/map.md",
+    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/length.md",
+    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/join.md",
+    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/flat.md",
+    "Knowledge/001 Dataview/DQL/Functions/Utility",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations",
+    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations",
+    "Knowledge/001 Dataview/DQL/Functions/Numeric Operations",
+    "Knowledge/001 Dataview/DQL/Functions/Constructors",
     "Attachments/Query Renderings/Grouping of groups in dvjs Elements.png",
-    "Knowledge/001 Dataview/Progress bar.md",
-    "Journal/Monthly/2023/2023-M08.md",
-    "Journal/Daily/2023/2023-08-01.md",
-    "Discord Support/Dataview Queries/DV DQL sum.md",
-    "Discord Support/Dataview Queries/DV DQL TABLE any contains.md",
-    "Discord Support/Dataview Queries/DV DQL TABLE filter.md",
-    "Discord Support/Dataview Queries/DV DQL Sorting.md",
-    "Discord Support/Dataview Queries/DV DQL basic Syntax.md",
-    "Archive/1 Lottery games Script broken.md",
-    "Code Modules/moduleUtils.js.md",
-    "Knowledge/001 Dataview/DVJS/DV Functions/dv.current.md",
-    "Knowledge/001 Dataview/DVJS/DV Functions/dv.pages.md",
     "Knowledge/People",
     "Code Modules",
     "Canvas/Movie Canvas/Movies.canvas",
@@ -238,11 +233,6 @@
     "Attachments/Query Renderings/FROM DQL Overview.png",
     "Attachments/Query Renderings/DVJS INLINE page text filter.png",
     "Attachments/Query Renderings",
-    "Attachments",
-    "Archive",
-    "Knowledge/000 MOC",
-    "Templates Archive",
-    "Templates/Scripts",
     "Canvas/Setups.canvas",
     "Attachments/Pasted image 20230810194317.png"
   ]

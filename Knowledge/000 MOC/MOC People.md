@@ -61,7 +61,7 @@ SORT On
 
 - Query meta
     - QueryType:: [[DQL]]
-    - dataCommands:: [[TABLE]], [[FROM]], [[WHERE]], [[FLATTEN]], [[SORT]]
+    - dataCommands:: [[TABLE]], [[FROM]], [[WHERE]], [[FLATTEN]], [[Knowledge/001 Dataview/DQL/Data Commands/SORT]]
     - functions:: [[date]], [[dur]], [[string]], [[choice]]
     - tags:: 
     - image:: 

@@ -51,10 +51,16 @@ flatten file.tasks as T
 
 
 
+[]
 
 
+```js dataview
+TASK
+WHERE contains(tags, "#task") and contains(tags, "#main") and !completed and 
 
+any(list("#publish-phase", "#reviewer-phase", "editor-phase", "impact-phase", "#advisor-advice/Songi", "#collaborator-advice/Asif", "#collaborator-advice/Elena", "#submission-guidelines", "#my-advice"), (t)=> contains(tags, t))
 
+```
 
 
 
