@@ -166,13 +166,14 @@
       "command-palette:Open command palette": false,
       "obsidian-media-db-plugin:Add new Media DB entry": false,
       "templater-obsidian:Templater": false,
-      "periodic-notes:Open today": false,
       "darlal-switcher-plus:Open in Headings Mode": false,
-      "darlal-switcher-plus:Open Symbols for the active editor": false
+      "darlal-switcher-plus:Open Symbols for the active editor": false,
+      "periodic-notes:Open today": false
     }
   },
-  "active": "e4f7d3408c2735d5",
+  "active": "6be23f01fafe8381",
   "lastOpenFiles": [
+    "Knowledge/Testing",
     "Knowledge/002 Queries/Datasets/YAML Datasets.md",
     "Knowledge/002 Queries/Datasets/Headers datasets.md",
     "Knowledge/002 Queries/Datasets/list + inline metadata datasets.md",
@@ -199,7 +200,6 @@
     "Knowledge/People/@Dovos.md",
     "Knowledge/People/@Danny Hatcher.md",
     "Knowledge/People/@Daniel @NL.md",
-    "testing.md",
     "Knowledge/001 Dataview/DQL/Functions/Utility",
     "Knowledge/001 Dataview/DQL/Functions/String Operations",
     "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations",
