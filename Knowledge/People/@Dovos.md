@@ -1,25 +1,26 @@
 ---
 aliases: 
 Type: Person
-DOB: 2023-10-10
+DOB: 1999-03-04
 Adress: 
-Country: Netherlands
+Country: Germany
 Email: 
-Website: 
+Website:
+  - https://github.com/xDovos/Dataview-Deep-Dive
 MOC: 
-Twitter: "@dbarenholz"
-eyecolor: brown
+Twitter:
 ---
 
-status::  `$=return(await self.require.import("Code Modules/modulePB.js.md")).PBSingleNoteHeader(dv, "@Daniel @NL", "Status Tasks")`
+status::  `$=return(await self.require.import("Code Modules/modulePB.js.md")).PBSingleNoteHeader(dv, "@Dovos", "Status Tasks")`
 
 ###### Status Tasks
-- [x] Create the Note ✅ 2023-10-11
-- [ ] Fill out the Properties
+- [x] Create the Note ✅ 2023-10-27
+- [x] Fill out the Properties ✅ 2023-10-27
 - [ ] Write interesting stuff about that person.
 
 
-# @Daniel @NL
+# @Dovos
+
 
 
 ## Appearances

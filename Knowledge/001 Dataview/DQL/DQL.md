@@ -39,7 +39,7 @@ WHERE contains(rows.L.children.QueryType, this.file.link)
     - dataCommands:: [[TABLE]], [[WHERE]], [[FLATTEN]], [[GROUP BY]]
     - functions:: [[filter]], [[flat]], [[contains]], [[embed]], [[arrow function]]
     - tags:: 
-    - image:: [[]]
+    - image:: 
 
 ## Appearances
 

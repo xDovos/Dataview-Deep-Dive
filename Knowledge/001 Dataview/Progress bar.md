@@ -97,7 +97,7 @@ TextFilter:: `$= const setPage = "File Name"; const setFilter = "Text Filter" ; 
 
 - A progress bar that takes the file name and a text filter
 - The file name can be automated inside the template from the Templater plugin 
-	- const setPage = "<%tp.file.title%>";
+	- const setPage = "Progress bar";
 - The text filter looks into the task text and searches for a match. you can do:
 	- Tags: "#tag"
 	- Words: "Word"

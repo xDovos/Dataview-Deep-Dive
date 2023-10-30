@@ -8,24 +8,12 @@
         "type": "tabs",
         "children": [
           {
-            "id": "09af9ba2761fbd83",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Knowledge/002 Queries/unsorted queries.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
             "id": "e4f7d3408c2735d5",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Vault.md",
+                "file": "Knowledge/002 Queries/Datasets/list + inline metadata datasets.md",
                 "mode": "source",
                 "source": false
               }
@@ -43,8 +31,7 @@
               }
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -110,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Vault.md",
+                "file": "Knowledge/002 Queries/Datasets/list + inline metadata datasets.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -127,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Vault.md",
+                "file": "Knowledge/002 Queries/Datasets/list + inline metadata datasets.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -150,7 +137,7 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Vault.md"
+                "file": "Knowledge/002 Queries/Datasets/list + inline metadata datasets.md"
               }
             }
           },
@@ -178,40 +165,41 @@
       "canvas:Create new canvas": false,
       "command-palette:Open command palette": false,
       "obsidian-media-db-plugin:Add new Media DB entry": false,
-      "darlal-switcher-plus:Open in Headings Mode": false,
-      "darlal-switcher-plus:Open Symbols for the active editor": false,
       "templater-obsidian:Templater": false,
-      "periodic-notes:Open today": false
+      "periodic-notes:Open today": false,
+      "darlal-switcher-plus:Open in Headings Mode": false,
+      "darlal-switcher-plus:Open Symbols for the active editor": false
     }
   },
   "active": "e4f7d3408c2735d5",
   "lastOpenFiles": [
-    "Knowledge/001 Dataview/DQL/Functions/Utility/striptime.md",
-    "Knowledge/001 Dataview/DQL/Functions/Utility/meta.md",
-    "Knowledge/001 Dataview/DQL/Functions/Utility/localtime.md",
-    "Knowledge/001 Dataview/DQL/Functions/Utility/durationformat.md",
-    "Knowledge/001 Dataview/DQL/Functions/Utility/default.md",
-    "Knowledge/001 Dataview/DQL/Functions/Utility/dateformat.md",
-    "Knowledge/001 Dataview/DQL/Functions/Utility/choice.md",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations/upper.md",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations/truncate.md",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations/substring.md",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations/startswith.md",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations/split.md",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations/replace.md",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations/regex.md",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations/lower.md",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations/padleft.md",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations/padright.md",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations/endswith.md",
-    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/sort.md",
-    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/reverse.md",
-    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/nonnull.md",
-    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/none.md",
-    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/map.md",
-    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/length.md",
-    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/join.md",
-    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/flat.md",
+    "Knowledge/002 Queries/Datasets/YAML Datasets.md",
+    "Knowledge/002 Queries/Datasets/Headers datasets.md",
+    "Knowledge/002 Queries/Datasets/list + inline metadata datasets.md",
+    "Discord Support/Dataview Queries/DV DQL Sorting.md",
+    "Discord Support/Dataview Queries/DV DQL basic Syntax.md",
+    "Knowledge/Plugins/Markdown Syntax.md",
+    "Discord Support/Obsidian Plugins/Tikzjax plugin.md",
+    "Discord Support/Obsidian Plugins/Excalidraw Plugin.md",
+    "Discord Support/Obsidian Plugins/Note_Types.md",
+    "Knowledge/Plugins/Dataview Plugin.md",
+    "Discord Support/Dataview Testing/Tavern.md",
+    "Discord Support/Dataview Testing/person.md",
+    "Discord Support/Dataview Testing/City.md",
+    "Knowledge/002 Queries/unsorted queries.md",
+    "Templates/DQL function overview.md",
+    "Journal/Weekly/2023/2023-W31.md",
+    "Knowledge/002 Queries/Query switching.md",
+    "Knowledge/002 Queries/Datasets",
+    "Knowledge/002 Queries/ThreeInTen Analysis.md",
+    "Knowledge/002 Queries/Tasks Completion date.md",
+    "Knowledge/002 Queries/String that tells the current date.md",
+    "Knowledge/002 Queries/Side bar query note.md",
+    "Knowledge/002 Queries/Query Query.md",
+    "Knowledge/People/@Dovos.md",
+    "Knowledge/People/@Danny Hatcher.md",
+    "Knowledge/People/@Daniel @NL.md",
+    "testing.md",
     "Knowledge/001 Dataview/DQL/Functions/Utility",
     "Knowledge/001 Dataview/DQL/Functions/String Operations",
     "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations",
@@ -232,7 +220,6 @@
     "Attachments/Query Renderings/GROUP BY DQL Overview.png",
     "Attachments/Query Renderings/FROM DQL Overview.png",
     "Attachments/Query Renderings/DVJS INLINE page text filter.png",
-    "Attachments/Query Renderings",
     "Canvas/Setups.canvas",
     "Attachments/Pasted image 20230810194317.png"
   ]

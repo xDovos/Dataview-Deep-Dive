@@ -1,9 +1,5 @@
 ---
-Type: Dataview
-QueryType: DVJS
-tags:
-  - DV/DVJS
-  - DV/Query
+Type: Query
 movement:
   - name: Horse
     base: 24
@@ -64,15 +60,23 @@ movies:
     rating: 4.5
     Myrating: ⭐⭐
 self:
-  - "[[DV DVJS TABLE Datasets YAML#DV DQL TABLE dataset movement]]"
-  - "[[DV DVJS TABLE Datasets YAML#DV DVJS TABLE dataset movement]]"
-  - "[[DV DVJS TABLE Datasets YAML#DV DVJS TABLE dataset movement reduced table
-    with column field]]"
-  - "[[DV DVJS TABLE Datasets YAML#DV DVJS TABLE dataset Transport manually
-    Markdown]]"
-  - "[[DV DVJS TABLE Datasets YAML#DV DVJS TABLE dataset Transport]]"
-"":
+  - "[[YAML Datasets#DV DQL TABLE dataset movement]]"
+  - "[[YAML Datasets#DV DVJS TABLE dataset movement]]"
+  - "[[YAML Datasets#DV DVJS TABLE dataset movement reduced table with column field]]"
+  - "[[YAML Datasets#DV DVJS TABLE dataset Transport manually Markdown]]"
+  - "[[YAML Datasets#DV DVJS TABLE dataset Transport]]"
 ---
+
+status:: `$=return(await self.require.import("Code Modules/modulePB.js.md")).PBSingleNoteHeader(dv, "YAML Datasets", "Status Tasks")`
+
+###### Status Tasks
+- [x] Create the Note ✅ 2023-10-31
+- [x] Write the YAML metadata ✅ 2023-10-31
+    - [ ] fix the yamlfied json back into json format. i hate that the properties do this.
+- [ ] Write the query
+
+
+# YAML Datasets
 
 ## DV DQL TABLE dataset movement
 
@@ -81,6 +85,8 @@ TABLE M.name, M.base, M.slow, M.normal, M.fast
 where file.path = this.file.path
 FLATTEN movement as M
 ```
+
+
 
 ```dataview
 TABLE rows.M.base as "base", rows.M.slow as "slow", rows.M.normal as "normal", rows.M.fast as "fast"
@@ -170,6 +176,18 @@ for (let move of Object.entries(pg.transport)){
 }
 dv.paragraph(dv.markdownTable(header, data))
 dv.table(header, data)
+```
+
+
+
+## Appearances
+
+```dataview
+Table without id file.inlinks as Inlinks, 
+map(file.outlinks, (t)=> choice(meta(t).subpath, 
+"[["+ link(meta(t).path).file.name+"#"+ meta(t).subpath +"]]", 
+link(meta(t).path))) as Outlinks
+where file.path = this.file.path
 ```
 
 

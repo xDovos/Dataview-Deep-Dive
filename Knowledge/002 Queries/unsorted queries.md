@@ -8,26 +8,6 @@ FirstContactDate: 2022-11-08
 ---
 # Unsorted Queries
 
-## Illness tracking inside one note
-
-
-- [date:: 2023-03-28], [illness:: fever], [note:: no note]
-- [date:: 2023-05-28], [illness:: cold], [note:: [[artest 2023-05-28]] ]
-- [date:: 2023-05-29], [illness:: cold], [note:: [[artest 2023-05-28]]  ]
-- [date:: 2023-06-23], [illness:: headache], [note:: no note ]
-- [date:: 2023-08-28], [illness:: fever], [note:: no note]
-
-
-
-```dataview
-Table without id L.date as Date, L.illness as Illness, L.note as Note
-WHERE file.path = this.file.path
-flatten file.lists as L
-WHERE L.illness
-
-
-```
-
 ## Overwriting of the task visuals inside TASK Query
 
 ```dataview
@@ -37,39 +17,6 @@ where !completed
 flatten [file.link + " @ " + text] AS visual
 LIMIT 5
 ```
-
-## some way of making datasets inside one note
-### Pros
-- Vertical grip
-- Very comfortable
-### Cons
-- Battery required
-### Notes
-- Software: Logi Options+
-- Sensor: 4000dpi
-- Battery: 1x AA
-- Receiver: Unifying USB Receiver
-
-
-```dataview
-TABLE without id Pros.text as Pros, Cons.text as Cons, Notes.text as Notes
-where file.path = this.file.path
-flatten [filter(flat(file.lists), (item) => meta(item.section).subpath = "Pros")] as Pros
-flatten [filter(flat(file.lists), (item) => meta(item.section).subpath = "Cons")] as Cons
-flatten [filter(flat(file.lists), (item) => meta(item.section).subpath = "Notes")] as Notes
-
-```
-
-
-```dataview
-TABLE without id Pros.text as Pros, Cons.text as Cons, Notes.text as Notes
-where file.path = this.file.path
-flatten filter(flat(file.lists), (item) => meta(item.section).subpath = "Pros") as Pros
-flatten filter(flat(file.lists), (item) => meta(item.section).subpath = "Cons") as Cons
-flatten filter(flat(file.lists), (item) => meta(item.section).subpath = "Notes") as Notes
-
-```
-
 
 ## Styling of DQL table outputs and Projects and subtasks based on task parent + children
 

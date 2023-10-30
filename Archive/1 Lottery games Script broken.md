@@ -1,4 +1,4 @@
-<%*
+<\%*
 
 function choose(n, r) {
   return [...new Array(n)].map((_0, idx) => idx +1).shuffle().slice(0, r)
@@ -27,7 +27,7 @@ function main(){
         output = JSON.stringify(gameResult) + ","
 -%>
     <%output%>
-<%*
+<\%*
     }
     console.timeLog("gameResults")
 }
