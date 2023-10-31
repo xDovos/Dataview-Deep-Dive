@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Knowledge/002 Queries/Datasets/list + inline metadata datasets.md",
+                "file": "Knowledge/002 Queries/Datasets/YAML Datasets.md",
                 "mode": "source",
                 "source": false
               }
@@ -25,13 +25,14 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Templates/DQL function overview.md",
+                "file": "Knowledge/002 Queries/unsorted queries.md",
                 "mode": "source",
                 "source": false
               }
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -97,7 +98,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Knowledge/002 Queries/Datasets/list + inline metadata datasets.md",
+                "file": "Knowledge/002 Queries/unsorted queries.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +115,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Knowledge/002 Queries/Datasets/list + inline metadata datasets.md",
+                "file": "Knowledge/002 Queries/unsorted queries.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +138,7 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Knowledge/002 Queries/Datasets/list + inline metadata datasets.md"
+                "file": "Knowledge/002 Queries/unsorted queries.md"
               }
             }
           },
@@ -171,35 +172,36 @@
       "periodic-notes:Open today": false
     }
   },
-  "active": "6be23f01fafe8381",
+  "active": "3e30381c652369c4",
   "lastOpenFiles": [
-    "Knowledge/Testing",
-    "Knowledge/002 Queries/Datasets/YAML Datasets.md",
+    "Knowledge/000 MOC/Dataview Overview.md",
+    "Knowledge/000 MOC/MOC People.md",
+    "Knowledge/000 MOC/Movies.md",
+    "Discord Support/Dataview Queries/DV DQL Weekly Notes.md",
+    "Discord Support/Dataview Queries/DV DQL TASK Query.md",
+    "Discord Support/Dataview Queries/DV DVJS LIST Folder notes.md",
+    "Discord Support/Dataview Queries/DV DVJS LIST non md.md",
+    "Discord Support/Dataview Queries/DV DVJS md embeds.md",
+    "Discord Support/Dataview Queries/DV DVJS Nested Callouts.md",
+    "Discord Support/Dataview Queries/DV DVJS OBSIDIAN CHARTS.md",
+    "Discord Support/Dataview Queries/DV DVJS prev and next file in the folder.md",
+    "Discord Support/Dataview Queries/DV DVJS TABLE Custom rows.md",
+    "Discord Support/Dataview Queries/DV DVJS TABLE LIMIT.md",
+    "Discord Support/Dataview Queries/DV DVJS TABLE Links.md",
+    "Discord Support/Dataview Queries/DV DVJS TABLE map.md",
+    "Discord Support/Dataview Queries/DV DVJS TABLE sum row.md",
+    "Discord Support/Dataview Queries/DV DVJS TABLE Word counting.md",
+    "Discord Support/Dataview Queries/DV DVJS TABLE TAGS.md",
+    "Discord Support/Dataview Queries/DV DVJS TABLE momentjs.md",
+    "Discord Support/Dataview Queries/DV YOU DONT.md",
+    "Knowledge/002 Queries/Datasets/DV YAML nested fields.md",
+    "Discord Support/Dataview Queries/DV Minimal Style Settings.md",
     "Knowledge/002 Queries/Datasets/Headers datasets.md",
-    "Knowledge/002 Queries/Datasets/list + inline metadata datasets.md",
-    "Discord Support/Dataview Queries/DV DQL Sorting.md",
-    "Discord Support/Dataview Queries/DV DQL basic Syntax.md",
-    "Knowledge/Plugins/Markdown Syntax.md",
-    "Discord Support/Obsidian Plugins/Tikzjax plugin.md",
-    "Discord Support/Obsidian Plugins/Excalidraw Plugin.md",
-    "Discord Support/Obsidian Plugins/Note_Types.md",
-    "Knowledge/Plugins/Dataview Plugin.md",
-    "Discord Support/Dataview Testing/Tavern.md",
-    "Discord Support/Dataview Testing/person.md",
-    "Discord Support/Dataview Testing/City.md",
-    "Knowledge/002 Queries/unsorted queries.md",
-    "Templates/DQL function overview.md",
-    "Journal/Weekly/2023/2023-W31.md",
-    "Knowledge/002 Queries/Query switching.md",
+    "Discord Support/Dataview Queries/DV DQL TABLE lists Manipulation.md",
+    "Discord Support/Dataview Queries/DV DQL TABLE with Tasks.md",
+    "Discord Support/Dataview Queries/DV DQL TASK ANY contains.md",
+    "Knowledge/Testing",
     "Knowledge/002 Queries/Datasets",
-    "Knowledge/002 Queries/ThreeInTen Analysis.md",
-    "Knowledge/002 Queries/Tasks Completion date.md",
-    "Knowledge/002 Queries/String that tells the current date.md",
-    "Knowledge/002 Queries/Side bar query note.md",
-    "Knowledge/002 Queries/Query Query.md",
-    "Knowledge/People/@Dovos.md",
-    "Knowledge/People/@Danny Hatcher.md",
-    "Knowledge/People/@Daniel @NL.md",
     "Knowledge/001 Dataview/DQL/Functions/Utility",
     "Knowledge/001 Dataview/DQL/Functions/String Operations",
     "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations",
@@ -211,7 +213,6 @@
     "Canvas/Movie Canvas/Movies.canvas",
     "Canvas/School vault setup.canvas",
     "Canvas/Movie Canvas",
-    "Canvas",
     "Attachments/Query Renderings/Weekly log Overview.png",
     "Attachments/Query Renderings/WHERE DQL Overview.png",
     "Attachments/Query Renderings/Weekly Habit Tracking.png",

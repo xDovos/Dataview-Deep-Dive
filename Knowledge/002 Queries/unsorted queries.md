@@ -219,22 +219,6 @@ Where any(file.etags, (x) => contains(filter(this.file.etags, (t)=>!contains(lis
 sort file.mtime DESC
 ```
 
-## activity logging
-
-- [activity:: "stuff"], [start:: 2023-09-07T10:39], [end:: 2023-09-07T11:39]
-- [activity:: "class"], [start:: 2023-09-07T11:39], [end:: 2023-09-07T12:19]
-- [activity:: "Homework"], [start:: 2023-09-07T12:31], [end:: 2023-09-07T13:09]
-- [activity:: "class"], [start:: 2023-09-07T14:39], [end:: 2023-09-07T16:39]
-- [activity:: "free time"], [start:: 2023-09-07T14:39], [end:: 2023-09-07T16:39]
- 
- ```dataview
-TABLE rows.L.activity as "Activity", rows.L.start as "Start", rows.L.end as "End", map(rows.L, (L)=> dur(L.end - L.start)) as Duration
-WHERE activity
-FLATTEN file.lists as L
-WHERE L.activity
-group by file.link as File
-
-```
 
 ## shows what notes link into an outlink and how many they are. (a roundabout way of doing inlinks)
 
