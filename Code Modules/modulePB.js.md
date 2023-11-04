@@ -25,7 +25,7 @@ you can see how they work inside [[Progress bar]]
 
 ## PBSingleNoteHeader
 
-```JS
+```js
 export function PBSingleNoteHeader(dv, setPage, setFilter){
     const tasks = dv.page(setPage).file.tasks.where(t => String(t.section).includes(setFilter));
     const value = Math.round(((tasks.where(t => t.completed).length) / tasks.length) * 100); 

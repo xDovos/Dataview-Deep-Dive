@@ -8,13 +8,16 @@ status::  `$= const setPage = "length"; const setFilter = "Status Tasks" ; const
 
 ###### Status Tasks
 - [x] Create the Note ✅ 2023-10-11
-- [ ] Write the YAML metadata
+- [x] Write the YAML metadata ✅ 2023-11-04
+- [x] add the docs page ✅ 2023-11-03
 - [x] Write the query ✅ 2023-08-12
 
 # length
 
-length() returns the length of an array or string and has many usecases.
-it works on a cell level so you can't use it to get the length or the table or list.
+- docs:: [Function length](https://blacksmithgu.github.io/obsidian-dataview/reference/functions/#lengthobjectarray)
+
+length(object|array) returns the length of an array or string and has many use cases.
+it works on a row level so you can't use it to get the length or the table or list.
 
 ## length Overview
 
@@ -43,7 +46,6 @@ WHERE contains(rows.L.children.functions, this.file.link)
     - functions:: [[filter]], [[flat]], [[contains]], [[embed]], [[arrow function]]
     - tags:: 
     - image:: [[FROM DQL Overview.png]]
-
 
 
 ## Appearances

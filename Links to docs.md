@@ -10,7 +10,9 @@ status::  `$= const setPage = "Links to docs"; const setFilter = "Status Tasks" 
 - [ ] Write the YAML metadata
 - [ ] Write the query
 
-
+```dataviewjs
+console.log(dv.current())
+```
 # Links to docs
 
 ## Links to the Docs
@@ -24,10 +26,14 @@ Group by L.section as Section
 
 >[!info]- Rendered
 >```dataview
->Table rows.L.docs as Docs
+>Table rows.Section,  rows.rows.L.docs as Docs
+>where docs
 >Flatten file.lists as L
 >where L.docs
->Group by L.section as Section
+>FLATTEN [choice((meta(L.section).subpath = L.link.file.name ), L.link.file.link, L.section)] as L2
+>Group by L2 as Section
+>FLATTEN [map(rows, (r) => reverse(split(r.file.folder, "/"))[0])[0]] as Type
+>group by Type as Type
 >```
 
 - Query meta

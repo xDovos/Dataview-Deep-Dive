@@ -30,7 +30,13 @@ Group by containsword(links.reviewtags, "early") as groups
 Flatten [round((length(rows.file.link) / rows.amount[0])*100, 2)] as Percentage
 ```
 
+[[test of testing]]
 
-
+```dataview
+table out, choice(out.file, "✅","❌")
+from "Knowledge/Testing"
+flatten file.outlinks as out
+where out = link("test of "+ file.name)
+```
 
 

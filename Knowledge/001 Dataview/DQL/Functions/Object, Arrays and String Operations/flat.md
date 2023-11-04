@@ -1,6 +1,6 @@
 ---
-aliases: []
-Type: 
+aliases: 
+Type: function
 MOC:
 ---
 
@@ -8,11 +8,14 @@ status::  `$= const setPage = "flat"; const setFilter = "Status Tasks" ; const v
 
 ###### Status Tasks
 - [x] Create the Note ✅ 2023-10-11
-- [ ] Write the YAML metadata
+- [x] Write the YAML metadata ✅ 2023-11-04
+- [x] add the docs page ✅ 2023-11-03
 - [ ] Write the query
 
 
 # flat
+
+- docs:: [Function flat](https://blacksmithgu.github.io/obsidian-dataview/reference/functions/#flatarray-depth)
 
 ## flat Overview
 

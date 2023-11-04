@@ -30,9 +30,57 @@
                 "source": false
               }
             }
+          },
+          {
+            "id": "9217734d842a2be0",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Knowledge/001 Dataview/DQL/Functions/String Operations/endswith.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "1351aaaa44cbd017",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Knowledge/001 Dataview/DQL/Functions/Utility/striptime.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "f807047181600b2a",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Templates/1 Docs list point.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "84fb7ad427fbf631",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Knowledge/001 Dataview/Progress bar.md",
+                "mode": "source",
+                "source": false
+              }
+            }
           }
         ],
-        "currentTab": 1
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -98,7 +146,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Knowledge/002 Queries/unsorted queries.md",
+                "file": "Knowledge/001 Dataview/DQL/Functions/Utility/striptime.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -115,7 +163,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Knowledge/002 Queries/unsorted queries.md",
+                "file": "Knowledge/001 Dataview/DQL/Functions/Utility/striptime.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -138,7 +186,7 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Knowledge/002 Queries/unsorted queries.md"
+                "file": "Knowledge/001 Dataview/DQL/Functions/Utility/striptime.md"
               }
             }
           },
@@ -157,7 +205,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 369.5
+    "width": 369.5,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -172,34 +221,35 @@
       "periodic-notes:Open today": false
     }
   },
-  "active": "3e30381c652369c4",
+  "active": "1351aaaa44cbd017",
   "lastOpenFiles": [
-    "Knowledge/000 MOC/Dataview Overview.md",
-    "Knowledge/000 MOC/MOC People.md",
-    "Knowledge/000 MOC/Movies.md",
-    "Discord Support/Dataview Queries/DV DQL Weekly Notes.md",
-    "Discord Support/Dataview Queries/DV DQL TASK Query.md",
-    "Discord Support/Dataview Queries/DV DVJS LIST Folder notes.md",
-    "Discord Support/Dataview Queries/DV DVJS LIST non md.md",
-    "Discord Support/Dataview Queries/DV DVJS md embeds.md",
-    "Discord Support/Dataview Queries/DV DVJS Nested Callouts.md",
-    "Discord Support/Dataview Queries/DV DVJS OBSIDIAN CHARTS.md",
-    "Discord Support/Dataview Queries/DV DVJS prev and next file in the folder.md",
-    "Discord Support/Dataview Queries/DV DVJS TABLE Custom rows.md",
-    "Discord Support/Dataview Queries/DV DVJS TABLE LIMIT.md",
-    "Discord Support/Dataview Queries/DV DVJS TABLE Links.md",
-    "Discord Support/Dataview Queries/DV DVJS TABLE map.md",
-    "Discord Support/Dataview Queries/DV DVJS TABLE sum row.md",
-    "Discord Support/Dataview Queries/DV DVJS TABLE Word counting.md",
-    "Discord Support/Dataview Queries/DV DVJS TABLE TAGS.md",
-    "Discord Support/Dataview Queries/DV DVJS TABLE momentjs.md",
-    "Discord Support/Dataview Queries/DV YOU DONT.md",
-    "Knowledge/002 Queries/Datasets/DV YAML nested fields.md",
-    "Discord Support/Dataview Queries/DV Minimal Style Settings.md",
-    "Knowledge/002 Queries/Datasets/Headers datasets.md",
-    "Discord Support/Dataview Queries/DV DQL TABLE lists Manipulation.md",
-    "Discord Support/Dataview Queries/DV DQL TABLE with Tasks.md",
-    "Discord Support/Dataview Queries/DV DQL TASK ANY contains.md",
+    "Knowledge/001 Dataview/DQL/Functions/Utility/durationformat.md",
+    "Knowledge/001 Dataview/DQL/Functions/Utility/localtime.md",
+    "Knowledge/001 Dataview/DQL/Functions/Utility/meta.md",
+    "Knowledge/001 Dataview/DQL/Functions/Utility/striptime.md",
+    "Knowledge/001 Dataview/DQL/Functions/Utility/default.md",
+    "Knowledge/001 Dataview/DQL/Functions/Utility/dateformat.md",
+    "Knowledge/001 Dataview/DQL/Functions/Utility/choice.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/upper.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/truncate.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/substring.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/startswith.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/split.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/replace.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/endswith.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/regex.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/lower.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/padleft.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/padright.md",
+    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/length.md",
+    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/filter.md",
+    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/extract.md",
+    "Knowledge/001 Dataview/DQL/Functions/Constructors/date.md",
+    "Knowledge/Testing/testing.md",
+    "Knowledge/Testing/testing2.md",
+    "Links to docs.md",
+    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/sort.md",
+    "Pasted image 20231103153020.png",
     "Knowledge/Testing",
     "Knowledge/002 Queries/Datasets",
     "Knowledge/001 Dataview/DQL/Functions/Utility",
@@ -221,7 +271,6 @@
     "Attachments/Query Renderings/GROUP BY DQL Overview.png",
     "Attachments/Query Renderings/FROM DQL Overview.png",
     "Attachments/Query Renderings/DVJS INLINE page text filter.png",
-    "Canvas/Setups.canvas",
-    "Attachments/Pasted image 20230810194317.png"
+    "Canvas/Setups.canvas"
   ]
 }

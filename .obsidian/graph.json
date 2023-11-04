@@ -69,13 +69,6 @@
         "a": 1,
         "rgb": 10354793
       }
-    },
-    {
-      "query": "path:Vorlagen  ",
-      "color": {
-        "a": 1,
-        "rgb": 10354793
-      }
     }
   ],
   "collapse-display": true,
@@ -84,10 +77,10 @@
   "nodeSizeMultiplier": 1.21015625,
   "lineSizeMultiplier": 0.98046875,
   "collapse-forces": false,
-  "centerStrength": 0.518229166666667,
-  "repelStrength": 12.65625,
-  "linkStrength": 0.861979166666667,
-  "linkDistance": 161,
-  "scale": 0.2588386562181631,
-  "close": true
+  "centerStrength": 0.369791666666667,
+  "repelStrength": 14.7916666666667,
+  "linkStrength": 0.442708333333333,
+  "linkDistance": 380,
+  "scale": 0.13168724279835428,
+  "close": false
 }

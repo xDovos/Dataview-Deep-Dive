@@ -1,0 +1,7 @@
+{
+  "minimal-style@@dataview-inline-lists": false,
+  "minimal-style@@trim-cols": false,
+  "minimal-style@@minimal-strike-lists": true,
+  "minimal-style@@row-lines": true,
+  "minimal-style@@row-alt": true
+}

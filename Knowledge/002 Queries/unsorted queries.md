@@ -220,6 +220,12 @@ sort file.mtime DESC
 ```
 
 
+```dataview
+TABLE
+Where any(file.tags, (t)=> contains(this.file.etags, t))
+group by file.etags
+```
+
 ## shows what notes link into an outlink and how many they are. (a roundabout way of doing inlinks)
 
 ```js dataview

@@ -1,6 +1,6 @@
 ---
-aliases: []
-Type: 
+aliases: 
+Type: function
 MOC:
 ---
 
@@ -8,11 +8,16 @@ status:: `$=return(await self.require.import("Code Modules/modulePB.js.md")).PBS
 
 ###### Status Tasks
 - [x] Create the Note ✅ 2023-10-21
-- [ ] Write the YAML metadata
+- [x] Write the YAML metadata ✅ 2023-11-04
+- [x] add the docs page ✅ 2023-11-03
 - [ ] Write the query
 
 
 # regex
+
+- docs:: [Function regextest](https://blacksmithgu.github.io/obsidian-dataview/reference/functions/#regextestpattern-string)
+- docs:: [Function regexmatch](https://blacksmithgu.github.io/obsidian-dataview/reference/functions/#regexmatchpattern-string)
+- docs:: [Function regexreplace](https://blacksmithgu.github.io/obsidian-dataview/reference/functions/#regexreplacestring-pattern-replacement)
 
 ## regex Overview
 

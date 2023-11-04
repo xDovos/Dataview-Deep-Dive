@@ -1,6 +1,6 @@
 ---
-aliases: []
-Type: 
+aliases: 
+Type: function
 MOC:
 ---
 
@@ -9,10 +9,13 @@ status::  `$= const setPage = "contains"; const setFilter = "Status Tasks" ; con
 ###### Status Tasks
 - [x] Create the Note ✅ 2023-10-11
 - [ ] Write the YAML metadata
+- [x] add the docs page ✅ 2023-11-03
 - [ ] Write the query
 
 
 # contains
+
+- docs:: [Function contains and friends](https://blacksmithgu.github.io/obsidian-dataview/reference/functions/#contains-and-friends)
 
 ## contains Overview
 

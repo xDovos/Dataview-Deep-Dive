@@ -1,18 +1,21 @@
 ---
-aliases: []
-Type: 
+aliases: 
+Type: function
 MOC:
 ---
 
 status:: `$=return(await self.require.import("Code Modules/modulePB.js.md")).PBSingleNoteHeader(dv, "striptime", "Status Tasks")`
 
 ###### Status Tasks
-- [ ] Create the Note
+- [x] Create the Note ✅ 2023-10-21
 - [x] Write the YAML metadata ✅ 2023-10-21
+- [x] add the docs page ✅ 2023-11-03
 - [ ] Write the query
 
 
 # striptime
+
+- docs:: [Function striptime](https://blacksmithgu.github.io/obsidian-dataview/reference/functions/#striptimedate)
 
 ## striptime Overview
 

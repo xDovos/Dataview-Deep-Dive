@@ -1,6 +1,6 @@
 ---
-aliases: []
-Type: 
+aliases: 
+Type: function
 MOC:
 ---
 
@@ -8,11 +8,14 @@ status::  `$= const setPage = "embed"; const setFilter = "Status Tasks" ; const 
 
 ###### Status Tasks
 - [x] Create the Note ✅ 2023-10-11
-- [ ] Write the YAML metadata
+- [x] Write the YAML metadata ✅ 2023-11-03
+- [x] add the docs page ✅ 2023-11-03
 - [ ] Write the query
 
 
 # embed
+
+- docs:: [Function embed](https://blacksmithgu.github.io/obsidian-dataview/reference/functions/#embedlink-embed)
 
 ## embed Overview
 

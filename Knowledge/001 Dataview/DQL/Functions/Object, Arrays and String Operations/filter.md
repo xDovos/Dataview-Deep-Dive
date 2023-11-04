@@ -8,11 +8,14 @@ status::  `$= const setPage = "filter"; const setFilter = "Status Tasks" ; const
 
 ###### Status Tasks
 - [x] Create the Note ✅ 2023-10-11
-- [ ] Write the YAML metadata
+- [x] Write the YAML metadata ✅ 2023-11-04
+- [x] add the docs page ✅ 2023-11-03
 - [ ] Write the query
 
 
 # filter
+
+- docs:: [Function filter](https://blacksmithgu.github.io/obsidian-dataview/reference/functions/#filterarray-predicate)
 
 ## filter Overview
 
