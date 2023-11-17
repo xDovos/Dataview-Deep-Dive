@@ -151,24 +151,24 @@ group by Project as G
 
 ### old version
 
-```js dataview
+```dataview
 table status, "`$= dv.taskList(dv.page(\"" + file.name + "\").file.tasks.where((t)=> !t.completed).where((t)=> t.section.subpath == 'Status Tasks'), false)`" AS TASKS
-from "Knowledge/001 Dataview/DQL"
+from "Knowledge/001 Dataview/DQL/Data Commands"
 
 ```
 
 ### new version with callouts to hide the tasks
 
-```js dataview
+```dataview
 table status, "`$=const tasks = dv.page(\"" + file.name + "\").file.tasks.where(t=> !t.checked && t.section.subpath == 'Status Tasks');let md =  '>[!todo]- Tasks\n>'+ String.fromCharCode(96).repeat(3) + 'dataviewjs\n>let group2 = dv.array(JSON.parse('+String.fromCharCode(96);let md2 = String.fromCharCode(96)+'));\n>dv.taskList(group2, false);\n>'+ String.fromCharCode(96).repeat(3)+ '\n';dv.span(md + JSON.stringify(tasks.array()) + md2);`" AS TASKS
-from "Knowledge/001 Dataview/DQL"
+from "Knowledge/001 Dataview/DQL/Data Commands"
 ```
 
 ### Modules Version with callouts
 
-```js dataview
+```dataview
 table status, "`$=return(await self.require.import('Code Modules/moduleUtils.js.md')).UtilsTaskListCallout(dv, \""+ file.name +"\", t => !t.checked && t.section.subpath == 'Status Tasks')`" AS TASKS
-from "Knowledge/001 Dataview/DQL"
+from "Knowledge/001 Dataview/DQL/Data Commands"
 ```
 
 

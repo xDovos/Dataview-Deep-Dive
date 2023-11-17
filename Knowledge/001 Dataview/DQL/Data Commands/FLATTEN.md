@@ -29,8 +29,6 @@ flatten does multiple things.
     1. if you don't want it to create new rows but your expression returns an array then encase the whole expression into [ ]. this won't create the additional rows because the expression then returns an array with one value that holds the other array.
 3. if you don't name the results with AS then it will overwrite the used field name or won't be accessible later in the query so i would advice to always name the result.
 
-
-
 ## FLATTEN Overview
 
 ```js 

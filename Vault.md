@@ -28,11 +28,15 @@ VaultNotesOverview:: `$=return(await self.require.import("Code Modules/modulePB.
     - [x] [[ThreeInTen Data]] ✅ 2023-08-10
     - [ ] [[ThreeInTen Analysis]]
 - [ ] Look through the old queries and see what setups are needed for them
-- [ ] find a Kowledge subject where we can show other types of Queries like MOC
+- [ ] find a Knowledge subject where we can show other types of Queries like MOC
 - [ ] Finish the [[How dataview works]] note
     - [ ] or rework it into the vault.
 - [ ] Create multiple Canvas that show visually how to navigate the vault and what is in here.
-- [ ] 
+- [ ] Write notes that show how to style dataview queries
+    - [ ] column alignment
+    - [ ] text coloring on conditions
+    - [ ] Cards
+    - [ ] custom rendering dv.views examples
 
 # Vault
 

@@ -34,7 +34,7 @@ MOC: "[[Movies]]"
 ```dataview
 TABLE WITHOUT ID ("![|100](" + image + ")") as "Cover", 
 personalRating as "Rating"
-FROM "Movies/Harry Potter and the Deathly Hallows - Part 1 (2010)"
+FROM "Knowledge/Movies/Harry Potter and the Deathly Hallows - Part 1 (2010)"
 
 ```
 

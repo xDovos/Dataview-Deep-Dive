@@ -8,79 +8,18 @@
         "type": "tabs",
         "children": [
           {
-            "id": "e4f7d3408c2735d5",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Knowledge/002 Queries/Datasets/YAML Datasets.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "3e30381c652369c4",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Knowledge/002 Queries/unsorted queries.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "9217734d842a2be0",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Knowledge/001 Dataview/DQL/Functions/String Operations/endswith.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "1351aaaa44cbd017",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Knowledge/001 Dataview/DQL/Functions/Utility/striptime.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "f807047181600b2a",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Templates/1 Docs list point.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
             "id": "84fb7ad427fbf631",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Knowledge/001 Dataview/Progress bar.md",
+                "file": "Links to docs.md",
                 "mode": "source",
                 "source": false
               }
             }
           }
-        ],
-        "currentTab": 3
+        ]
       }
     ],
     "direction": "vertical"
@@ -109,7 +48,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "distin",
+                "query": "file.fron",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -146,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Knowledge/001 Dataview/DQL/Functions/Utility/striptime.md",
+                "file": "Links to docs.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -163,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Knowledge/001 Dataview/DQL/Functions/Utility/striptime.md",
+                "file": "Links to docs.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -186,7 +125,7 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Knowledge/001 Dataview/DQL/Functions/Utility/striptime.md"
+                "file": "Links to docs.md"
               }
             }
           },
@@ -205,8 +144,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 369.5,
-    "collapsed": true
+    "width": 369.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -221,35 +159,34 @@
       "periodic-notes:Open today": false
     }
   },
-  "active": "1351aaaa44cbd017",
+  "active": "84fb7ad427fbf631",
   "lastOpenFiles": [
-    "Knowledge/001 Dataview/DQL/Functions/Utility/durationformat.md",
-    "Knowledge/001 Dataview/DQL/Functions/Utility/localtime.md",
-    "Knowledge/001 Dataview/DQL/Functions/Utility/meta.md",
-    "Knowledge/001 Dataview/DQL/Functions/Utility/striptime.md",
-    "Knowledge/001 Dataview/DQL/Functions/Utility/default.md",
-    "Knowledge/001 Dataview/DQL/Functions/Utility/dateformat.md",
-    "Knowledge/001 Dataview/DQL/Functions/Utility/choice.md",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations/upper.md",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations/truncate.md",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations/substring.md",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations/startswith.md",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations/split.md",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations/replace.md",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations/endswith.md",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations/regex.md",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations/lower.md",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations/padleft.md",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations/padright.md",
-    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/length.md",
-    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/filter.md",
-    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/extract.md",
-    "Knowledge/001 Dataview/DQL/Functions/Constructors/date.md",
-    "Knowledge/Testing/testing.md",
-    "Knowledge/Testing/testing2.md",
-    "Links to docs.md",
-    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/sort.md",
+    "Knowledge/002 Queries/Amount of inlinks and outlinks.md",
     "Pasted image 20231103153020.png",
+    "Knowledge/002 Queries/Query switching.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/SORT.md",
+    "Discord Support/Dataview Queries/DV DVJS LIST non md.md",
+    "Knowledge/001 Dataview/Progress bar.md",
+    "Knowledge/000 MOC/Movies.md",
+    "Knowledge/000 MOC/MOC People.md",
+    "Knowledge/Movies/Harry Potter and the Deathly Hallows - Part 1 (2010).md",
+    "Knowledge/002 Queries/unsorted queries.md",
+    "Knowledge/002 Queries/Datasets/YAML Datasets.md",
+    "Knowledge/001 Dataview/How dataview works.md",
+    "Templates/1 Docs list point.md",
+    "Templates/Template Status bar setup.md",
+    "Discord Support/Dataview Queries/DV DVJS TABLE sum row.md",
+    "Discord Support/Dataview Queries/DV DVJS TABLE momentjs.md",
+    "Journal/Daily/2023/2023-08-12.md",
+    "Journal/Weekly/2023/2023-W32.md",
+    "2023-08-12 - Samstag.md",
+    "Journal/Monthly/2023/2023-M08.md",
+    "Vault.md",
+    "Knowledge/001 Dataview/DQL/Functions/String Operations/endswith.md",
+    "Journal/Daily/2023/2023-08-31.md",
+    "Journal/Monthly/2023/2023-M07.md",
+    "Knowledge/001 Dataview/DQL/Functions/Utility/striptime.md",
     "Knowledge/Testing",
     "Knowledge/002 Queries/Datasets",
     "Knowledge/001 Dataview/DQL/Functions/Utility",

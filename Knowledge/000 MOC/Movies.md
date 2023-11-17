@@ -20,9 +20,9 @@ status::  `$= const setPage = "Movies"; const setFilter = "Status Tasks" ; const
 ## Description
 
 ```dataview
-TABLE
-WHERE contains(MOC, this.file.link)
-
+TABLE ("![|100](" + image + ")") as "Cover", 
+personalRating as "Rating"
+where contains(moc, this.file.link)
 
 ```
 
