@@ -26,7 +26,7 @@ Group by L.section as Section
 
 >[!info]- Rendered
 >```dataview
->Table rows.Section,  rows.rows.L.docs as Docs
+>Table rows.Section,  flat(rows.rows.L.docs) as Docs
 >where docs
 >Flatten file.lists as L
 >where L.docs

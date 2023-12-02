@@ -32,7 +32,7 @@ SORT default(((x) => {
 ```dataview
 TABLE
 FROM "Discord Support"
-SORT regexreplace(file.name, "[^\x00-\x7F]+(\s)?", "") asc
+SORT regexreplace(string(file.link), "[^\x00-\x7F]+(\s)?", "") asc
 
 
 ```

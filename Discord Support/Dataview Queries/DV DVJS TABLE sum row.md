@@ -130,10 +130,10 @@ dv.table(
  hello
 ```dataviewjs
 const DQL = await dv.tryQuery(`
-  TABLE DailyStepsWalked  
-  FROM "Journal/Daily"
-  where dateformat(file.day, "yyyy-'M'MM") = "2023-M02"
-  sort file.day desc
+  Table without id link(file.link, dateformat(file.day,"yyyy-MM-dd - cccc")) as "Day" , dailystepswalked
+    From "Journal/Daily/2023"
+        where dateformat(file.day,"kkkk-'W'WW") = this.file.name
+    sort file.day
   `)
 function avarege(data, colm){
     let temp = 0

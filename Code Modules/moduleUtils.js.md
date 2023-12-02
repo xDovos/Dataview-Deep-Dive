@@ -30,6 +30,21 @@ export function UtilsTaskListCallout(dv, note, filter)
 }
 ```
 
+
+
+```js
+export function UtilsArray(end)
+{
+    let result = [];
+    for (let i = 1; i <= end; i++) {
+      result.push(i);
+    }
+    //console.log(result)
+    return result.join(",");
+}
+```
+
+
 ## Appearances
 
 ```dataview

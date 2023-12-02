@@ -58,7 +58,7 @@ SORT length(flat(rows.links.out)) desc, length(flat(rows.links.in)) desc
 
 >[!info]- Rendered
 >```dataview
->TABLE length(flat(rows.links.out)) as inlinks, length(flat(rows.links.in)) as outlinks
+>TABLE length(flat(rows.links.out)) as Inlinks,  length(flat(rows.links.in)) as outlinks
 >WHERE (contains(file.outlinks, link("FLATTEN")) or contains(file.inlinks, link("FLATTEN"))) and file.path != this.file.path
 >FLATTEN {out: filter(file.outlinks, (t)=> t = link("FLATTEN")), in: filter(file.inlinks, (t)=> t = link("FLATTEN"))} as links
 >GROUP BY file.link as File
@@ -68,6 +68,34 @@ SORT length(flat(rows.links.out)) desc, length(flat(rows.links.in)) desc
 - Query meta
     - QueryType:: [[DQL]]
     - dataCommands:: [[TABLE]], [[WHERE]], [[FLATTEN]], [[GROUP BY]], [[Knowledge/001 Dataview/DQL/Data Commands/SORT|SORT]]
+    - functions:: [[length]], [[contains]], [[filter]], [[flat]]
+    - tags:: #file/outlinks , #file/inlinks 
+    - image:: 
+
+
+## LIST Complex amount of inlinks and outlinks per note to this note
+
+```js dataview
+LIST {in: length(flat(rows.links.out)), out: length(flat(rows.links.in))}
+WHERE (contains(file.outlinks, this.file.link) or contains(file.inlinks, this.file.link)) and file.path != this.file.path
+FLATTEN {out: filter(file.outlinks, (t)=> t = this.file.link), in: filter(file.inlinks, (t)=> t = this.file.link)} as links
+WHERE contains(links.out, this.file.link) or contains(links.in, this.file.link)
+GROUP BY file.link as File
+SORT length(flat(rows.links.out)) desc, length(flat(rows.links.in)) desc
+```
+
+>[!info]- Rendered
+>```dataview
+>LIST {in: length(flat(rows.links.out)), out: length(flat(rows.links.in))}
+>WHERE (contains(file.outlinks, link("FLATTEN")) or contains(file.inlinks, link("FLATTEN"))) and file.path != this.file.path
+>FLATTEN {out: filter(file.outlinks, (t)=> t = link("FLATTEN")), in: filter(file.inlinks, (t)=> t = link("FLATTEN"))} as links
+>GROUP BY file.link as File
+>SORT length(flat(rows.links.out)) desc, length(flat(rows.links.in)) desc
+>```
+
+- Query meta
+    - QueryType:: [[DQL]]
+    - dataCommands:: [[Knowledge/001 Dataview/DQL/Data Commands/LIST|LIST]], [[WHERE]], [[FLATTEN]], [[GROUP BY]], [[Knowledge/001 Dataview/DQL/Data Commands/SORT|SORT]]
     - functions:: [[length]], [[contains]], [[filter]], [[flat]]
     - tags:: #file/outlinks , #file/inlinks 
     - image:: 

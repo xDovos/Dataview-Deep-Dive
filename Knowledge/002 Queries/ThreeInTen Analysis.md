@@ -175,7 +175,7 @@ FLATTEN [round((length(rows.round) / rows.TotalRounds[0])*100, 2)] as pobability
 ```
 
 >[!info]+ Rendered
->```dataview
+>```js dataview
 >TABLE pobability
 >FROM "Raw Data/ThreeInTen Data"
 >FLATTEN [length(threeinten)] as TotalRounds

@@ -3,14 +3,8 @@
     "aliases": "aliases",
     "cssclasses": "multitext",
     "tags": "tags",
-    "Docs": "multitext",
-    "homeworkTask": "checkbox",
-    "homeworktime": "number",
-    "learningTask": "checkbox",
-    "learningTime": "number",
     "Dataview": "date",
     "DOB": "date",
-    "Website": "multitext",
-    "Brirthday": "date"
+    "Website": "multitext"
   }
 }

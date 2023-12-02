@@ -16,7 +16,7 @@ status::  `$= const setPage = "TABLE"; const setFilter = "Status Tasks" ; const 
 
 - docs:: [DQL TABLE](https://blacksmithgu.github.io/obsidian-dataview/queries/query-types/#table)
 
-Table declares what type of query you get as result. there is also [[LIST]], [[TASK]] and [[CALENDAR]].
+Table declares what type of query you get as result. there is also [[Knowledge/001 Dataview/DQL/Functions/Constructors/list]], [[TASK]] and [[CALENDAR]].
 i find that TABLE has the best rendering look and most of the queries inside the vault will be rendered as tables.
 
 

@@ -75,7 +75,7 @@ window.renderChart(chartData, this.container)
 
 ## DV DVJS OBSIDIAN CHARTS CSV
 
-```js dataviewjs  
+```dataviewjs  
 let data = await dv.io.csv("999 Attachments/user_hr_data_2023-01-28_14.36.12.csv")
 let tick = data.map(t=> t.sec).array()
 let HR_BPM = data.map(t=> t.hr_bpm).array()

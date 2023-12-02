@@ -1,7 +1,7 @@
 ---
 position: test
 something: test
-map: test
+map2: test
 list:
 ---
 
