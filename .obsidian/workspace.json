@@ -8,43 +8,43 @@
         "type": "tabs",
         "children": [
           {
-            "id": "86ffc9a12ca3477a",
+            "id": "63d53c4fcd6a7d28",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Knowledge/Testing/Untitled 1.md",
+                "file": "Journal/Monthly/2023/2023-M08.md",
                 "mode": "source",
                 "source": false
               }
             }
           },
           {
-            "id": "635a1d99a957e8f8",
+            "id": "1f25841840dd676d",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Knowledge/Testing/Untitled 1.md",
+                "file": "Knowledge/002 Queries/Progress bar.md",
                 "mode": "source",
                 "source": false
               }
             }
           },
           {
-            "id": "24302b073ecd3b82",
+            "id": "93f05b5133ba0df9",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Templates/Scripts/Dataview to csv converter.md",
+                "file": "Journal/Daily/2023/2023-08-04.md",
                 "mode": "source",
                 "source": false
               }
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -73,7 +73,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "[\"id\":]",
+                "query": "tag:#tag",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -110,7 +110,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Templates/Scripts/Dataview to csv converter.md",
+                "file": "Knowledge/002 Queries/Progress bar.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -127,7 +127,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Templates/Scripts/Dataview to csv converter.md",
+                "file": "Knowledge/002 Queries/Progress bar.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -150,7 +150,7 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Templates/Scripts/Dataview to csv converter.md"
+                "file": "Knowledge/002 Queries/Progress bar.md"
               }
             }
           },
@@ -167,11 +167,11 @@
             }
           }
         ],
-        "currentTab": 4
+        "currentTab": 2
       }
     ],
     "direction": "horizontal",
-    "width": 370.5,
+    "width": 440.5,
     "collapsed": true
   },
   "left-ribbon": {
@@ -187,39 +187,39 @@
       "periodic-notes:Open today": false
     }
   },
-  "active": "24302b073ecd3b82",
+  "active": "1f25841840dd676d",
   "lastOpenFiles": [
+    "Knowledge/002 Queries/Obsidian Charts Queries.md",
+    "test.md",
+    "Journal/Daily/2023/2023-08-04.md",
+    "Journal/Monthly/2023/2023-M08.md",
+    "Knowledge/Testing/charts testing.md",
     "Knowledge/Testing/Untitled 1.md",
-    "Untitled 2.md",
-    "Untitled.md",
-    "Knowledge/002 Queries/Progress bar.md",
-    "Templates/Scripts/Dataview to csv converter.md",
-    "Templates/testing.md",
-    "Templates Archive/Templater Harrish.md",
-    "Templates Archive/Script JSON to YAML json metadata converter.md",
-    "Knowledge/002 Queries/unsorted queries.md",
+    "Knowledge/Testing/testing.md",
     "Knowledge/002 Queries/ThreeInTen Analysis.md",
+    "Knowledge/002 Queries/unsorted queries.md",
+    "Knowledge/002 Queries/Progress bar.md",
+    "Journal/Weekly/2023/2023-W31.md",
+    "Code Modules/moduleUtils.js.md",
+    "Code Modules/modulePB.js.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/SORT.md",
+    "Knowledge/002 Queries/Tasks Completion date.md",
+    "Knowledge/002 Queries/String that tells the current date.md",
+    "Knowledge/002 Queries/Side bar query note.md",
+    "Knowledge/002 Queries/Query switching.md",
+    "Knowledge/002 Queries/Query Query.md",
+    "Knowledge/002 Queries/Combining list queries.md",
+    "Vault.md",
+    "Knowledge/Testing/testing2.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
+    "Discord Support/Dataview Queries/DV DVJS LIST non md.md",
+    "Discord Support/Dataview Queries/DV DVJS LIST Folder notes.md",
+    "Discord Support/Dataview Queries/DV DVJS TABLE sum row.md",
     "Raw Data/results.json",
     "Raw Data/results10mil.json",
-    "Knowledge/000 MOC/MOC People.md",
-    "Raw Data/ThreeInTen Data.md",
     "Raw Data/ThreeInTen CSVData.csv",
     "Raw Data/data.csv",
-    "Journal/Weekly/2023/2023-W31.md",
-    "Discord Support/Dataview Queries/DV DVJS TABLE sum row.md",
-    "Discord Support/Dataview Queries/DV DQL Sorting.md",
-    "Knowledge/002 Queries/Tasks Completion date.md",
-    "Knowledge/002 Queries/All properties and values.md",
-    "Code Modules/moduleUtils.js.md",
     "Pasted image 20231122040741.png",
-    "Journal/Weekly/2023/2023-W32.md",
-    "Journal/Daily/2023/2023-08-10.md",
-    "Discord Support/Dataview Queries/DV DVJS OBSIDIAN CHARTS.md",
-    "Discord Support/Dataview Queries/DV DVJS LIST non md.md",
-    "Discord Support/Dataview Queries/DV DVJS md embeds.md",
-    "Knowledge/Testing/testing2.md",
-    "Vault.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/LIST.md",
     "Pasted image 20231103153020.png",
     "Knowledge/Testing",
     "Knowledge/002 Queries/Datasets",

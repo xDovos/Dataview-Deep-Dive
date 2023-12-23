@@ -38,5 +38,8 @@ from "Knowledge/Testing"
 flatten file.outlinks as out
 where out = link("test of "+ file.name)
 ```
+filter(file.etags, (x)=> !contains(x, "#Project") and !contains(x, "#Resourse") ) as "Notes" 
+filter(file.etags, (x)=> contains(x, "#Project") ) as "Project" 
+filter(file.etags, (x)=> contains(x, "#Resourse") ) as "Resourse" 
 
 

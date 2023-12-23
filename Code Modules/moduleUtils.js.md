@@ -30,7 +30,37 @@ export function UtilsTaskListCallout(dv, note, filter)
 }
 ```
 
-
+```js
+export function relativeDate(isoDateStr) {
+    const deltaSecs = (new Date() - new Date(isoDateStr)) / 1000;
+    let unit;
+    let delta;
+    if (deltaSecs < 60) {
+        unit = "second";
+        delta = deltaSecs;
+    } else if (deltaSecs < 60 * 60) {
+        unit = "minute";
+        delta = Math.ceil(deltaSecs / 60);
+    } else if (deltaSecs < 60 * 60 * 24) {
+        unit = "hour";
+        delta = Math.ceil(deltaSecs / 60 / 60);
+    } else if (deltaSecs < 60 * 60 * 24 * 7) {
+        unit = "day";
+        delta = Math.ceil(deltaSecs / 60 / 60 / 24);
+    } else if (deltaSecs < 60 * 60 * 24 * 7 * 4) {
+        unit = "week";
+        delta = Math.ceil(deltaSecs / 60 / 60 / 24 / 7);
+    } else if (deltaSecs < 60 * 60 * 24 * 7 * 4 * 12) {
+        unit = "month";
+        delta = Math.ceil(deltaSecs / 60 / 60 / 24 / 7 / 4);
+    } else {
+        unit = "year";
+        delta = Math.ceil(deltaSecs / 60 / 60 / 24 / 7 / 4 / 12);
+    }
+    const formatter = new Intl.RelativeTimeFormat("en", { style: "long", numeric: "auto" });
+    return formatter.format(-delta, unit);
+}
+```
 
 ```js
 export function UtilsArray(end)

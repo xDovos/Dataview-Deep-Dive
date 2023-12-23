@@ -50,7 +50,7 @@ i use the progress bars mostly tasks based but you can also use them time based 
 in general progress bars don't need to be written in dvjs but it is better to do so because it is easier to get the right files and tasks in dvjs.
 some of the progress bars have a return(await self.require.import("Code Modules/modulePB.js.md")) syntax. for these you need to look into the [[modulePB.js]] note to see the actual query. it is a .js.md note so you can open it with obsidian. 
 the example note for the progress bars shown in this note are in [[File Name]]
-
+#tag #file/tasks 
 
 ## DVJS Inline Progress bars
 ### progress bar on one page with a filter
@@ -166,7 +166,7 @@ from "Knowledge/001 Dataview/DQL/Data Commands"
 
 ### Modules Version with callouts
 
-```js dataview
+```dataview
 table status, "`$=return(await self.require.import('Code Modules/moduleUtils.js.md')).UtilsTaskListCallout(dv, \""+ file.name +"\", t => !t.checked && t.section.subpath == 'Status Tasks')`" AS TASKS
 from "Knowledge/001 Dataview/DQL/Data Commands"
 ```
@@ -271,14 +271,14 @@ function liveBar(start, end, now){
 }
 
 function lastBdayCalc(){
-console.log(dv.duration(DateDiff(dv.date("today").set({month: Bday.month, day: Bday.day}), dv.date("now"))))
-    if(dv.duration(DateDiff(dv.date("today").set({month: Bday.month, day: Bday.day}), dv.date("now"))) <= dv.duration("0 days")){
+    if(dv.duration(module.DateDiff(dv.date("today").set({month: Bday.month, day: Bday.day}), dv.date("now"))) <= dv.duration("0 days")){
         return dv.date("today").set({month: Bday.month, day: Bday.day})
     }else{
         return dv.date("today").set({month: Bday.month, day: Bday.day}).minus({year: 1})
     }
 }
-const Bday = dv.date("1999-10-09")
+
+const Bday = dv.date("1999-03-04")
 const lastBday = lastBdayCalc(Bday)
 const nextBday = lastBday.plus({year: 1})
 

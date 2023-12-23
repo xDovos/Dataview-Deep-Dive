@@ -486,16 +486,16 @@ let nivel8 = dv.pages().where(t=> t.nivel == 8).file.link
 let nivel9 = dv.pages().where(t=> t.nivel == 9).file.link
 
 let data = [0].flatMap(()=> [nivel0, nivel1, nivel2, nivel3, nivel4, nivel5, nivel6, nivel7, nivel8, nivel9 ])
-console.log(nivel0)
+console.log(data)
 dv.table(["Nivel 0", "Nivel 1", "Nivel 2", "Nivel 3", "Nivel 4", "Nivel 5", "Nivel 6", "Nivel 7", "Nivel 8", "Nivel 9", ], data)
 
 ```
 
 ```dataviewjs
 let Cclass = "Mage";
-let nivel0 = dv.pages().where(t=> t.nivel == 0 && dv.array(t.class).includes(Cclass)).file.link;
-let nivel1 = dv.pages().where(t=> t.nivel == 1 && t.class.includes(Cclass)).file.link;
-let nivel2 = dv.pages().where(t=> t.nivel == 2 && t.class.includes(Cclass)).file.link;
+let nivel0 = dv.pages().where(t=> t.nivel == 0 ).file.link;
+let nivel1 = dv.pages().where(t=> t.nivel == 1 ).file.link;
+let nivel2 = dv.pages().where(t=> t.nivel == 2 ).file.link;
 let nivel3 = dv.pages().where(t=> t.nivel == 3 && t.class == Cclass).file.link;
 let nivel4 = dv.pages().where(t=> t.nivel == 4 && t.class == Cclass).file.link;
 let nivel5 = dv.pages().where(t=> t.nivel == 5 && t.class == Cclass).file.link;
