@@ -10,6 +10,7 @@ status:: `$=return(await self.require.import("Code Modules/modulePB.js.md")).PBS
 - [x] Create the Note ✅ 2023-10-30
 - [ ] Write the YAML metadata
 - [ ] Write the query
+- [ ] Queries
 
 
 # Side bar query note

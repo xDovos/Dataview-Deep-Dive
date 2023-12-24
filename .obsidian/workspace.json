@@ -8,15 +8,17 @@
         "type": "tabs",
         "children": [
           {
-            "id": "63d53c4fcd6a7d28",
+            "id": "4c264df50ba9030f",
             "type": "leaf",
+            "pinned": true,
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Journal/Monthly/2023/2023-M08.md",
+                "file": "Templates/Scripts/Appending headers to the tasks.md",
                 "mode": "source",
                 "source": false
-              }
+              },
+              "pinned": true
             }
           },
           {
@@ -26,18 +28,6 @@
               "type": "markdown",
               "state": {
                 "file": "Knowledge/002 Queries/Progress bar.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "93f05b5133ba0df9",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Journal/Daily/2023/2023-08-04.md",
                 "mode": "source",
                 "source": false
               }
@@ -80,14 +70,6 @@
                 "extraContext": false,
                 "sortOrder": "alphabetical"
               }
-            }
-          },
-          {
-            "id": "58720e2333c2caf3",
-            "type": "leaf",
-            "state": {
-              "type": "bookmarks",
-              "state": {}
             }
           }
         ]
@@ -165,9 +147,19 @@
                 "searchQuery": ""
               }
             }
+          },
+          {
+            "id": "c23c93f801afb492",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Knowledge/002 Queries/Progress bar.md"
+              }
+            }
           }
         ],
-        "currentTab": 2
+        "currentTab": 5
       }
     ],
     "direction": "horizontal",
@@ -176,45 +168,42 @@
   },
   "left-ribbon": {
     "hiddenItems": {
-      "daily-notes:Open today's daily note": false,
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
       "command-palette:Open command palette": false,
-      "obsidian-media-db-plugin:Add new Media DB entry": false,
-      "templater-obsidian:Templater": false,
       "darlal-switcher-plus:Open in Headings Mode": false,
       "darlal-switcher-plus:Open Symbols for the active editor": false,
-      "periodic-notes:Open today": false
+      "templater-obsidian:Templater": false
     }
   },
   "active": "1f25841840dd676d",
   "lastOpenFiles": [
     "Knowledge/002 Queries/Obsidian Charts Queries.md",
+    "Knowledge/002 Queries/Combining queries.md",
+    "Knowledge/002 Queries/Amount of inlinks and outlinks.md",
+    "Knowledge/002 Queries/All properties and values.md",
+    "Knowledge/002 Queries/unsorted queries.md",
+    "Knowledge/002 Queries/ThreeInTen Analysis.md",
+    "Knowledge/002 Queries/Tasks Completion date.md",
+    "Knowledge/002 Queries/Side bar query note.md",
+    "Knowledge/002 Queries/String that tells the current date.md",
+    "Knowledge/002 Queries/Query switching.md",
+    "Knowledge/002 Queries/Query Query.md",
+    "Knowledge/002 Queries/Progress bar.md",
+    "Knowledge/002 Queries/Progress bar 1.md",
+    "Knowledge/002 Queries/Listing stuff.md",
+    "Templates/Scripts/Appending headers to the tasks.md",
+    "Templates/Scripts/Scipt PC sheet analyse.md",
+    "Templates/Scripts/Dataview to csv converter.md",
+    "Templates/Scripts/Player character sheet creation .md",
+    "Templates/Template Status bar setup.md",
+    "Templates/Template Standard Note.md",
+    "Templates/Template People.md",
+    "Templates/DQL function overview.md",
+    "Templates/DQL Codeblock.md",
     "test.md",
     "Journal/Daily/2023/2023-08-04.md",
     "Journal/Monthly/2023/2023-M08.md",
-    "Knowledge/Testing/charts testing.md",
-    "Knowledge/Testing/Untitled 1.md",
-    "Knowledge/Testing/testing.md",
-    "Knowledge/002 Queries/ThreeInTen Analysis.md",
-    "Knowledge/002 Queries/unsorted queries.md",
-    "Knowledge/002 Queries/Progress bar.md",
-    "Journal/Weekly/2023/2023-W31.md",
-    "Code Modules/moduleUtils.js.md",
-    "Code Modules/modulePB.js.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/SORT.md",
-    "Knowledge/002 Queries/Tasks Completion date.md",
-    "Knowledge/002 Queries/String that tells the current date.md",
-    "Knowledge/002 Queries/Side bar query note.md",
-    "Knowledge/002 Queries/Query switching.md",
-    "Knowledge/002 Queries/Query Query.md",
-    "Knowledge/002 Queries/Combining list queries.md",
-    "Vault.md",
-    "Knowledge/Testing/testing2.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
-    "Discord Support/Dataview Queries/DV DVJS LIST non md.md",
-    "Discord Support/Dataview Queries/DV DVJS LIST Folder notes.md",
-    "Discord Support/Dataview Queries/DV DVJS TABLE sum row.md",
     "Raw Data/results.json",
     "Raw Data/results10mil.json",
     "Raw Data/ThreeInTen CSVData.csv",

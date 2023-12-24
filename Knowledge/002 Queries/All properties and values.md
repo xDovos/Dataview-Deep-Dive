@@ -10,6 +10,10 @@ status:: `$=return(await self.require.import("Code Modules/modulePB.js.md")).PBS
 - [ ] Create the Note
 - [ ] Write the YAML metadata
 - [ ] Write the query
+- [ ] Queries
+    - [x] All properties and values overview ✅ 2023-12-24
+        - [x] Write the Query ✅ 2023-12-24
+        - [x] Write the Query Metadata ✅ 2023-12-24
 
 
 # All properties and values 
@@ -75,8 +79,8 @@ dv.table(
 
 - Query meta
     - QueryType:: [[DVJS]]
-    - DVfunctions:: 
-    - JSfunctions:: 
+    - DVfunctions:: [[dv.pages]], [[dataArray.filter]], [[DataArray.array]], [[dataArray.push]], [[unique]], [[DataArray.sort]], [[DataArray.map]], [[dv.table]]
+    - JSfunctions:: [[Object.values]]
     - tags:: 
     - image:: 
 

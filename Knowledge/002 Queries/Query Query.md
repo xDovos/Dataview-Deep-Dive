@@ -11,6 +11,10 @@ status::  `$= const setPage = "Query Query"; const setFilter = "Status Tasks" ; 
 - [ ] Write the YAML metadata
 - [ ] Write the query
     - [x] Querying Queries ✅ 2023-10-06
+- [ ] Queries
+    - [ ] Querying Queries
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
 
 
 # Query Query

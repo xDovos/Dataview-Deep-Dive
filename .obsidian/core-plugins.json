@@ -8,11 +8,9 @@
   "tag-pane",
   "properties",
   "page-preview",
-  "daily-notes",
   "command-palette",
   "editor-status",
-  "bookmarks",
-  "word-count",
+  "outline",
   "file-recovery",
   "sync"
 ]

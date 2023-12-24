@@ -1,19 +1,17 @@
 [
   "heatmap-calendar",
-  "obsidian-media-db-plugin",
   "metadata-menu",
-  "obsidian-minimal-settings",
   "obsidian-charts",
   "nldates-obsidian",
   "darlal-switcher-plus",
   "quickadd",
   "obsidian-quiet-outline",
-  "obsidian-style-settings",
   "obsidian-tasks-plugin",
   "templater-obsidian",
   "dataview",
   "better-word-count",
   "modules",
-  "periodic-notes",
-  "emoji-shortcodes"
+  "emoji-shortcodes",
+  "cm-editor-syntax-highlight-obsidian",
+  "obsidian-style-settings"
 ]

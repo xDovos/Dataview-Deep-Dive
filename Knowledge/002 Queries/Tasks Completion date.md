@@ -10,12 +10,16 @@ status::  `$= const setPage = "Tasks Completion date"; const setFilter = "Status
 - [x] Create the Note ✅ 2023-10-30
 - [ ] Write the YAML metadata
 - [ ] Write the query
+- [ ] Queries
+    - [ ] Grouping Tasks by completion date
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
 
 
 # Tasks Completion date
 
 
-## unnamed
+## Grouping Tasks by completion date
 
 ```js dataviewjs 
 let startDate = dv.date("2023-08-01");

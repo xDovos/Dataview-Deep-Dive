@@ -10,12 +10,22 @@ status:: `$=return(await self.require.import("Code Modules/modulePB.js.md")).PBS
 - [x] Create the Note ✅ 2023-11-17
 - [x] Write the YAML metadata ✅ 2023-11-17
 - [ ] Write the query
+- [ ] Queries
+    - [x] Simple amount of inlinks per note to this note ✅ 2023-12-24
+        - [x] Write the Query ✅ 2023-12-24
+        - [x] Write the Query Metadata ✅ 2023-12-24
+    - [x] Complex amount of inlinks and outlinks per note to this note ✅ 2023-12-24
+        - [x] Write the Query ✅ 2023-12-24
+        - [x] Write the Query Metadata ✅ 2023-12-24
+    - [x] LIST Complex amount of inlinks and outlinks per note to this note ✅ 2023-12-24
+        - [x] Write the Query ✅ 2023-12-24
+        - [x] Write the Query Metadata ✅ 2023-12-24
 
 
 # Amount of inlinks and outlinks
 
 in all queries change all link("FLATTEN") to this.file.link to get it dynamically working. i have done this this way because i don't link to this note.
-
+ 
 ## Simple amount of inlinks per note to this note
 
 ```js

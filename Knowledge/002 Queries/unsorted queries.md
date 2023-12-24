@@ -6,6 +6,97 @@ tags:
 Birthday: 1999-05-07
 FirstContactDate: 2022-11-08
 ---
+
+status::  `$=return(await self.require.import("Code Modules/modulePB.js.md")).PBSingleNoteHeader(dv, "unsorted queries", "Status Tasks")`
+###### Status Tasks
+- [ ] Create the note
+- [ ] Queries
+    - [ ] Overwriting of the task visuals inside TASK Query
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] Styling of DQL table outputs and Projects and subtasks based on task parent + children
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] DO NOT RUN IT how to destroy your notes with dataview + templater
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] grouping groups in dvjs
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] markdown file text embedding into a table without link embedding
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] Seeded RNG testing
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] Flatten equivalent in dvjs
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] Meeting person table?
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] metadata menu api stuff and sorting by object
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] callouts don't support inline queries
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] Any Contains stuff
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] shows what notes link into an outlink and how many they are. (a roundabout way of doing inlinks)
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] shows files with double tags inside the tags properties field
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] Counting an Emote inside a note
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] Gets all subfolders of the current file folder
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] Flatten Abuse that works
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] DV DVJS TASK Status Count table
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] Clickable Picture Links
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] getting the file link after filtering a word inside the tasks
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] quotes query and daily quotes generator
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] Daily Quotes
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] DV DVJS adding index Column
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] DV DVJS time greeting
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] Calendar
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] DV DQL Tag view
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] DV DQL Find Alias use
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] Table without Query
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] Ghost links
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+
+
 # Unsorted Queries
 
 ## Overwriting of the task visuals inside TASK Query

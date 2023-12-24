@@ -10,6 +10,19 @@ status:: `$=return(await self.require.import("Code Modules/modulePB.js.md")).PBS
 - [x] Create the Note ✅ 2023-12-22
 - [x] Write the YAML metadata ✅ 2023-12-22
 - [ ] Write the query
+- [ ] Queries
+    - [ ] Bar charts Habit counter
+        - [x] Write the Query ✅ 2023-12-24
+        - [ ] Write the Query Metadata
+    - [ ] Line Charts Csv
+        - [x] Write the Query ✅ 2023-12-24
+        - [ ] Write the Query Metadata
+    - [ ] line chart daily note
+        - [x] Write the Query ✅ 2023-12-24
+        - [ ] Write the Query Metadata
+    - [ ] pie chart random colors
+        - [x] Write the Query ✅ 2023-12-24
+        - [ ] Write the Query Metadata
 
 
 # Obsidian Charts Queries

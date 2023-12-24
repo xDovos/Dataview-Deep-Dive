@@ -38,6 +38,48 @@ status::  `$= const setPage = "Progress bar"; const setFilter = "Status Tasks" ;
     - [x] time based Modules ✅ 2023-09-30
         - [ ] Explanation
     - [ ] PB based on property values.
+- [ ] Queries
+    - [ ] DVJS Inline Progress bars
+        - [x] progress bar on one page with a filter ✅ 2023-05-20
+            - [x] Write the Query ✅ 2023-05-20
+            - [x] Write the Query Metadata ✅ 2023-05-20
+        - [x] progress bar on one page with a filter Modules ✅ 2023-05-20
+            - [x] Write the Query ✅ 2023-05-20
+            - [x] Write the Query Metadata ✅ 2023-05-20
+        - [ ] progress bar on one page under one header
+            - [x] Write the Query ✅ 2023-12-24
+            - [ ] Write the Query Metadata
+        - [ ] progress overview of pages
+            - [x] Write the Query ✅ 2023-12-24
+            - [ ] Write the Query Metadata
+    - [ ] DQL TABLE with inline Progress bar fields
+        - [x] Write the Query ✅ 2023-12-24
+        - [ ] Write the Query Metadata
+    - [ ] DQL TABLE MOC with progress bar and checking of the tasks
+        - [ ] old version
+            - [x] Write the Query ✅ 2023-09-30
+            - [ ] Write the Query Metadata
+        - [ ] new version with callouts to hide the tasks
+            - [x] Write the Query ✅ 2023-09-30
+            - [ ] Write the Query Metadata
+        - [ ] Modules Version with callouts
+            - [x] Write the Query ✅ 2023-09-30
+            - [ ] Write the Query Metadata
+    - [ ] DV DVJS TABLE that creates Progress bars
+        - [x] Write the Query ✅ 2023-12-24
+        - [ ] Write the Query Metadata
+    - [ ] DV DVJS TABLE Progress bar time progress
+        - [x] Write the Query ✅ 2023-12-24
+        - [ ] Write the Query Metadata
+    - [ ] native Duration calculation
+        - [x] Write the Query ✅ 2023-12-24
+        - [ ] Write the Query Metadata
+    - [ ] Custom Duration calculation
+        - [x] Write the Query ✅ 2023-12-24
+        - [ ] Write the Query Metadata
+    - [ ] Modules Version
+        - [x] Write the Query ✅ 2023-12-24
+        - [ ] Write the Query Metadata
 
 
 # Progress bar
@@ -336,3 +378,4 @@ dv.table(["Name", "Bar"], data)
     - you can use the custom function that calculates a bit better because it skips the weeks and thus doesn't have the 28 days = 4 weeks = 1 month problem.
 
 
+ 

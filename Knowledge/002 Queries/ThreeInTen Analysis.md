@@ -18,6 +18,25 @@ status::  `$= const setPage = "ThreeInTen Analysis"; const setFilter = "Status T
         - [x] dvjs ✅ 2023-10-14
         - [x] DQL ✅ 2023-10-14
     - [ ] 
+- [ ] Queries
+    - [ ] Intro
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] Raw Data Table
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] amount of appearances of the numbers
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] Drawings of the same numbers
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] Probability Analysis
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] Probability Analysis DQL
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
 
 
 # ThreeInTen Analysis

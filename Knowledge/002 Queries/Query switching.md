@@ -11,6 +11,13 @@ status::  `$= const setPage = "Query switching"; const setFilter = "Status Tasks
 - [ ] Write the YAML metadata
 - [ ] Write the query
     - [x] Query Switching Based on Task Status ✅ 2023-10-01
+- [ ] Queries
+    - [ ] Switching Filter Based on Task with if statement
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
+    - [ ] Switching Filter Based on Task with inline if statement
+        - [ ] Write the Query
+        - [ ] Write the Query Metadata
 
 
 # Query switching
