@@ -22,7 +22,8 @@ Flatten list(1,2,3) as nr
 
 
 
-```js dataviewjs
+
+```dataviewjs
 
 let data = await this.app.vault.readJson("Raw Data/results.json")
 
@@ -44,10 +45,43 @@ function calculateHitProbabilities() {
   return probabilities;
 }
 
+function factorial(n) {
+  if (n === 0 || n === 1) {
+    return 1;
+  }
+  return n * factorial(n - 1);
+}
+
+function binomialCoefficient(n, k) {
+  return factorial(n) / (factorial(k) * factorial(n - k));
+}
+
+function calculateProbability(matchCount) {
+  const totalCombinations = binomialCoefficient(10, 3);
+
+  if (matchCount === 0) {
+    const waysToChoose = binomialCoefficient(7, 3);
+    return parseFloat((waysToChoose / totalCombinations)*100).toFixed(2);
+  } else if (matchCount === 1) {
+    const waysToChoose1 = binomialCoefficient(3, 1);
+    const waysToChoose2 = binomialCoefficient(7, 2);
+    return parseFloat(((waysToChoose1 * waysToChoose2) / totalCombinations)*100).toFixed(2);
+  } else if (matchCount === 2) {
+    const waysToChoose1 = binomialCoefficient(3, 2);
+    const waysToChoose2 = binomialCoefficient(7, 1);
+    return parseFloat(((waysToChoose1 * waysToChoose2) / totalCombinations)*100).toFixed(2);
+  } else if (matchCount === 3) {
+    return parseFloat((1 / totalCombinations)*100).toFixed(2);
+  } else {
+    return 0; // Invalid matchCount
+  }
+}
+
 
 let probabilities = calculateHitProbabilities();
 //console.log(probabilities)
 let tdata = dv.array(probabilities).map(t=> [ "Probability",t[0], t[1], t[2], t[3]])
+tdata.values.push(["Calculated", calculateProbability(0),calculateProbability(1),calculateProbability(2),calculateProbability(3)])
 
 function numCounts(numbers){
     const counts = {};
@@ -63,6 +97,8 @@ let tdata2 = []
 tdata2.push(dv.array(countDrawn).flatMap(t=> ["Drawn", t["1"], t["2"], t["3"], t["4"], t["5"], t["6"], t["7"], t["8"], t["9"], t["10"]]))
 tdata2.push(dv.array(countPicked).flatMap(t=> ["Picked", t["1"], t["2"], t["3"], t["4"], t["5"], t["6"], t["7"], t["8"], t["9"], t["10"]]))
 tdata2.push(["Diff", tdata2[0][1]-tdata2[1][1], tdata2[0][2]-tdata2[1][2], tdata2[0][3]-tdata2[1][3], tdata2[0][4]-tdata2[1][4], tdata2[0][5]-tdata2[1][5], tdata2[0][6]-tdata2[1][6], tdata2[0][7]-tdata2[1][7], tdata2[0][8]-tdata2[1][8], tdata2[0][9]-tdata2[1][9], tdata2[0][10]-tdata2[1][10]])
+
+
 
 dv.header(2, "probability")
 dv.table(["matches", "0", "1", "2", "3"], tdata)

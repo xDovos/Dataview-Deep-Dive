@@ -10,6 +10,13 @@ status:: `$=return(await self.require.import("Code Modules/modulePB.js.md")).PBS
 - [x] Create the Note ✅ 2023-10-31
 - [ ] Write the YAML metadata
 - [ ] Write the query
+- [ ] Queries
+    - [x] Pros Cons Header Query DQL ✅ 2023-12-27
+        - [x] Write the Query ✅ 2023-12-27
+        - [x] Write the Query Metadata ✅ 2023-12-27
+    - [x] Pros Cons Header Query DVJS ✅ 2023-12-27
+        - [x] Write the Query ✅ 2023-12-27
+        - [x] Write the Query Metadata ✅ 2023-12-27
 
 
 # Headers Datasets
@@ -87,14 +94,13 @@ dv.table(["Pros", "Cons", "Notes"], data)
 
 ## Appearances
 
-```dataview
-Table without id file.inlinks as Inlinks, 
-map(file.outlinks, (t)=> choice(meta(t).subpath, 
-"[["+ link(meta(t).path).file.name+"#"+ meta(t).subpath +"]]", 
-link(meta(t).path))) as Outlinks
-where file.path = this.file.path
+```dataviewjs
+const inlinks = dv.current().file.inlinks
+const outlinks = dv.current().file.outlinks.mutate(t=> t.embed = false)
+const indexA = Array.from({ length: Math.max(inlinks.length, outlinks.length) }, (_, index) => index)
+const data = indexA.map((i)=> [inlinks[i] || " ", outlinks[i] || " "])
+const style = "<span style='font-size:smaller;color:var(--text-muted)'>("
+dv.table(["inlinks "+ style + inlinks.length +")", "outlinks "+ style + outlinks.length +")"], data)
+this.container.querySelectorAll(".table-view-table tr:first-of-type th:first-of-type > span.small-text")[0].style.visibility = "hidden";
 ```
-
-
-
 

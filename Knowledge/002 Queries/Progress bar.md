@@ -11,33 +11,6 @@ status::  `$= const setPage = "Progress bar"; const setFilter = "Status Tasks" ;
 
 ###### Status Tasks
 - [x] Write an intro to this note ✅ 2023-10-10
-- [ ] rewrite the note and it's queries to the vaults standard.
-- [ ] Progress bar Types
-    - [ ] Inline Progress bars
-        - [x] bar with Text Filter ✅ 2023-05-20
-            - [x] Explanation ✅ 2023-05-20
-            - [x] Modules ✅ 2023-09-30
-        - [x] bar with Header Filter ✅ 2023-05-20
-            - [ ] Explanation
-            - [x] Modules ✅ 2023-09-30
-        - [ ] Bar of multiple files
-            - [x] Text filter ✅ 2023-05-20
-                - [ ] Explanation
-                - [x] Modules ✅ 2023-09-30
-            - [x] Header Filter ✅ 2023-05-20
-                - [ ] Explanation 
-                - [x] Modules ✅ 2023-09-30
-- [ ] DQL Table of Progress bars/MOC
-    - [x] With the tasks ✅ 2023-05-20
-    - [x] With the tasks inside a callout ✅ 2023-05-20
-        - [ ] Explanation
-- [ ] Dvjs Table that creates Progress bars 
-    - [x] Tasks based ✅ 2023-05-20
-    - [x] Time based native diff ✅ 2023-05-20
-    - [x] time based custom diff ✅ 2023-09-30
-    - [x] time based Modules ✅ 2023-09-30
-        - [ ] Explanation
-    - [ ] PB based on property values.
 - [ ] Queries
     - [ ] DVJS Inline Progress bars
         - [x] progress bar on one page with a filter ✅ 2023-05-20
@@ -80,6 +53,7 @@ status::  `$= const setPage = "Progress bar"; const setFilter = "Status Tasks" ;
     - [ ] Modules Version
         - [x] Write the Query ✅ 2023-12-24
         - [ ] Write the Query Metadata
+
 
 
 # Progress bar
@@ -313,7 +287,7 @@ function liveBar(start, end, now){
 }
 
 function lastBdayCalc(){
-    if(dv.duration(module.DateDiff(dv.date("today").set({month: Bday.month, day: Bday.day}), dv.date("now"))) <= dv.duration("0 days")){
+    if(dv.duration(DateDiff(dv.date("today").set({month: Bday.month, day: Bday.day}), dv.date("now"))) <= dv.duration("0 days")){
         return dv.date("today").set({month: Bday.month, day: Bday.day})
     }else{
         return dv.date("today").set({month: Bday.month, day: Bday.day}).minus({year: 1})

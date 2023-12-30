@@ -11,9 +11,12 @@ status::  `$= const setPage = "Tasks Completion date"; const setFilter = "Status
 - [ ] Write the YAML metadata
 - [ ] Write the query
 - [ ] Queries
-    - [ ] Grouping Tasks by completion date
-        - [ ] Write the Query
-        - [ ] Write the Query Metadata
+    - [x] Grouping Tasks by completion date ✅ 2023-12-27
+        - [x] Write the Query ✅ 2023-12-27
+        - [x] Write the Query Metadata ✅ 2023-12-27
+    - [x] Task Completion per month ✅ 2023-12-27
+        - [x] Write the Query ✅ 2023-12-27
+        - [x] Write the Query Metadata ✅ 2023-12-27
 
 
 # Tasks Completion date
@@ -49,21 +52,48 @@ dv.paragraph(listg)
 
 - Query meta
     - QueryType:: [[DVJS]]
-    - DVfunctions:: [[dv.pages]], [[dv.date]], [[DataArray.where]], [[DataArray.groupBy]], [[dv.paragraph]]. [[date.toFormat]], 
+    - DVfunctions:: [[dv.pages]], [[dv.date]], [[DataArray.where]], [[DataArray.groupBy]], [[dv.paragraph]]. [[date.toFormat]], [[dv.fileLink]]
     - JSfunctions:: 
-    - tags:: 
+    - tags:: #file/tasks 
+    - image:: 
+
+## Task Completion per month
+
+```js
+const pages = dv.pages().file.tasks.where(p => p.completed).groupBy(p=> p.completion?.month);
+const header = pages.map(p => String(p.key || "null"))
+let data = []
+data.push(pages.map(p => p.rows.length).array())
+dv.table(header, data)
+```
+
+>[!info]+ Rendered
+>```dataviewjs
+>const pages = dv.pages().file.tasks.where(p => p.completed).groupBy(p=> p.completion?.month);
+>const header = pages.map(p => String(p.key || "null"))
+>let data = []
+>data.push(pages.map(p => p.rows.length).array())
+>dv.table(header, data)
+>```
+
+- Query meta
+    - QueryType:: [[DVJS]]
+    - DVfunctions:: [[dv.pages]], [[DataArray.where]], [[DataArray.groupBy]], [[DataArray.map]], [[DataArray.array]], [[dv.table]]
+    - JSfunctions:: [[Array.push]], [[JS String]], [[JS OR]]
+    - tags:: #file/tasks 
     - image:: 
 
 
 
 ## Appearances
 
-```dataview
-Table without id file.inlinks as Inlinks, 
-map(file.outlinks, (t)=> choice(meta(t).subpath, 
-"[["+ link(meta(t).path).file.name+"#"+ meta(t).subpath +"]]", 
-link(meta(t).path))) as Outlinks
-where file.path = this.file.path
+```dataviewjs
+const inlinks = dv.current().file.inlinks
+const outlinks = dv.current().file.outlinks.mutate(t=> t.embed = false)
+const indexA = Array.from({ length: Math.max(inlinks.length, outlinks.length) }, (_, index) => index)
+const data = indexA.map((i)=> [inlinks[i] || " ", outlinks[i] || " "])
+const style = "<span style='font-size:smaller;color:var(--text-muted)'>("
+dv.table(["inlinks "+ style + inlinks.length +")", "outlinks "+ style + outlinks.length +")"], data)
+this.container.querySelectorAll(".table-view-table tr:first-of-type th:first-of-type > span.small-text")[0].style.visibility = "hidden";
 ```
-
 

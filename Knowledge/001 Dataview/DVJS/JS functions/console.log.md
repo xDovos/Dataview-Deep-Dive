@@ -17,14 +17,13 @@ status::  `$= const setPage = "console.log"; const setFilter = "Status Tasks" ; 
 
 ## Appearances
 
-```dataview
-Table without id file.inlinks as Inlinks, 
-map(file.outlinks, (t)=> choice(meta(t).subpath, 
-"[["+ link(meta(t).path).file.name+"#"+ meta(t).subpath +"]]", 
-link(meta(t).path))) as Outlinks
-where file.path = this.file.path
+```dataviewjs
+const inlinks = dv.current().file.inlinks
+const outlinks = dv.current().file.outlinks.mutate(t=> t.embed = false)
+const indexA = Array.from({ length: Math.max(inlinks.length, outlinks.length) }, (_, index) => index)
+const data = indexA.map((i)=> [inlinks[i] || " ", outlinks[i] || " "])
+const style = "<span style='font-size:smaller;color:var(--text-muted)'>("
+dv.table(["inlinks "+ style + inlinks.length +")", "outlinks "+ style + outlinks.length +")"], data)
+this.container.querySelectorAll(".table-view-table tr:first-of-type th:first-of-type > span.small-text")[0].style.visibility = "hidden";
 ```
-
-
-
 

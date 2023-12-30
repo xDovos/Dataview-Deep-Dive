@@ -12,11 +12,14 @@ status::  `$= const setPage = "Query switching"; const setFilter = "Status Tasks
 - [ ] Write the query
     - [x] Query Switching Based on Task Status ✅ 2023-10-01
 - [ ] Queries
-    - [ ] Switching Filter Based on Task with if statement
-        - [ ] Write the Query
-        - [ ] Write the Query Metadata
-    - [ ] Switching Filter Based on Task with inline if statement
-        - [ ] Write the Query
+    - [x] Switching Filter Based on Task with if statement ✅ 2023-12-27
+        - [x] Write the Query ✅ 2023-12-27
+        - [x] Write the Query Metadata ✅ 2023-12-27
+    - [x] Switching Filter Based on Task with inline if statement ✅ 2023-12-27
+        - [x] Write the Query ✅ 2023-12-27
+        - [x] Write the Query Metadata ✅ 2023-12-27
+    - [ ] showing alternative outputs if null
+        - [x] Write the Query ✅ 2023-12-27
         - [ ] Write the Query Metadata
 
 
@@ -85,16 +88,45 @@ exp ? dv.span("the task is completed") : dv.span("the task is not completed")
 
 
 
-## Appearances
+## showing alternative outputs if null
 
-```dataview
-Table without id file.inlinks as Inlinks, 
-map(file.outlinks, (t)=> choice(meta(t).subpath, 
-"[["+ link(meta(t).path).file.name+"#"+ meta(t).subpath +"]]", 
-link(meta(t).path))) as Outlinks
-where file.path = this.file.path
+```js 
+const dql = dv.tryQuery(`Task
+    where due < date(today)
+    where !completed
+    Where contains(text,"📅")
+    sort due asc`);
+
+dql ? dv.taskList(dql) : dv.paragraph("Well done");
+
 ```
 
+>[!info]- Rendered
+>```dataviewjs
+>
+>```
 
 
+- Query meta
+    - QueryType:: [[DVJS]]
+    - DVfunctions:: 
+    - JSfunctions:: 
+    - tags:: 
+    - image:: 
+
+
+
+
+
+## Appearances
+
+```dataviewjs
+const inlinks = dv.current().file.inlinks
+const outlinks = dv.current().file.outlinks.mutate(t=> t.embed = false)
+const indexA = Array.from({ length: Math.max(inlinks.length, outlinks.length) }, (_, index) => index)
+const data = indexA.map((i)=> [inlinks[i] || " ", outlinks[i] || " "])
+const style = "<span style='font-size:smaller;color:var(--text-muted)'>("
+dv.table(["inlinks "+ style + inlinks.length +")", "outlinks "+ style + outlinks.length +")"], data)
+this.container.querySelectorAll(".table-view-table tr:first-of-type th:first-of-type > span.small-text")[0].style.visibility = "hidden";
+```
 

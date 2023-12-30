@@ -4226,12 +4226,13 @@ var FieldSet4 = class {
       }
     });
   }
-  reset(children) {
+  reset(children, updateNeeded = true) {
     this.rowSorters = {};
     this.filters = {};
     this.columnManagers = {};
     this.build(children);
-    this.tableView.update();
+    if (updateNeeded)
+      this.tableView.update();
     this.tableView.saveViewBtn.setCta();
   }
   getParams() {
@@ -4298,11 +4299,11 @@ var FieldSet4 = class {
       }
     });
   }
-  changeView(_name) {
+  changeView(_name, updateNeeded = true) {
     const options2 = this.fileClass.getFileClassOptions();
     const savedViews = options2.savedViews || [];
     this.tableView.manager.selectedView = _name || "";
-    this.reset();
+    this.reset(void 0, updateNeeded);
     if (_name && savedViews.find((view) => view.name === _name)) {
       const savedView = savedViews.find((view) => view.name === _name);
       Object.keys(this.filters).forEach((id) => {
@@ -4503,13 +4504,14 @@ var FileClassDataviewTable = class {
           const fileClassName = id.split("____")[0];
           return fileFileClasses(path).includes(fileClassName);
         };
-        const values = new Function(
+        const query = new Function(
           "dv",
           "current",
           "fileClassFiles",
           "hasFileClass",
           `return ${this.buildDvJSQuery()}`
-        )(dvApi, current, fileClassFiles, hasFileClass).values;
+        )(dvApi, current, fileClassFiles, hasFileClass);
+        const values = query.values;
         const count = values.length;
         const rangesCount = Math.floor(count / this.limit) + 1;
         if (rangesCount < 2)
@@ -4733,7 +4735,7 @@ ${sorters.join("")}
     const templatesFolder = (_a = this.plugin.app.plugins.plugins["templater-obsidian"]) == null ? void 0 : _a.settings["templates_folder"];
     dvQuery += `dv.pages()
 `;
-    dvQuery += `    .where(p => fileClassFiles.includes(p.file.path)
+    dvQuery += `    .filter(p => fileClassFiles.includes(p.file.path)
         ${!!classFilesPath ? "        && !p.file.path.includes('" + classFilesPath + "')\n" : ""}
         ${templatesFolder ? "        && !p.file.path.includes('" + templatesFolder + "')\n" : ""}
         )
@@ -4798,7 +4800,7 @@ dv.table([
       if (column.name === "file") {
         return '        dv.el("div", p.file.link, {cls: "field-name"})';
       } else {
-        return `        hasFileClass(p.file.path, "${column.id}") ? f(dv, p, "${column.name}", {options: {alwaysOn: false, showAddField: true}}) : ""`;
+        return `        hasFileClass(p.file.path, "${column.id}") ? f(dv, p, "${column.name}", {options: {alwaysOn: false, showAddField: ${this.view.manager.showAddField}}}) : ""`;
       }
     }).join(",\n");
     dvJS += "    \n])";
@@ -4937,7 +4939,7 @@ var FileClassTableView = class {
     this.limit = this.fileClass.getFileClassOptions().limit;
     this.container.replaceChildren();
     this.createHeader();
-    this.changeView(this.selectedView);
+    this.changeView(this.selectedView, false);
   }
   createHeader() {
     const header = this.container.createDiv({ cls: "options" });
@@ -4955,6 +4957,8 @@ var FileClassTableView = class {
     this.buildSavedViewRemoveButton(applyContainer);
     if (this.fileClass.getChildren().length)
       this.buildChildrenSelector(applyContainer);
+    this.buildHideInsertFieldBtn(applyContainer);
+    this.buildRefreshBtn(applyContainer);
     this.buildHideFilters(applyContainer);
   }
   update(maxRows, sliceStart = 0) {
@@ -5002,8 +5006,8 @@ var FileClassTableView = class {
   ** Actions
   */
   /* view selection */
-  changeView(name) {
-    this.fieldSet.changeView(name);
+  changeView(name, updateNeeded = true) {
+    this.fieldSet.changeView(name, updateNeeded);
     this.selectedView = name;
     this.toggleFavoriteBtnState();
     this.viewSelect.setValue(name || "");
@@ -5023,7 +5027,7 @@ var FileClassTableView = class {
     } else {
       this.viewSelect.addOption("", "--None--");
       savedViews.sort((a, b) => a.name < b.name ? -1 : 1).forEach((view) => this.viewSelect.addOption(view.name, view.name));
-      this.viewSelect.onChange((value) => this.changeView(value));
+      this.viewSelect.onChange((value) => this.changeView(value, false));
       this.viewSelect.setValue(this.selectedView || "");
     }
   }
@@ -5112,6 +5116,41 @@ var FileClassTableView = class {
       }
     };
     hideFilterBtn.onClick(() => toggleState());
+  }
+  buildHideInsertFieldBtn(container) {
+    const btnContainer = container.createDiv({ cls: "cell" });
+    const hideInsertBtn = new import_obsidian24.ButtonComponent(btnContainer);
+    hideInsertBtn.setIcon("plus-circle");
+    hideInsertBtn.setTooltip("Show insert field button in each cell (slower)");
+    const toggleState = () => {
+      if (this.manager.showAddField) {
+        hideInsertBtn.removeCta();
+        this.manager.showAddField = false;
+      } else {
+        hideInsertBtn.setCta();
+        this.manager.showAddField = true;
+      }
+    };
+    hideInsertBtn.onClick(() => {
+      toggleState();
+      this.update();
+    });
+  }
+  triggerRefreshNeeded() {
+    this.refreshBtn.buttonEl.show();
+    this.refreshBtn.setCta();
+  }
+  buildRefreshBtn(container) {
+    const btnContainer = container.createDiv({ cls: "cell" });
+    this.refreshBtn = new import_obsidian24.ButtonComponent(btnContainer);
+    this.refreshBtn.setIcon("refresh-cw");
+    this.refreshBtn.setTooltip("Refresh table results");
+    this.refreshBtn.buttonEl.hide();
+    this.refreshBtn.onClick(() => {
+      this.refreshBtn.removeCta();
+      this.update();
+      this.refreshBtn.buttonEl.hide();
+    });
   }
   /*
   ** Children selector
@@ -5234,7 +5273,6 @@ var FileClassView = class extends import_obsidian25.ItemView {
   async onOpen() {
     var _a;
     this.icon = (_a = this.fileClass) == null ? void 0 : _a.getIcon();
-    this.tableView.update();
   }
 };
 
@@ -5295,43 +5333,45 @@ var FileClassViewManager = class extends import_obsidian27.Component {
     this.onOpenTabDisplay = onOpenTabDisplay;
     this.revealAfterOpen = revealAfterOpen;
     this.selectedView = selectedView;
+    this.showAddField = false;
     if (!this.fileClass) {
       this.fileClassViewType = FILECLASS_VIEW_TYPE;
     } else {
       this.fileClassViewType = FILECLASS_VIEW_TYPE + "__" + this.fileClass.name;
     }
   }
-  async build() {
+  async openRegisterAndIndexView(fileClass) {
     var _a;
-    if (this.fileClass) {
-      this.name = this.fileClass.name;
-      this.fileClassViewType = FILECLASS_VIEW_TYPE + "__" + this.fileClass.name;
-      await this.openFileClassView();
-      this.registerIndexingDone();
-      this.plugin.indexDB.fileClassViews.editElement(this.fileClassViewType, {
-        id: this.fileClassViewType,
-        leafId: (_a = this.fileClassView) == null ? void 0 : _a.leaf.id
-      });
-    } else {
+    this.fileClass = fileClass;
+    this.name = this.fileClass.name;
+    this.fileClassViewType = FILECLASS_VIEW_TYPE + "__" + this.fileClass.name;
+    await this.openFileClassView();
+    this.registerEvent(this.plugin.app.workspace.on("metadata-menu:fileclass-indexed", () => {
+      var _a2;
+      const view = (_a2 = this.plugin.app.workspace.getLeavesOfType(this.fileClassViewType)[0]) == null ? void 0 : _a2.view;
+      if (view) {
+        view.updateFieldsView();
+        view.updateSettingsView();
+        view.tableView.triggerRefreshNeeded();
+      }
+    }));
+    this.plugin.indexDB.fileClassViews.editElement(this.fileClassViewType, {
+      id: this.fileClassViewType,
+      leafId: (_a = this.fileClassView) == null ? void 0 : _a.leaf.id
+    });
+  }
+  async build() {
+    if (this.fileClass)
+      this.openRegisterAndIndexView(this.fileClass);
+    else {
       const tagsAndFileClasses = this.getActiveFileTagsAndFileClasses();
       if (tagsAndFileClasses.length === 1) {
         const index = this.plugin.fieldIndex;
         const fileClassName = tagsAndFileClasses[0];
         const fileClass = index.fileClassesName.get(fileClassName) || index.tagsMatchingFileClasses.get(fileClassName);
-        if (fileClass) {
-          this.name = fileClass.name;
-          this.fileClass = fileClass;
-          this.fileClassViewType = FILECLASS_VIEW_TYPE + "__" + fileClass.name;
-          await this.openFileClassView();
-          this.registerIndexingDone();
-          this.plugin.indexDB.fileClassViews.editElement(
-            FILECLASS_VIEW_TYPE + "__" + this.name,
-            {
-              id: FILECLASS_VIEW_TYPE + "__" + this.name,
-              leafId: this.fileClassView.leaf.id
-            }
-          );
-        } else {
+        if (fileClass)
+          this.openRegisterAndIndexView(fileClass);
+        else {
           this.plugin.removeChild(this);
           this.unload();
         }
@@ -5346,17 +5386,6 @@ var FileClassViewManager = class extends import_obsidian27.Component {
         choiceModal.open();
       }
     }
-  }
-  registerIndexingDone() {
-    this.registerEvent(this.plugin.app.workspace.on("metadata-menu:indexed", () => {
-      var _a;
-      const view = (_a = this.plugin.app.workspace.getLeavesOfType(this.fileClassViewType)[0]) == null ? void 0 : _a.view;
-      if (view) {
-        view.updateFieldsView();
-        view.updateSettingsView();
-        view.tableView.build();
-      }
-    }));
   }
   async openFileClassView() {
     if (this.fileClass) {
@@ -22700,6 +22729,7 @@ var FieldIndex = class extends FieldIndexBuilder {
       this.plugin.app.metadataCache.on("resolved", async () => {
         if (this.plugin.app.metadataCache.inProgressTaskCount === 0 && this.plugin.launched) {
           if (this.changedFiles.every((file) => this.classFilesPath && file.path.startsWith(this.classFilesPath))) {
+            this.plugin.app.workspace.trigger("metadata-menu:fileclass-indexed");
             await updateCanvasAfterFileClass(this.plugin, this.changedFiles);
           }
           await this.indexFields();
@@ -25003,6 +25033,7 @@ var FileClassCodeBlockManager = class extends import_obsidian81.MarkdownRenderCh
     this.source = source;
     this.ctx = ctx;
     this.isLoaded = false;
+    this.showAddField = false;
   }
   build() {
     var _a;
@@ -25025,6 +25056,7 @@ var FileClassCodeBlockManager = class extends import_obsidian81.MarkdownRenderCh
       if (this.fileClass) {
         this.itemsPerPage = content["files per page"] || this.fileClass.options.limit || this.plugin.settings.tableViewMaxRecords;
         this.startAtItem = content["start"] || 0;
+        this.showAddField = content["showAddField"] === true || false;
         this.fileClassCodeBlockView = new FileClassCodeBlockView(this, this.tableId, this.fileClass, paginationContainer, tableContainer, selectedView, this.ctx);
         this.fileClassCodeBlockView.fileClassDataviewTable.limit = this.itemsPerPage;
         this.plugin.registerMarkdownPostProcessor((el2, ctx) => {

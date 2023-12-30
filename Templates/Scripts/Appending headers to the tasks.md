@@ -24,6 +24,7 @@ for (let i = 2; i < headings.length; i++){
         - [ ] Write the Query Metadata
 `;
 }
+
 // Join lines back together
 const newContent = lines.join("\n");
 // Update file you want to edit

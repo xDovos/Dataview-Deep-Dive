@@ -1,8 +1,15 @@
 ---
 Type: Dataview
-QueryType: "DVJS"
-tags: [DV/DVJS, DV/Query, Templater]
-self: ["[[DV DVJS Templater#DV DVJS Templater List]]", "[[DV DVJS Templater#DV DVJS Templater Table]]", "[[DV DVJS Templater#DV DVJS Templater List with DQL Query]]", "[[DV DVJS Templater#DV DVJS Templater Table with DQL Query]]"]
+QueryType: DVJS
+tags:
+  - DV/DVJS
+  - DV/Query
+  - Templater
+self:
+  - "[[Templater with dataview#DV DVJS Templater List]]"
+  - "[[Templater with dataview#DV DVJS Templater Table]]"
+  - "[[Templater with dataview#DV DVJS Templater List with DQL Query]]"
+  - "[[Templater with dataview#DV DVJS Templater Table with DQL Query]]"
 ---
 Docs:: [markdownList](https://blacksmithgu.github.io/obsidian-dataview/api/code-reference/#dvmarkdownlistvalues), [markdownTable](https://blacksmithgu.github.io/obsidian-dataview/api/code-reference/#dvmarkdowntableheaders-values)
 

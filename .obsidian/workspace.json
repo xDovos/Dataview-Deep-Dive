@@ -8,13 +8,13 @@
         "type": "tabs",
         "children": [
           {
-            "id": "4c264df50ba9030f",
+            "id": "fe6400d54a541d3b",
             "type": "leaf",
             "pinned": true,
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Templates/Scripts/Appending headers to the tasks.md",
+                "file": "Templates/Scripts/Appearance query change.md",
                 "mode": "source",
                 "source": false
               },
@@ -22,19 +22,67 @@
             }
           },
           {
-            "id": "1f25841840dd676d",
+            "id": "3871a756e9ef6913",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Knowledge/002 Queries/Progress bar.md",
+                "file": "Templates/Scripts/Appending headers to the tasks.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "4c264df50ba9030f",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Knowledge/002 Queries/All properties and values.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "d6a959402ab28b23",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Archive/1 Lottery games Script broken.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "a1d802bb4357f934",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Canvas/Movie Canvas/Dashboard.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "67bf2eeaaa184673",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Knowledge/001 Dataview/DQL/Data Commands/TABLE.md",
                 "mode": "source",
                 "source": false
               }
             }
           }
         ],
-        "currentTab": 1
+        "currentTab": 5
       }
     ],
     "direction": "vertical"
@@ -63,7 +111,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "tag:#tag",
+                "query": "container",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -92,7 +140,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Knowledge/002 Queries/Progress bar.md",
+                "file": "Knowledge/001 Dataview/DQL/Data Commands/TABLE.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -109,7 +157,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Knowledge/002 Queries/Progress bar.md",
+                "file": "Knowledge/001 Dataview/DQL/Data Commands/TABLE.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -132,7 +180,7 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Knowledge/002 Queries/Progress bar.md"
+                "file": "Knowledge/001 Dataview/DQL/Data Commands/TABLE.md"
               }
             }
           },
@@ -154,12 +202,11 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Knowledge/002 Queries/Progress bar.md"
+                "file": "Knowledge/001 Dataview/DQL/Data Commands/TABLE.md"
               }
             }
           }
-        ],
-        "currentTab": 5
+        ]
       }
     ],
     "direction": "horizontal",
@@ -176,34 +223,34 @@
       "templater-obsidian:Templater": false
     }
   },
-  "active": "1f25841840dd676d",
+  "active": "67bf2eeaaa184673",
   "lastOpenFiles": [
-    "Knowledge/002 Queries/Obsidian Charts Queries.md",
-    "Knowledge/002 Queries/Combining queries.md",
-    "Knowledge/002 Queries/Amount of inlinks and outlinks.md",
-    "Knowledge/002 Queries/All properties and values.md",
-    "Knowledge/002 Queries/unsorted queries.md",
-    "Knowledge/002 Queries/ThreeInTen Analysis.md",
-    "Knowledge/002 Queries/Tasks Completion date.md",
-    "Knowledge/002 Queries/Side bar query note.md",
-    "Knowledge/002 Queries/String that tells the current date.md",
-    "Knowledge/002 Queries/Query switching.md",
-    "Knowledge/002 Queries/Query Query.md",
-    "Knowledge/002 Queries/Progress bar.md",
-    "Knowledge/002 Queries/Progress bar 1.md",
-    "Knowledge/002 Queries/Listing stuff.md",
+    "Canvas/Movie Canvas/Dashboard.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/TABLE.md",
+    "Templates/Scripts/Appearance query change.md",
     "Templates/Scripts/Appending headers to the tasks.md",
+    "Raw Data/ThreeInTen Data.md",
+    "Templates/testing.md",
+    "Links to docs.md",
+    "README.md",
+    "Vault.md",
+    "Archive/1 Lottery games Script broken.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/GROUP BY.md",
+    "Knowledge/002 Queries/All properties and values.md",
+    "Discord Support/Dataview Queries/DV DQL sum.md",
+    "Knowledge/002 Queries/Progress bar.md",
+    "Code Modules/modulePB.js.md",
+    "Knowledge/002 Queries/Combining queries.md",
     "Templates/Scripts/Scipt PC sheet analyse.md",
-    "Templates/Scripts/Dataview to csv converter.md",
     "Templates/Scripts/Player character sheet creation .md",
-    "Templates/Template Status bar setup.md",
-    "Templates/Template Standard Note.md",
-    "Templates/Template People.md",
-    "Templates/DQL function overview.md",
-    "Templates/DQL Codeblock.md",
-    "test.md",
-    "Journal/Daily/2023/2023-08-04.md",
-    "Journal/Monthly/2023/2023-M08.md",
+    "Knowledge/Testing/Untitled 1.md",
+    "Knowledge/Testing/testing.md",
+    "Knowledge/001 Dataview/DVJS/DVJS.md",
+    "Knowledge/002 Queries/Query Query.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/SORT.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/LIST.md",
+    "Knowledge/002 Queries/unsorted queries.md",
+    "Knowledge/002 Queries/Templater with dataview.md",
     "Raw Data/results.json",
     "Raw Data/results10mil.json",
     "Raw Data/ThreeInTen CSVData.csv",
