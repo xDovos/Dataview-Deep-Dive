@@ -1,11 +1,16 @@
 ---
-Alias: ["Hello", "Apple"]
+aliases:
+  - Hello
+  - Apple
 Type: Dataview
 QueryType: DQL
-#tags: [DV/DQL, DV/Query]
-self: ["",""]
-array1:  ["apples"]
-array2: [ "apples", "haus", "Peter"]
+self:
+  - ""
+  - ""
+array1: 5
+array2:
+  - apples
+  - birn
 ---
 docs::
 
@@ -29,8 +34,10 @@ WHERE !completed
 name:: 3
 
 ```dataview
-TABLE choice(typeof(array1) = "array", any(array1, (t)=> contains(this.array2, t)), contains(this.array2, array1)),
-    default(((x) => {"array":any(array1, (t)=> contains(this.array2, t)), "number":"is a number", "string": "is a sting" }[x])(typeof(array1)), "99"), typeof(array1), (x) => {"null": null,"string": "NaN", "number": this.name - 5}[typeof(this.name)](x)
+TABLE default(((x) => {"array": any(array1, (t)=> contains(this.array2, t)), 
+                    "number": "is a number", 
+                    "string": "is a sting" }[x])(typeof(array1)), "99")
+    
 where file.path = this.file.path
 ```
 

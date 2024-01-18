@@ -21,6 +21,8 @@ status::  `$= const setPage = "Query Query"; const setFilter = "Status Tasks" ; 
 
 ## Querying Queries
 
+made by [scottTomaszewski](https://gist.github.com/scottTomaszewski/c95c4a0f2f9b5a1f4c3566d03df52040)
+
 the filters don't work in the callout. if you want to use the query remove the "js " before the "dataviewjs" so that the codeblock is rendering.
 
  ```dataviewjs

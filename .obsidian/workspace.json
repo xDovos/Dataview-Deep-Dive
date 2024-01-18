@@ -39,50 +39,50 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Knowledge/002 Queries/All properties and values.md",
+                "file": "Knowledge/Testing/Untitled 1.md",
                 "mode": "source",
                 "source": false
               }
             }
           },
           {
-            "id": "d6a959402ab28b23",
+            "id": "e2a2a07909e10c11",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Archive/1 Lottery games Script broken.md",
+                "file": "Knowledge/002 Queries/Yearly overview of completed tasks inside the notes.md",
                 "mode": "source",
                 "source": false
               }
             }
           },
           {
-            "id": "a1d802bb4357f934",
+            "id": "28acbbd381f9054d",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Canvas/Movie Canvas/Dashboard.md",
+                "file": "Knowledge/002 Queries/Yearly overview of completed tasks inside the notes.md",
                 "mode": "source",
                 "source": false
               }
             }
           },
           {
-            "id": "67bf2eeaaa184673",
+            "id": "ee2804caa9d1e210",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Knowledge/001 Dataview/DQL/Data Commands/TABLE.md",
+                "file": "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/all.md",
                 "mode": "source",
                 "source": false
               }
             }
           }
         ],
-        "currentTab": 5
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -111,7 +111,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "container",
+                "query": "Array",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -140,7 +140,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Knowledge/001 Dataview/DQL/Data Commands/TABLE.md",
+                "file": "Knowledge/002 Queries/Yearly overview of completed tasks inside the notes.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -157,7 +157,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Knowledge/001 Dataview/DQL/Data Commands/TABLE.md",
+                "file": "Knowledge/002 Queries/Yearly overview of completed tasks inside the notes.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -180,7 +180,7 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Knowledge/001 Dataview/DQL/Data Commands/TABLE.md"
+                "file": "Knowledge/002 Queries/Yearly overview of completed tasks inside the notes.md"
               }
             }
           },
@@ -202,7 +202,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Knowledge/001 Dataview/DQL/Data Commands/TABLE.md"
+                "file": "Knowledge/002 Queries/Yearly overview of completed tasks inside the notes.md"
               }
             }
           }
@@ -223,34 +223,34 @@
       "templater-obsidian:Templater": false
     }
   },
-  "active": "67bf2eeaaa184673",
+  "active": "e2a2a07909e10c11",
   "lastOpenFiles": [
-    "Canvas/Movie Canvas/Dashboard.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/TABLE.md",
+    "Knowledge/Testing/Untitled.md",
+    "Knowledge/002 Queries/Datasets/list + inline metadata datasets.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
+    "Knowledge/002 Queries/Combining queries.md",
+    "Knowledge/002 Queries/Yearly overview of completed tasks inside the notes.md",
+    "Knowledge/Testing/Untitled 1.md",
+    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/all.md",
+    "Discord Support/Dataview Queries/DV DQL TASK ANY contains.md",
     "Templates/Scripts/Appearance query change.md",
     "Templates/Scripts/Appending headers to the tasks.md",
-    "Raw Data/ThreeInTen Data.md",
-    "Templates/testing.md",
-    "Links to docs.md",
-    "README.md",
-    "Vault.md",
-    "Archive/1 Lottery games Script broken.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/GROUP BY.md",
-    "Knowledge/002 Queries/All properties and values.md",
-    "Discord Support/Dataview Queries/DV DQL sum.md",
-    "Knowledge/002 Queries/Progress bar.md",
-    "Code Modules/modulePB.js.md",
-    "Knowledge/002 Queries/Combining queries.md",
-    "Templates/Scripts/Scipt PC sheet analyse.md",
-    "Templates/Scripts/Player character sheet creation .md",
-    "Knowledge/Testing/Untitled 1.md",
-    "Knowledge/Testing/testing.md",
-    "Knowledge/001 Dataview/DVJS/DVJS.md",
-    "Knowledge/002 Queries/Query Query.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/SORT.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/LIST.md",
     "Knowledge/002 Queries/unsorted queries.md",
-    "Knowledge/002 Queries/Templater with dataview.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/SORT.md",
+    "Knowledge/002 Queries/Datasets/YAML Stuff.md",
+    "Knowledge/Testing/Untitled 1 1.md",
+    "Knowledge/002 Queries/ThreeInTen Analysis.md",
+    "Raw Data/ThreeInTen Data.md",
+    "Journal/Monthly/2023/2023-M09.md",
+    "Journal/Daily/2023/2023-09-15.md",
+    "Journal/Daily/2023/2023-08-30.md",
+    "Journal/Daily/2023/2023-08-28.md",
+    "Journal/Daily/2023/2023-08-12.md",
+    "Journal/Daily/2023/2023-08-10.md",
+    "Journal/Daily/2023/2023-08-08.md",
+    "Journal/Daily/2023/2023-08-07.md",
+    "Journal/Daily/2023/2023-08-06.md",
+    "fileClasses/Daily.md",
     "Raw Data/results.json",
     "Raw Data/results10mil.json",
     "Raw Data/ThreeInTen CSVData.csv",

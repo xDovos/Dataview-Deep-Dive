@@ -5,6 +5,7 @@
     "tags": "tags",
     "Dataview": "date",
     "DOB": "date",
-    "Website": "multitext"
+    "Website": "multitext",
+    "array1": "number"
   }
 }

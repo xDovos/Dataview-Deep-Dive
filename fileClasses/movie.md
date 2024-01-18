@@ -22,7 +22,20 @@ fields:
       canvasPath: Canvas/Movies.canvas
     type: CanvasGroup
     path: ""
-version: "2.0"
+version: "2.1"
+limit: 100
+mapWithTag: false
+icon: package
+tagNames: 
+filesPaths: 
+bookmarksGroups: 
+excludes: 
+extends: 
+savedViews: []
+favoriteView: 
+fieldsOrder:
+  - S801gR
+  - dp0x5g
 ---
 
 Status:: {"type":"CanvasGroup","options":{"groupColors":[],"groupLabels":["Watching","Queued","Waiting"],"canvasPath":"Canvas/Movies.canvas"}}

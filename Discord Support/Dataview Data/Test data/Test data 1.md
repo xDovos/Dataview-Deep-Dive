@@ -33,9 +33,9 @@ meta:
 
 [[Test data 2]]
 
-[[Test data 3]]
+[[Test Data 3]]
 
-[[Test data 4]]
+[[Test Data 4]]
 
 
 - [ ] task 1

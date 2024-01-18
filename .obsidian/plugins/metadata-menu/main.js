@@ -32,13 +32,13 @@ module.exports = __toCommonJS(main_exports);
 window.DEBUG = false;
 
 // main.ts
-var import_obsidian83 = require("obsidian");
+var import_obsidian92 = require("obsidian");
 
 // src/commands/paletteCommands.ts
-var import_obsidian59 = require("obsidian");
+var import_obsidian68 = require("obsidian");
 
 // src/components/NoteFields.ts
-var import_obsidian58 = require("obsidian");
+var import_obsidian67 = require("obsidian");
 
 // node_modules/crypto-random-string/core.js
 var urlSafeCharacters = [..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~"];
@@ -174,10 +174,10 @@ var browser_default = createStringGenerator(specialRandomBytes, getRandomValues)
 var cryptoRandomStringAsync = createAsyncStringGenerator(specialRandomBytes, getRandomValues);
 
 // src/fields/fieldManagers/InputField.ts
-var import_obsidian34 = require("obsidian");
+var import_obsidian35 = require("obsidian");
 
 // src/modals/fields/InputModal.ts
-var import_obsidian33 = require("obsidian");
+var import_obsidian34 = require("obsidian");
 
 // src/note/note.ts
 var import_obsidian = require("obsidian");
@@ -277,7 +277,9 @@ var statusIcon = {
 };
 
 // src/utils/parser.ts
+var fieldComponents = ["inQuote", "inList", "preSpacer", "startStyle", "attribute", "endStyle", "beforeSeparatorSpacer", "afterSeparatorSpacer", "values"];
 var genericFieldRegex = "(?<inQuote>>*(\\s+)?)?(?<inList>- )?(?<preSpacer>(\\s+)?)?(?<startStyle>[_\\*~`]*)(?<attribute>[-\\w\\p{Letter}\\p{Emoji_Presentation}\\s]*)(?<endStyle>[_\\*~`]*)(?<beforeSeparatorSpacer>\\s*)";
+var inlineFieldRegex = (attribute) => `(?<inQuote>>*(\\s+)?)?(?<inList>- )?(?<preSpacer>(\\s+)?)?(?<startStyle>[_\\*~\`]*)(?<attribute>${attribute})(?<endStyle>[_\\*~\`]*)(?<beforeSeparatorSpacer>\\s*)::(?<afterSeparatorSpacer>\\s*)`;
 var fullLineRegex = new RegExp(`^\\s*${genericFieldRegex}::\\s*(?<values>.*)?`, "u");
 var inSentenceRegexBrackets = new RegExp(`\\[${genericFieldRegex}::\\s*(?<values>[^\\]]+)?\\]`, "gu");
 var inSentenceRegexPar = new RegExp(`\\(${genericFieldRegex}::\\s*(?<values>[^\\)]+)?\\)`, "gu");
@@ -440,7 +442,7 @@ var ExistingField = class {
     this.indexedPath = this.indexedPath || this.indexedId;
   }
   isRoot() {
-    return this.indexedId === this.indexedPath;
+    return this.field.path === "";
   }
   async getChildrenFields(plugin, file) {
     if (!Array.isArray(this.value))
@@ -504,7 +506,7 @@ var LineNode = class {
       if (!this.field)
         return "";
       const ancestors = this.field.getAncestors();
-      const level = ancestors.length;
+      const level = ancestors.map((a) => a.type === "ObjectList" /* ObjectList */ ? 2 : 1).reduce((p, c) => p + c, 0);
       return `${"  ".repeat(level + 1 + shift)}- ${value}`;
     };
     this.removeIndentedListItems = () => {
@@ -604,10 +606,8 @@ var LineNode = class {
                       lastObject == null ? void 0 : lastObject.push(this.line);
                     }
                     const index = objectListLines.length - 1;
-                    this.indexedId = `${this.field.id}`;
                     this.indexedPath = `${parentNode == null ? void 0 : parentNode.indexedPath}[${index}]____${this.field.id}`;
                   } else {
-                    this.indexedId = `${this.field.id}`;
                     this.indexedPath = `${parentNode == null ? void 0 : parentNode.indexedPath}____${this.field.id}`;
                   }
                   this.value = Field_default.getValueFromIndexedPath(this.field, this.line.note.frontmatter, this.indexedPath);
@@ -805,11 +805,12 @@ var Line = class {
     this.note.lines.remove(this);
   }
   getLastChildLine() {
+    var _a, _b;
     let lastChildLine = this;
     for (const line of this.note.lines.filter((_l) => _l.number > this.number)) {
       if (line.indentationLevel === 0)
         break;
-      if (line.indentationLevel > this.indentationLevel || line.indentationLevel === this.indentationLevel && !line.isNewListItem) {
+      if (line.indentationLevel > this.indentationLevel || line.indentationLevel === this.indentationLevel && ((_b = (_a = line.nodes[0]) == null ? void 0 : _a.field) == null ? void 0 : _b.type) === "ObjectList" /* ObjectList */ && !line.isNewListItem) {
         lastChildLine = line;
       } else {
         break;
@@ -846,6 +847,10 @@ var Note = class {
       const values = rawValue.replace(/(\,\s+)/g, ",").split(",").filter((v) => !!v).map((value) => itemRendering(value));
       return values.length ? values : "";
     };
+    this.renderMultiFilesFields = (rawValue, itemRendering) => {
+      const values = (rawValue.match(/\!?\[(?:\[??[^\[]*?\]\])/g) || []).map((value) => itemRendering(value));
+      return (values == null ? void 0 : values.length) ? values : "";
+    };
     this.createLine = (value, position, lineNumber, field, asList = false, asBlockquote = false) => {
       const newLine = new Line(this.plugin, this, position, "", lineNumber);
       const newNode = new LineNode(this.plugin, newLine);
@@ -863,7 +868,7 @@ var Note = class {
   }
   renderValueString(_rawValue, fieldType, indentationLevel = 0) {
     if (_rawValue) {
-      if (_rawValue.startsWith("[[")) {
+      if (_rawValue.startsWith("[[") || _rawValue.startsWith("![[")) {
         return `"${_rawValue}"`;
       } else if (_rawValue.startsWith("#")) {
         return `${_rawValue}`;
@@ -886,17 +891,20 @@ ${"  ".repeat(indentationLevel + 1)}`;
       case "yaml":
         switch (type) {
           case "Lookup" /* Lookup */:
-            return this.renderMultiFields(rawValue, (item) => this.renderValueString(item, type, indentationLevel));
+            return this.renderMultiFilesFields(rawValue, (item) => this.renderValueString(item, type, indentationLevel));
           case "Multi" /* Multi */:
             return this.renderMultiFields(rawValue, (item) => this.renderValueString(item, type, indentationLevel));
           case "MultiFile" /* MultiFile */:
-            return this.renderMultiFields(rawValue, (item) => `"${item}"`);
+            return this.renderMultiFilesFields(rawValue, (item) => `"${item}"`);
+            ;
+          case "MultiMedia" /* MultiMedia */:
+            return this.renderMultiFilesFields(rawValue, (item) => `"${item}"`);
           case "Canvas" /* Canvas */:
-            return this.renderMultiFields(rawValue, (item) => item ? `"${item}"` : "");
+            return this.renderMultiFilesFields(rawValue, (item) => item ? `"${item}"` : "");
           case "CanvasGroup" /* CanvasGroup */:
             return this.renderMultiFields(rawValue, (item) => this.renderValueString(item, type, indentationLevel));
           case "CanvasGroupLink" /* CanvasGroupLink */:
-            return this.renderMultiFields(rawValue, (item) => item ? `"${item}"` : "");
+            return this.renderMultiFilesFields(rawValue, (item) => item ? `"${item}"` : "");
           case void 0:
             if ([...ReservedMultiAttributes, this.plugin.settings.fileClassAlias].includes(field.name)) {
               return this.renderMultiFields(rawValue, (item) => `${item}`);
@@ -1042,68 +1050,77 @@ ${"  ".repeat(indentationLevel + 1)}`;
         const newLine = new Line(this.plugin, this, "yaml", content, 1);
         newLine.renderLine(asList, asBlockquote);
       }
-    } else if (id.startsWith("new-field-")) {
+      return;
+    }
+    if (!upperFieldIndex) {
+      DEBUG && console.log("Not an item of objectlist");
+      const field = this.getField(id);
+      if (!field)
+        return;
+      if (frontmatterOnlyTypes.includes(field.type) && !this.frontmatter)
+        this.initFrontmatter();
       const frontmatterEnd = this.frontmatterEnd();
-      const position = frontmatterEnd && (lineNumber || this.lines.length) <= frontmatterEnd ? "yaml" : "inline";
-      const _ = position === "yaml" ? ":" : "::";
-      const fR = id.match(/new-field-(?<fieldName>.*)/);
-      if ((_b = fR == null ? void 0 : fR.groups) == null ? void 0 : _b.fieldName) {
-        const content = `${fR.groups.fieldName}${_} ${payload.value}`;
-        const newLine = new Line(this.plugin, this, position, content, lineNumber || this.lines.length);
-        newLine.renderLine(asList, asBlockquote);
-      }
-    } else {
-      if (upperFieldIndex) {
-        const i = parseInt(upperFieldIndex);
-        const parentFieldIndexedPath = upperPath.replace(/\[\w+\]$/, "");
-        const parentNode = this.getNodeForIndexedPath(parentFieldIndexedPath);
-        if (!parentNode) {
-          new import_obsidian.Notice("A parent field is missing, this field can't be added");
-          return;
-        }
-        const field = this.getField(id);
-        const lastItemLine = parentNode.line.objectListLines[i].last();
-        if (lastItemLine) {
-          if (/-(\s+)?$/.test(((_c = parentNode.line.objectListLines[i].last()) == null ? void 0 : _c.rawContent) || "") && field) {
-            const node = lastItemLine.nodes[0];
-            node.createFieldNodeContent(field, payload.value, "yaml");
-            node.line.renderLine(asList, asBlockquote);
-          } else {
-            const lastChildLine = lastItemLine.getLastChildLine();
-            this.createLine(payload.value, "yaml", lastChildLine ? lastChildLine.number + 1 : 1, field, asList, asBlockquote);
-          }
+      let insertLineNumber = (lineNumber ? Math.max(lineNumber, 0) : void 0) || frontmatterEnd || ((_b = this.lines.last()) == null ? void 0 : _b.number) || 0;
+      if (frontmatterOnlyTypes.includes(field.type))
+        insertLineNumber = frontmatterEnd;
+      const position = frontmatterEnd && insertLineNumber <= frontmatterEnd ? "yaml" : "inline";
+      if (field.type !== "ObjectList" /* ObjectList */) {
+        DEBUG && console.log("Not an ObjectList");
+        const parentField = this.existingFields.find((eF) => eF.indexedPath === upperPath);
+        if ((parentField == null ? void 0 : parentField.field.type) === "Object" /* Object */) {
+          DEBUG && console.log("child of an object");
+          const parentLine = (_c = this.getNodeForIndexedPath(upperPath)) == null ? void 0 : _c.line;
+          const lastChildLine = parentLine == null ? void 0 : parentLine.getLastChildLine();
+          this.createLine(payload.value, "yaml", lastChildLine ? lastChildLine.number + 1 : 1, field, asList, asBlockquote);
+        } else {
+          DEBUG && console.log("No parent field or parent not an object");
+          this.createLine(payload.value, position, insertLineNumber, field, asList, asBlockquote);
         }
       } else {
-        const field = this.getField(id);
-        if (!field)
-          return;
-        if (frontmatterOnlyTypes.includes(field.type) && !this.frontmatter)
-          this.initFrontmatter();
-        const frontmatterEnd = this.frontmatterEnd();
-        let insertLineNumber = (lineNumber ? Math.max(lineNumber, 0) : void 0) || frontmatterEnd || ((_d = this.lines.last()) == null ? void 0 : _d.number) || 0;
-        if (frontmatterOnlyTypes.includes(field.type))
-          insertLineNumber = frontmatterEnd;
-        const position = frontmatterEnd && insertLineNumber <= frontmatterEnd ? "yaml" : "inline";
-        if (field.type === "ObjectList" /* ObjectList */) {
-          const node = this.getNodeForIndexedPath(upperPath);
-          if (node) {
-            const newItemLine = new Line(this.plugin, node.line.note, position, "", node.line.number + 1);
-            const shift = /^(\s+)-(\s+)?(.*)/.test(node.rawContent) ? 1 : 0;
-            new LineNode(this.plugin, newItemLine, node.buildIndentedListItem("", shift));
-            newItemLine.renderLine(asList, asBlockquote);
-          } else {
-            const objectListHeaderLine = new Line(this.plugin, this, position, `${field.name}:`, insertLineNumber);
-            objectListHeaderLine.renderLine();
-          }
+        DEBUG && console.log("An ObjectList");
+        const upperNode = this.getNodeForIndexedPath(upperPath);
+        if (!upperNode) {
+          DEBUG && console.log("no upper node (shouldnt exist)");
+          const objectListHeaderLine = new Line(this.plugin, this, position, `${field.name}:`, insertLineNumber);
+          objectListHeaderLine.renderLine();
         } else {
-          const parentField = this.existingFields.find((eF) => eF.indexedPath === upperPath);
-          if ((parentField == null ? void 0 : parentField.field.type) === "Object" /* Object */) {
-            const parentLine = (_e = this.getNodeForIndexedPath(upperPath)) == null ? void 0 : _e.line;
-            const lastChildLine = parentLine == null ? void 0 : parentLine.getLastChildLine();
-            this.createLine(payload.value, "yaml", lastChildLine ? lastChildLine.number + 1 : 1, field, asList, asBlockquote);
+          if (((_d = upperNode.field) == null ? void 0 : _d.id) !== field.id) {
+            DEBUG && console.log("upper node indexed path !==  this indexed path we are adding the header and a first item");
+            const objectListHeaderLine = new Line(this.plugin, this, position, "", upperNode.line.number + 1);
+            const node = new LineNode(this.plugin, objectListHeaderLine, "");
+            node.createFieldNodeContent(field, "", "yaml");
+            node.line.renderLine();
           } else {
-            this.createLine(payload.value, position, insertLineNumber, field, asList, asBlockquote);
+            DEBUG && console.log("the object list doesn't have a first item, let's create it");
+            const newItemLine = new Line(this.plugin, upperNode.line.note, position, "", upperNode.line.number + 1);
+            const shift = /^(\s+)-(\s+)?(.*)/.test(upperNode.rawContent) ? 1 : 0;
+            new LineNode(this.plugin, newItemLine, upperNode.buildIndentedListItem("", shift));
+            newItemLine.renderLine();
           }
+        }
+      }
+    } else {
+      DEBUG && console.log("in an existing item of an object list");
+      const i = parseInt(upperFieldIndex);
+      const parentFieldIndexedPath = upperPath.replace(/\[\w+\]$/, "");
+      const parentNode = this.getNodeForIndexedPath(parentFieldIndexedPath);
+      if (!parentNode) {
+        new import_obsidian.Notice("A parent field is missing, this field can't be added");
+        return;
+      }
+      const field = this.getField(id);
+      const lastItemLine = parentNode.line.objectListLines[i].last();
+      if (lastItemLine) {
+        DEBUG && console.log("we have a last object for item");
+        if (/-(\s+)?$/.test(((_e = parentNode.line.objectListLines[i].last()) == null ? void 0 : _e.rawContent) || "") && field) {
+          DEBUG && console.log("replace the placeholder");
+          const node = lastItemLine.nodes[0];
+          node.createFieldNodeContent(field, payload.value, "yaml");
+          node.line.renderLine(asList, asBlockquote);
+        } else {
+          DEBUG && console.log("add the field at the end");
+          const lastChildLine = lastItemLine.getLastChildLine();
+          this.createLine(payload.value, "yaml", lastChildLine ? lastChildLine.number + 1 : 1, field, asList, asBlockquote);
         }
       }
     }
@@ -1118,12 +1135,12 @@ ${"  ".repeat(indentationLevel + 1)}`;
   }
   async createOrUpdateFields(fields, lineNumber, asList = false, asBlockquote = false) {
     fields.forEach((field) => {
-      const node = this.getNodeForIndexedPath(field.id);
+      const node = this.getNodeForIndexedPath(field.indexedPath);
       if (node && node.field) {
         node.createFieldNodeContent(node.field, field.payload.value, node.line.position, asList, asBlockquote);
         node.line.renderLine(asList, asBlockquote);
       } else {
-        this.insertField(field.id, field.payload, lineNumber, asList, asBlockquote);
+        this.insertField(field.indexedPath, field.payload, lineNumber, asList, asBlockquote);
       }
     });
     await this.plugin.app.vault.modify(this.file, this.renderNote());
@@ -1209,6 +1226,10 @@ function getFrontmatterPosition(plugin, file) {
 
 // src/commands/postValues.ts
 async function postValues(plugin, payload, fileOrFilePath, lineNumber, asList = false, asBlockquote = false) {
+  if (payload.some((_p) => !_p.indexedPath)) {
+    console.error("One payload's field is missing an indexed path");
+    return;
+  }
   const file = getFileFromFileOrPath(plugin, fileOrFilePath);
   const note = await Note.buildNote(plugin, file);
   await note.createOrUpdateFields(payload, lineNumber, asList, asBlockquote);
@@ -1221,8 +1242,8 @@ var cleanActions = (container, actionClass) => {
     actions.remove();
 };
 
-// src/modals/BaseModal.ts
-var import_obsidian32 = require("obsidian");
+// src/modals/baseFieldModals/BaseModal.ts
+var import_obsidian33 = require("obsidian");
 
 // src/fields/FieldManager.ts
 var import_obsidian7 = require("obsidian");
@@ -1240,8 +1261,8 @@ async function insertMissingFields(plugin, fileOrFilePath, lineNumber, asList = 
   const filteredClassFields = fileClassName ? ((_a = plugin.fieldIndex.fileClassesFields.get(fileClassName)) == null ? void 0 : _a.filter((field) => field.fileClassName === fileClassName)) || void 0 : void 0;
   const fieldsToInsert = [];
   if (!indexedPath) {
-    fields == null ? void 0 : fields.filter((field) => field.isRoot() && !note.existingFields.map((_f) => _f.field.id).includes(field.id)).filter((field) => filteredClassFields ? filteredClassFields.map((f2) => f2.id).includes(field.id) : true).forEach((field) => {
-      fieldsToInsert.push({ id: field.id, payload: { value: "" } });
+    fields == null ? void 0 : fields.filter((field) => field.isRoot() && !note.existingFields.map((_f) => _f.field.id).includes(field.id)).filter((field) => filteredClassFields ? filteredClassFields.map((f2) => f2.id).includes(field.id) : true).reverse().forEach((field) => {
+      fieldsToInsert.push({ indexedPath: field.id, payload: { value: "" } });
     });
   } else {
     const { id, index } = Field_default.getIdAndIndex(indexedPath == null ? void 0 : indexedPath.split("____").last());
@@ -1254,9 +1275,9 @@ async function insertMissingFields(plugin, fileOrFilePath, lineNumber, asList = 
     const missingFields = (note == null ? void 0 : note.fields.filter((_f) => {
       var _a2;
       return ((_a2 = _f.getFirstAncestor()) == null ? void 0 : _a2.id) === id;
-    }).filter((_f) => !existingFields.map((eF) => eF.field.id).includes(_f.id))) || [];
+    }).filter((_f) => !existingFields.map((eF) => eF.field.id).includes(_f.id)).reverse()) || [];
     missingFields.forEach((field) => {
-      fieldsToInsert.push({ id: `${indexedPath}____${field.id}`, payload: { value: "" } });
+      fieldsToInsert.push({ indexedPath: `${indexedPath}____${field.id}`, payload: { value: "" } });
     });
   }
   if (fieldsToInsert.length)
@@ -1419,7 +1440,7 @@ var InsertFieldSuggestModal = class extends import_obsidian4.FuzzySuggestModal {
       const field = (_a = this.plugin.fieldIndex.filesFields.get(this.file.path)) == null ? void 0 : _a.find((field2) => field2.name === item.actionLabel);
       if (field) {
         if (objectTypes2.includes(field.type)) {
-          await postValues(this.plugin, [{ id: field.id, payload: { value: "" } }], this.file);
+          await postValues(this.plugin, [{ indexedPath: field.id, payload: { value: "" } }], this.file);
           const eF = await Note.getExistingFieldForIndexedPath(this.plugin, this.file, field.id);
           const fieldManager = new FieldManager[field.type](this.plugin, field);
           fieldManager.createAndOpenFieldModal(this.file, field.name, eF, field.id, void 0, void 0, void 0, void 0);
@@ -1507,6 +1528,76 @@ var FieldSetting = class extends import_obsidian5.Setting {
 
 // src/settings/BaseSettingModal.ts
 var import_obsidian6 = require("obsidian");
+var TypeSelector = class extends import_obsidian6.SuggestModal {
+  constructor(fieldSetting, labelContainer) {
+    super(fieldSetting.plugin.app);
+    this.fieldSetting = fieldSetting;
+    this.labelContainer = labelContainer;
+    this.containerEl.addClass("metadata-menu");
+  }
+  getSuggestions(query) {
+    const fieldTypes = [];
+    Object.keys(FieldTypeTooltip).forEach((key) => {
+      if (!rootOnlyTypes.includes(key)) {
+        fieldTypes.push(key);
+      } else {
+        if (this.fieldSetting.field.isRoot())
+          fieldTypes.push(key);
+      }
+    });
+    return fieldTypes.filter((k) => k.toLowerCase().includes(query.toLowerCase()));
+  }
+  renderSuggestion(value, el) {
+    el.addClass("value-container");
+    const iconContainer = el.createDiv({ cls: "icon-container" });
+    (0, import_obsidian6.setIcon)(iconContainer, FieldIcon[value]);
+    const chipContainer = el.createDiv({ cls: "field-type-container" });
+    chipContainer.createDiv({ text: value, cls: `chip ${FieldTypeTagClass[value]}` });
+    chipContainer.createDiv({ cls: "spacer" });
+    el.createDiv({ cls: "field-type-tooltip", text: FieldTypeTooltip[value] });
+  }
+  onChooseSuggestion(item, evt) {
+    this.fieldSetting.setType(item, this.labelContainer);
+  }
+};
+var ParentSelector = class extends import_obsidian6.SuggestModal {
+  constructor(fieldSetting, compatibleParents) {
+    super(fieldSetting.plugin.app);
+    this.fieldSetting = fieldSetting;
+    this.compatibleParents = compatibleParents;
+  }
+  getSuggestions(query) {
+    const parents = this.compatibleParents.filter((p) => p.name.toLowerCase().includes(query.toLowerCase()));
+    return parents;
+  }
+  renderSuggestion(parent, el) {
+    const path = ParentSelector.getParentPath(parent);
+    const display = ParentSelector.getHierarchyDisplay(
+      this.fieldSetting.plugin,
+      path,
+      this.fieldSetting.getFileClassName()
+    );
+    el.setText(display);
+  }
+  onChooseSuggestion(parent, evt) {
+    this.fieldSetting.setParent(parent);
+  }
+  static getHierarchyDisplay(plugin, path, fileClassName) {
+    const display = path.split("____").map((id) => {
+      var _a;
+      return ((_a = Field_default.getFieldFromId(
+        plugin,
+        id,
+        fileClassName
+      )) == null ? void 0 : _a.name) || "";
+    }).join(" > ");
+    return display;
+  }
+  static getParentPath(item) {
+    const path = item.path ? item.path + "____" + item.id : item.id;
+    return path;
+  }
+};
 var BaseSettingModal = class extends import_obsidian6.Modal {
   constructor(plugin) {
     super(plugin.app);
@@ -1572,39 +1663,38 @@ var BaseSettingModal = class extends import_obsidian6.Modal {
     });
     this.namePromptComponent = input;
   }
-  buildParentSelectContainer() {
+  setParent(parent) {
+    if (parent === void 0) {
+      this.path = "";
+      this.field.path = "";
+    } else {
+      const path = ParentSelector.getParentPath(parent);
+      this.path = path;
+      this.field.path = path;
+    }
+    this.buildParentSelectContainer(parent);
+    this.buildTypeSelectContainer();
+  }
+  buildParentSelectContainer(_parent) {
+    const parent = _parent || this.field.getFirstAncestor();
     this.parentSelectContainer.replaceChildren();
     const compatibleParents = this.field.getCompatibleParents();
-    const parentSelectorContainerLabel = this.parentSelectContainer.createDiv({ cls: "label" });
-    parentSelectorContainerLabel.setText(`Parent:`);
+    const parentName = parent ? ParentSelector.getHierarchyDisplay(
+      this.plugin,
+      ParentSelector.getParentPath(parent),
+      this.getFileClassName()
+    ) : "-- No parent field selected --";
+    this.parentSelectContainer.createDiv({ cls: "label" }).setText(`Parent:`);
     this.parentSelectContainer.createDiv({ cls: "spacer" });
-    const parentSelect = new import_obsidian6.DropdownComponent(this.parentSelectContainer);
-    parentSelect.addOption("none", "--None--");
-    compatibleParents.forEach((parent) => {
-      const path = parent.path ? parent.path + "____" + parent.id : parent.id;
-      const display = path.split("____").map((id) => {
-        var _a;
-        return ((_a = Field_default.getFieldFromId(this.plugin, id, this.getFileClassName())) == null ? void 0 : _a.name) || "";
-      }).join(" > ");
-      parentSelect.addOption(path, display);
+    this.parentSelectContainer.createDiv({ cls: parent ? "parent-label" : "parent-label empty" }).setText(parentName);
+    new import_obsidian6.ButtonComponent(this.parentSelectContainer).setButtonText(`${!this.field.path ? "Select a parent field" : "Change parent field"}`).onClick(() => {
+      new ParentSelector(this, compatibleParents).open();
     });
-    if (this.field.path) {
-      parentSelect.setValue(this.field.path || "none");
-    } else {
-      parentSelect.setValue("none");
-    }
-    parentSelect.onChange((path) => {
-      if (path === "none") {
-        this.path = "";
-        this.field.path = "";
-      } else {
-        this.path = path;
-        this.field.path = path;
-      }
-      this.buildTypeSelectContainer();
-    });
+    new import_obsidian6.ButtonComponent(this.parentSelectContainer).setIcon("trash").onClick(() => this.setParent(void 0));
     if (!compatibleParents.length)
       this.parentSelectContainer.hide();
+    else
+      this.parentSelectContainer.show();
   }
   createFrontmatterListDisplayContainer() {
     this.frontmatterListDisplayContainer = this.contentEl.createDiv({ cls: "field-container" });
@@ -1711,6 +1801,32 @@ are only available
 in the frontmatter section`);
     }
   }
+  setType(fieldType, fieldTypeLabelContainer) {
+    fieldTypeLabelContainer.setText(fieldType);
+    fieldTypeLabelContainer.className = `chip ${FieldTypeTagClass[fieldType]}`;
+    this.field = new Field_default(this.plugin);
+    this.setFileClassName();
+    Field_default.copyProperty(this.field, this.initialField);
+    this.field.name = this.namePromptComponent.getValue();
+    this.field.type = FieldTypeLabelMapping[fieldType];
+    this.field.path = this.path;
+    if (this.field.type !== this.initialField.type && ![this.field.type, this.initialField.type].every(
+      (fieldType2) => ["Multi" /* Multi */, "Select" /* Select */, "Cycle" /* Cycle */].includes(fieldType2)
+    )) {
+      this.field.options = {};
+    }
+    this.buildParentSelectContainer();
+    if (multiTypes.includes(this.field.type)) {
+      this.frontmatterListDisplayContainer.show();
+    } else {
+      this.frontmatterListDisplayContainer.hide();
+    }
+    while (this.fieldOptionsContainer.firstChild) {
+      this.fieldOptionsContainer.removeChild(this.fieldOptionsContainer.firstChild);
+    }
+    this.fieldManager = new FieldManager[this.field.type](this.plugin, this.field);
+    this.fieldManager.createSettingContainer(this.fieldOptionsContainer, this.plugin, this.location);
+  }
   buildTypeSelectContainer() {
     this.typeSelectContainer.replaceChildren();
     const typeSelectorContainerLabel = this.typeSelectContainer.createDiv({ cls: "label" });
@@ -1722,54 +1838,22 @@ in the frontmatter section`);
     (0, import_obsidian6.setIcon)(info.buttonEl, !(this.field.id && !this.isNew()) ? "shield-alert" : "lock");
     info.setTooltip(`The field type 
 can't be modified once saved`);
-    const typeSelect = new import_obsidian6.DropdownComponent(this.typeSelectContainer);
+    const typeNameContainer = this.typeSelectContainer.createDiv({ cls: "field-type-label" }).createDiv({ cls: `chip ${FieldTypeTagClass[this.field.type]}` });
+    if (!this.field.id || this.isNew()) {
+      new import_obsidian6.ButtonComponent(this.typeSelectContainer).setButtonText("Choose a type").onClick(() => {
+        new TypeSelector(this, typeNameContainer).open();
+      });
+    }
     this.frontmatterOnlyTypeInfoContainer = this.typeSelectContainer.createDiv({ cls: "tooltip-btn" });
     this.setTypeInfo();
-    Object.keys(FieldTypeTooltip).forEach((key) => {
-      if (!rootOnlyTypes.includes(key)) {
-        typeSelect.addOption(key, FieldTypeTooltip[key]);
-      } else {
-        if (this.field.isRoot())
-          typeSelect.addOption(key, FieldTypeTooltip[key]);
-      }
-    });
     if (this.field.type) {
-      typeSelect.setValue(this.field.type);
+      typeNameContainer.setText(this.field.type);
       if (multiTypes.includes(this.field.type)) {
         this.frontmatterListDisplayContainer.show();
       } else {
         this.frontmatterListDisplayContainer.hide();
       }
     }
-    if (this.field.id && !this.isNew()) {
-      typeSelect.setDisabled(true);
-      return;
-    }
-    typeSelect.onChange((typeLabel) => {
-      this.field = new Field_default(this.plugin);
-      this.setFileClassName();
-      Field_default.copyProperty(this.field, this.initialField);
-      this.field.name = this.namePromptComponent.getValue();
-      this.field.type = FieldTypeLabelMapping[typeLabel];
-      this.field.path = this.path;
-      if (this.field.type !== this.initialField.type && ![this.field.type, this.initialField.type].every(
-        (fieldType) => ["Multi" /* Multi */, "Select" /* Select */, "Cycle" /* Cycle */].includes(fieldType)
-      )) {
-        this.field.options = {};
-      }
-      this.buildParentSelectContainer();
-      this.setTypeInfo();
-      if (multiTypes.includes(this.field.type)) {
-        this.frontmatterListDisplayContainer.show();
-      } else {
-        this.frontmatterListDisplayContainer.hide();
-      }
-      while (this.fieldOptionsContainer.firstChild) {
-        this.fieldOptionsContainer.removeChild(this.fieldOptionsContainer.firstChild);
-      }
-      this.fieldManager = new FieldManager[this.field.type](this.plugin, this.field);
-      this.fieldManager.createSettingContainer(this.fieldOptionsContainer, this.plugin, this.location);
-    });
   }
   validateFields() {
     return this.fieldManager.validateName(
@@ -2048,7 +2132,7 @@ var FieldManager2 = class {
   static async replaceValues(plugin, path, id, value) {
     const file = plugin.app.vault.getAbstractFileByPath(path);
     if (file instanceof import_obsidian7.TFile && file.extension == "md") {
-      await postValues(plugin, [{ id, payload: { value } }], file);
+      await postValues(plugin, [{ indexedPath: id, payload: { value } }], file);
     }
   }
   static isSuggest(location) {
@@ -2120,7 +2204,7 @@ var FieldManager2 = class {
 };
 
 // src/fields/fieldManagers/ObjectField.ts
-var import_obsidian30 = require("obsidian");
+var import_obsidian31 = require("obsidian");
 
 // src/options/FieldCommandSuggestModal.ts
 var import_obsidian8 = require("obsidian");
@@ -2153,7 +2237,7 @@ var FieldCommandSuggestModal = class extends import_obsidian8.FuzzySuggestModal 
 };
 
 // src/options/OptionsList.ts
-var import_obsidian29 = require("obsidian");
+var import_obsidian30 = require("obsidian");
 
 // src/fileClass/fileClassAttribute.ts
 var FileClassAttribute = class {
@@ -2202,6 +2286,11 @@ var capitalize = (s) => {
   return s && s[0].toUpperCase() + s.slice(1);
 };
 
+// src/utils/array.ts
+var compareArrays = (a, b) => {
+  return a.length === b.length && a.every((element, index) => element === b[index]);
+};
+
 // src/fileClass/fileClass.ts
 var options = {
   "limit": { name: "limit", toValue: (value) => value },
@@ -2213,10 +2302,11 @@ var options = {
   "excludes": { name: "excludes", toValue: (values) => values.length ? values.map((attr) => attr.name) : null },
   "parent": { name: "extends", toValue: (value) => (value == null ? void 0 : value.name) || null },
   "savedViews": { name: "savedViews", toValue: (value) => value },
-  "favoriteView": { name: "favoriteView", toValue: (value) => value || null }
+  "favoriteView": { name: "favoriteView", toValue: (value) => value || null },
+  "fieldsOrder": { name: "fieldsOrder", toValue: (value) => value || [] }
 };
 var FileClassOptions = class {
-  constructor(limit, icon, parent, excludes, tagNames, mapWithTag = false, filesPaths, bookmarksGroups, savedViews, favoriteView) {
+  constructor(limit, icon, parent, excludes, tagNames, mapWithTag = false, filesPaths, bookmarksGroups, savedViews, favoriteView, fieldsOrder) {
     this.limit = limit;
     this.icon = icon;
     this.parent = parent;
@@ -2227,6 +2317,7 @@ var FileClassOptions = class {
     this.bookmarksGroups = bookmarksGroups;
     this.savedViews = savedViews;
     this.favoriteView = favoriteView;
+    this.fieldsOrder = fieldsOrder;
   }
 };
 var AddFileClassToFileModal = class extends import_obsidian9.SuggestModal {
@@ -2254,7 +2345,7 @@ var AddFileClassToFileModal = class extends import_obsidian9.SuggestModal {
     const fileClassAlias = this.plugin.settings.fileClassAlias;
     const currentFileClasses = this.plugin.fieldIndex.filesFileClasses.get(this.file.path);
     const newValue = currentFileClasses ? [...currentFileClasses.map((fc) => fc.name), value].join(", ") : value;
-    await postValues(this.plugin, [{ id: `fileclass-field-${fileClassAlias}`, payload: { value: newValue } }], this.file, -1);
+    await postValues(this.plugin, [{ indexedPath: `fileclass-field-${fileClassAlias}`, payload: { value: newValue } }], this.file, -1);
     if (this.plugin.settings.autoInsertFieldsAtFileClassInsertion) {
       insertMissingFields(this.plugin, this.file, -1);
     }
@@ -2278,7 +2369,8 @@ var FileClass = class {
       bookmarksGroups: _bookmarksGroups,
       icon: _icon,
       savedViews: _savedViews,
-      favoriteView: _favoriteView
+      favoriteView: _favoriteView,
+      fieldsOrder: _fieldsOrder
     } = ((_a = this.plugin.app.metadataCache.getFileCache(this.getClassFile())) == null ? void 0 : _a.frontmatter) || {};
     const index = this.plugin.fieldIndex;
     const parent = index.fileClassesName.get(_parent);
@@ -2299,7 +2391,8 @@ var FileClass = class {
     const icon = typeof _icon === "string" ? _icon : this.plugin.settings.fileClassIcon;
     const savedViews = _savedViews || [];
     const favoriteView = typeof _favoriteView === "string" && _favoriteView !== "" ? _favoriteView : null;
-    return new FileClassOptions(limit, icon, parent, excludes, tagNames, mapWithTag, filesPaths, bookmarksGroups, savedViews, favoriteView);
+    const fieldsOrder = _fieldsOrder || [];
+    return new FileClassOptions(limit, icon, parent, excludes, tagNames, mapWithTag, filesPaths, bookmarksGroups, savedViews, favoriteView, fieldsOrder);
   }
   isMappedWithTag() {
     var _a, _b;
@@ -2348,12 +2441,89 @@ var FileClass = class {
     const missingFields = this && file ? !((_a = this.plugin.fieldIndex.fileClassesFields.get(this.name)) == null ? void 0 : _a.map((f) => f.id).every((id) => currentFieldsIds.includes(id))) : false;
     return missingFields;
   }
+  moveField(thisId, direction) {
+    var _a;
+    const thisPath = (_a = FileClass.getFileClassAttributes(this.plugin, this).find((attr) => attr.id === thisId)) == null ? void 0 : _a.path;
+    const sortedPaths = [];
+    for (const attr of FileClass.buildSortedAttributes(this.plugin, this)) {
+      sortedPaths.push({ id: attr.id, path: attr.getField().path });
+    }
+    const compareShortId = (a) => a.id === thisId && a.path === thisPath;
+    const thisIndex = sortedPaths.findIndex(compareShortId);
+    let newIndex = thisIndex;
+    const testPath = (j) => {
+      if (sortedPaths[j].path === thisPath) {
+        newIndex = j;
+        return true;
+      }
+      return false;
+    };
+    if (direction === "upwards" && thisIndex > 0) {
+      for (let j = thisIndex - 1; j >= 0; j--)
+        if (testPath(j))
+          break;
+    } else if (direction === "downwards" && thisIndex < sortedPaths.length) {
+      for (let j = thisIndex + 1; j < sortedPaths.length; j++)
+        if (testPath(j))
+          break;
+    }
+    [sortedPaths[thisIndex], sortedPaths[newIndex]] = [sortedPaths[newIndex], sortedPaths[thisIndex]];
+    this.options.fieldsOrder = sortedPaths.map((p) => p.id);
+    this.updateOptions(this.options);
+  }
   getViewChildren(name) {
     var _a, _b;
     if (!name)
       return [];
     const childrenNames = ((_b = (_a = this.getFileClassOptions().savedViews) == null ? void 0 : _a.find((_view) => _view.name === name)) == null ? void 0 : _b.children) || [];
     return this.getChildren().filter((c) => childrenNames.includes(c.name));
+  }
+  static getSortedRootFields(plugin, fileClass) {
+    var _a;
+    const fieldsOrder = fileClass.fieldsOrder || FileClass.buildSortedAttributes(plugin, fileClass).map((attr) => attr.id);
+    const iFinder = (f) => {
+      return (id) => f.id === id;
+    };
+    const fields = ((_a = plugin.fieldIndex.fileClassesFields.get(fileClass.name)) == null ? void 0 : _a.filter((_f) => _f.isRoot())) || [];
+    const sortedFields = fields.sort((f1, f2) => {
+      return fieldsOrder.findIndex(iFinder(f1)) < fieldsOrder.findIndex(iFinder(f2)) ? -1 : 1;
+    });
+    return sortedFields;
+  }
+  static buildSortedAttributes(plugin, fileClass) {
+    const attributes = FileClass.getFileClassAttributes(plugin, fileClass);
+    const options2 = fileClass.getFileClassOptions();
+    const presetOrder = options2.fieldsOrder || [];
+    attributes.sort(
+      (a, b) => presetOrder.indexOf(a.id) > presetOrder.indexOf(b.id) ? 1 : -1
+    );
+    const sortedAttributes = attributes.filter((attr) => !attr.path);
+    let hasError = false;
+    while (sortedAttributes.length < attributes.length) {
+      const _initial = [...sortedAttributes];
+      sortedAttributes.forEach((sAttr, parentIndex) => {
+        var _a;
+        for (const attr of attributes) {
+          if (((_a = attr.path) == null ? void 0 : _a.split("____").last()) === sAttr.id && !sortedAttributes.includes(attr)) {
+            const parentLevel = sAttr.getLevel();
+            const parentSibling = sortedAttributes.slice(parentIndex + 1).find((oAttr) => oAttr.getLevel() <= parentLevel);
+            const parentSiblingIndex = parentSibling ? sortedAttributes.indexOf(parentSibling) : sortedAttributes.length;
+            sortedAttributes.splice(parentSiblingIndex, 0, attr);
+            break;
+          }
+        }
+      });
+      if (_initial.length === sortedAttributes.length) {
+        console.error("Impossible to restore field hierarchy, check you fileclass configuration");
+        new import_obsidian9.Notice("Impossible to restore field hierarchy, check you fileclass configuration");
+        hasError = true;
+        return FileClass.getFileClassAttributes(plugin, fileClass);
+      }
+    }
+    options2.fieldsOrder = sortedAttributes.map((sAttr) => sAttr.id);
+    if (!compareArrays(presetOrder, options2.fieldsOrder))
+      fileClass.updateOptions(options2);
+    return sortedAttributes;
   }
   static getFileClassAttributes(plugin, fileClass, excludes) {
     var _a, _b;
@@ -2703,13 +2873,13 @@ function legacyGenuineKeys(dvFile) {
 }
 
 // src/options/FileClassOptionsList.ts
-var import_obsidian28 = require("obsidian");
+var import_obsidian29 = require("obsidian");
 
 // src/components/FileClassViewManager.ts
-var import_obsidian27 = require("obsidian");
+var import_obsidian28 = require("obsidian");
 
 // src/fileClass/views/fileClassView.ts
-var import_obsidian25 = require("obsidian");
+var import_obsidian26 = require("obsidian");
 
 // src/fileClass/views/fileClassFieldsView.ts
 var import_obsidian11 = require("obsidian");
@@ -2800,6 +2970,8 @@ var FileClassFieldSetting = class {
     const fieldButtonsContainer = this.container.createDiv({ cls: "buttons-container" });
     this.addEditButton(fieldButtonsContainer);
     this.addDeleteButton(fieldButtonsContainer);
+    this.addMoveBtn(fieldButtonsContainer, "asc", this.fileClassAttribute.id);
+    this.addMoveBtn(fieldButtonsContainer, "desc", this.fileClassAttribute.id);
     const fieldOptionsContainer = this.container.createDiv({ cls: "options-container" });
     fieldOptionsContainer.createEl("span", { cls: "description", text: `${fCA.getOptionsString(this.plugin)}` });
   }
@@ -2825,6 +2997,15 @@ var FileClassFieldSetting = class {
       removeFileClassAttributeWithId(this.plugin, this.fileClass, this.fileClassAttribute.id);
     });
   }
+  addMoveBtn(container, dir, id) {
+    const btn = new import_obsidian11.ButtonComponent(container);
+    btn.setIcon(dir === "asc" ? "chevron-up" : "chevron-down");
+    btn.setTooltip(dir === "asc" ? "Move up" : "Move down");
+    btn.setClass("cell");
+    btn.onClick(() => {
+      this.fileClass.moveField(id, dir === "asc" ? "upwards" : "downwards");
+    });
+  }
 };
 var FileClassFieldsView = class {
   constructor(plugin, viewContainer, fileClass) {
@@ -2847,43 +3028,18 @@ var FileClassFieldsView = class {
   buildSettings() {
     this.container.replaceChildren();
     const fieldsContainer = this.container.createDiv({ cls: "fields-container" });
-    const attributes = FileClass.getFileClassAttributes(this.plugin, this.fileClass);
-    const sortedAttributes = attributes.filter((attr) => !attr.path);
-    let hasError = false;
-    while (sortedAttributes.length < attributes.length) {
-      const _initial = [...sortedAttributes];
-      sortedAttributes.forEach((sAttr, parentIndex) => {
-        var _a;
-        for (const attr of attributes) {
-          if (((_a = attr.path) == null ? void 0 : _a.split("____").last()) === sAttr.id && !sortedAttributes.includes(attr)) {
-            const parentLevel = sAttr.getLevel();
-            const parentSibling = sortedAttributes.slice(parentIndex + 1).find((oAttr) => oAttr.getLevel() <= parentLevel);
-            const parentSiblingIndex = parentSibling ? sortedAttributes.indexOf(parentSibling) : sortedAttributes.length;
-            sortedAttributes.splice(parentSiblingIndex, 0, attr);
-            break;
-          }
-        }
-      });
-      if (_initial.length === sortedAttributes.length) {
-        console.error("Impossible to restore field hierarchy, check you fileclass configuration");
-        hasError = true;
-        break;
-      }
-    }
-    if (hasError) {
-      attributes.forEach((attribute) => {
-        new FileClassFieldSetting(fieldsContainer, this.fileClass, attribute, this.plugin);
-      });
-    } else {
-      sortedAttributes.forEach((attribute) => {
-        new FileClassFieldSetting(fieldsContainer, this.fileClass, attribute, this.plugin);
-      });
-    }
+    const sortedAttributes = FileClass.buildSortedAttributes(this.plugin, this.fileClass);
+    sortedAttributes.forEach((attribute) => {
+      new FileClassFieldSetting(fieldsContainer, this.fileClass, attribute, this.plugin);
+    });
     this.builAddBtn();
   }
 };
 
 // src/fileClass/views/fileClassSettingsView.ts
+var import_obsidian13 = require("obsidian");
+
+// src/fileClass/views/settingsViewComponents/suggestModals.ts
 var import_obsidian12 = require("obsidian");
 var ParentSuggestModal = class extends import_obsidian12.SuggestModal {
   constructor(view) {
@@ -2966,9 +3122,8 @@ var PathSuggestModal = class extends import_obsidian12.SuggestModal {
   getSuggestions(query) {
     const abstractFiles = this.plugin.app.vault.getAllLoadedFiles();
     const folders = [];
-    const lowerCaseInputStr = query.toLowerCase();
     abstractFiles.forEach((folder) => {
-      if (folder instanceof import_obsidian12.TFolder && folder.path.toLowerCase().contains(lowerCaseInputStr)) {
+      if (folder instanceof import_obsidian12.TFolder && folder.path.toLowerCase().contains(query.toLowerCase())) {
         folders.push(folder);
       }
     });
@@ -3019,6 +3174,8 @@ var BookmarksGroupSuggestModal = class extends import_obsidian12.SuggestModal {
     el.setText(value);
   }
 };
+
+// src/fileClass/views/fileClassSettingsView.ts
 var FileClassSetting = class {
   constructor(container, label, toolTipText, buildOptionAndAction) {
     this.container = container;
@@ -3030,7 +3187,7 @@ var FileClassSetting = class {
   buildSetting() {
     this.container.createDiv({ text: this.label, cls: "label" });
     const toolTipBtnContainer = this.container.createDiv({ cls: "tooltip-btn" });
-    const tooltipBtn = new import_obsidian12.ButtonComponent(toolTipBtnContainer).setIcon("help-circle").setClass("tooltip-button");
+    const tooltipBtn = new import_obsidian13.ButtonComponent(toolTipBtnContainer).setIcon("help-circle").setClass("tooltip-button");
     const action = this.container.createDiv({ cls: "action" });
     this.buildOptionAndAction(action);
     const tooltip = this.container.createDiv({ cls: "tooltip-text" });
@@ -3107,14 +3264,14 @@ var FileClassSettingsView = class {
     const footer = this.container.createDiv({ cls: "footer" });
     const btnContainer = footer.createDiv({ cls: "cell" });
     this.saveBtn = btnContainer.createEl("button");
-    (0, import_obsidian12.setIcon)(this.saveBtn, "save");
+    (0, import_obsidian13.setIcon)(this.saveBtn, "save");
     this.saveBtn.onclick = async () => {
       await this.fileClass.updateOptions(this.fileClassOptions);
       this.saveBtn.removeClass("active");
     };
   }
   buildLimitComponent(action) {
-    const input = new import_obsidian12.TextComponent(action);
+    const input = new import_obsidian13.TextComponent(action);
     input.setValue(`${this.fileClassOptions.limit}`);
     input.onChange((value) => {
       this.saveBtn.addClass("active");
@@ -3122,7 +3279,7 @@ var FileClassSettingsView = class {
     });
   }
   buildMapWithTagComponent(action) {
-    const toggler = new import_obsidian12.ToggleComponent(action);
+    const toggler = new import_obsidian13.ToggleComponent(action);
     toggler.setValue(this.fileClassOptions.mapWithTag);
     toggler.onChange((value) => {
       this.saveBtn.addClass("active");
@@ -3131,27 +3288,27 @@ var FileClassSettingsView = class {
   }
   buildIconComponent(action) {
     const iconManagerContainer = action.createDiv({ cls: "icon-manager" });
-    const input = new import_obsidian12.TextComponent(iconManagerContainer);
+    const input = new import_obsidian13.TextComponent(iconManagerContainer);
     const iconContainer = iconManagerContainer.createDiv({});
     input.setValue(this.fileClassOptions.icon);
-    (0, import_obsidian12.setIcon)(iconContainer, this.fileClassOptions.icon);
+    (0, import_obsidian13.setIcon)(iconContainer, this.fileClassOptions.icon);
     input.onChange((value) => {
       this.saveBtn.addClass("active");
       this.fileClassOptions.icon = value;
-      (0, import_obsidian12.setIcon)(iconContainer, this.fileClassOptions.icon);
+      (0, import_obsidian13.setIcon)(iconContainer, this.fileClassOptions.icon);
     });
   }
   buildBindingComponent(action, boundItemsNames, suggestModal) {
     const itemsContainer = action.createDiv({ cls: "items" });
     boundItemsNames == null ? void 0 : boundItemsNames.forEach((item) => {
       const itemContainer = itemsContainer.createDiv({ cls: "item chip", text: item });
-      new import_obsidian12.ButtonComponent(itemContainer).setIcon("x-circle").setClass("item-remove").onClick(async () => {
+      new import_obsidian13.ButtonComponent(itemContainer).setIcon("x-circle").setClass("item-remove").onClick(async () => {
         boundItemsNames == null ? void 0 : boundItemsNames.remove(item);
         await this.fileClass.updateOptions(this.fileClassOptions);
       });
     });
     const addBtn = itemsContainer.createEl("button", { cls: "item add" });
-    (0, import_obsidian12.setIcon)(addBtn, "plus-circle");
+    (0, import_obsidian13.setIcon)(addBtn, "plus-circle");
     addBtn.onclick = () => {
       new suggestModal(this).open();
     };
@@ -3161,7 +3318,7 @@ var FileClassSettingsView = class {
     const fieldsContainer = action.createDiv({ cls: "items" });
     (_a = this.fileClassOptions.excludes) == null ? void 0 : _a.forEach((field) => {
       const fieldontainer = fieldsContainer.createDiv({ cls: "item chip", text: field.name });
-      new import_obsidian12.ButtonComponent(fieldontainer).setIcon("x-circle").setClass("item-remove").onClick(async () => {
+      new import_obsidian13.ButtonComponent(fieldontainer).setIcon("x-circle").setClass("item-remove").onClick(async () => {
         var _a2;
         const excludedFields = (_a2 = this.fileClassOptions.excludes) == null ? void 0 : _a2.filter((attr) => attr.name !== field.name);
         this.fileClassOptions.excludes = excludedFields;
@@ -3169,7 +3326,7 @@ var FileClassSettingsView = class {
       });
     });
     const fieldAddBtn = fieldsContainer.createEl("button", { cls: "item" });
-    (0, import_obsidian12.setIcon)(fieldAddBtn, "plus-circle");
+    (0, import_obsidian13.setIcon)(fieldAddBtn, "plus-circle");
     fieldAddBtn.onclick = () => {
       new FieldSuggestModal(this).open();
     };
@@ -3182,7 +3339,7 @@ var FileClassSettingsView = class {
     if (parent) {
       const path = this.fileClass.getClassFile().path;
       const component = this.plugin;
-      import_obsidian12.MarkdownRenderer.renderMarkdown(`[[${parent.name}]]`, parentLinkContainer, path, component);
+      import_obsidian13.MarkdownRenderer.renderMarkdown(`[[${parent.name}]]`, parentLinkContainer, path, component);
       (_a = parentLinkContainer.querySelector("a.internal-link")) == null ? void 0 : _a.addEventListener("click", (e) => {
         var _a2;
         this.plugin.app.workspace.openLinkText(
@@ -3197,14 +3354,14 @@ var FileClassSettingsView = class {
     parentManagerContainer.createDiv({ cls: "item spacer" });
     if (parent) {
       const parentRemoveBtn = parentManagerContainer.createEl("button", { cls: "item" });
-      (0, import_obsidian12.setIcon)(parentRemoveBtn, "trash");
+      (0, import_obsidian13.setIcon)(parentRemoveBtn, "trash");
       parentRemoveBtn.onclick = async () => {
         delete this.fileClassOptions.parent;
         await this.fileClass.updateOptions(this.fileClassOptions);
       };
     }
     const parentChangeBtn = parentManagerContainer.createEl("button", { cls: "item right-align" });
-    (0, import_obsidian12.setIcon)(parentChangeBtn, "edit");
+    (0, import_obsidian13.setIcon)(parentChangeBtn, "edit");
     parentChangeBtn.onclick = () => {
       new ParentSuggestModal(this).open();
     };
@@ -3212,17 +3369,17 @@ var FileClassSettingsView = class {
 };
 
 // src/fileClass/views/fileClassTableView.ts
-var import_obsidian24 = require("obsidian");
+var import_obsidian25 = require("obsidian");
 
 // src/fileClass/views/tableViewComponents/FieldComponent.ts
-var import_obsidian20 = require("obsidian");
+var import_obsidian21 = require("obsidian");
 
 // src/fileClass/views/tableViewComponents/RowSorterComponent.ts
-var import_obsidian14 = require("obsidian");
+var import_obsidian15 = require("obsidian");
 
 // src/fileClass/views/tableViewComponents/OptionsPriorityModal.ts
-var import_obsidian13 = require("obsidian");
-var OptionsPriorityModal = class extends import_obsidian13.Modal {
+var import_obsidian14 = require("obsidian");
+var OptionsPriorityModal = class extends import_obsidian14.Modal {
   constructor(plugin, fileClassFile, field, parentFieldSet, rowSorterComponent) {
     var _a;
     super(plugin.app);
@@ -3288,7 +3445,7 @@ var OptionsPriorityModal = class extends import_obsidian13.Modal {
       array[index1] = array.splice(index2, 1, array[index1])[0];
     };
     const buildPrioBtn = (direction) => {
-      const btn = new import_obsidian13.ButtonComponent(optionContainer);
+      const btn = new import_obsidian14.ButtonComponent(optionContainer);
       btn.setIcon(btnIcons[direction]);
       btn.setClass("small");
       btn.setDisabled(
@@ -3322,7 +3479,7 @@ var OptionsPriorityModal = class extends import_obsidian13.Modal {
   buildConfirm(footerActionsContainer) {
     const infoContainer = footerActionsContainer.createDiv({ cls: "info" });
     infoContainer.setText("Alt+Enter to save");
-    this.confirmButton = new import_obsidian13.ButtonComponent(footerActionsContainer);
+    this.confirmButton = new import_obsidian14.ButtonComponent(footerActionsContainer);
     this.confirmButton.setIcon("checkmark");
     this.confirmButton.onClick(() => {
       this.updateCustomOrder(this.orderedOptions);
@@ -3332,11 +3489,11 @@ var OptionsPriorityModal = class extends import_obsidian13.Modal {
   buildFooterActions(footerActionsContainer) {
     footerActionsContainer.createDiv({ cls: "spacer" });
     this.buildConfirm(footerActionsContainer);
-    const cancelButton = new import_obsidian13.ButtonComponent(footerActionsContainer);
+    const cancelButton = new import_obsidian14.ButtonComponent(footerActionsContainer);
     cancelButton.setIcon("cross");
     cancelButton.onClick(() => this.close());
     cancelButton.setTooltip("Cancel");
-    const refreshButton = new import_obsidian13.ButtonComponent(footerActionsContainer);
+    const refreshButton = new import_obsidian14.ButtonComponent(footerActionsContainer);
     refreshButton.setIcon("refresh-ccw");
     refreshButton.setTooltip("Cancel changes");
     refreshButton.onClick(async () => {
@@ -3344,7 +3501,7 @@ var OptionsPriorityModal = class extends import_obsidian13.Modal {
       this.buildOrderedOptions();
       this.confirmButton.removeCta();
     });
-    const resetButton = new import_obsidian13.ButtonComponent(footerActionsContainer);
+    const resetButton = new import_obsidian14.ButtonComponent(footerActionsContainer);
     resetButton.setIcon("eraser");
     resetButton.setTooltip("Reset initial ordering");
     resetButton.onClick(async () => {
@@ -3368,7 +3525,7 @@ var RowSorterComponent = class {
     this.priority = priority;
     this.customOrder = customOrder;
     this.buildSorterBtn = (direction) => {
-      const btn = new import_obsidian14.ButtonComponent(this.fieldContainer);
+      const btn = new import_obsidian15.ButtonComponent(this.fieldContainer);
       btn.setIcon(btnIcons[direction]);
       btn.onClick(() => {
         this.toggleRowSorterButtonsState(direction);
@@ -3377,10 +3534,10 @@ var RowSorterComponent = class {
       });
       return btn;
     };
-    this.id = `${this.fileClass}____${this.name}`;
+    this.id = `${this.fileClass.name}____${this.name}`;
     this.ascBtn = this.buildSorterBtn("asc");
     this.descBtn = this.buildSorterBtn("desc");
-    this.customOrderBtn = new import_obsidian14.ButtonComponent(fieldContainer);
+    this.customOrderBtn = new import_obsidian15.ButtonComponent(fieldContainer);
     this.customOrderBtn.setIcon("list-ordered");
     this.customOrderBtn.onClick(() => {
       var _a;
@@ -3437,18 +3594,19 @@ var RowSorterComponent = class {
     });
   }
   getMaxRowSorterPriority() {
-    return Object.values(this.parentFieldset.rowSorters).reduce((intermediateMax, currentSorter) => Math.max(intermediateMax, currentSorter.priority || 0), 0);
+    const maxPrio = Object.values(this.parentFieldset.rowSorters).reduce((intermediateMax, currentSorter) => Math.max(intermediateMax, currentSorter.priority || 0), 0);
+    return maxPrio;
   }
 };
 
 // src/fileClass/views/tableViewComponents/FilterComponent.ts
-var import_obsidian19 = require("obsidian");
+var import_obsidian20 = require("obsidian");
 
 // src/fileClass/views/tableViewComponents/OptionsMultiSelectModal.ts
-var import_obsidian17 = require("obsidian");
+var import_obsidian18 = require("obsidian");
 
-// src/fields/fieldManagers/AbstractFileBasedField.ts
-var import_obsidian15 = require("obsidian");
+// src/fields/abstractFieldManagers/AbstractFileBasedField.ts
+var import_obsidian16 = require("obsidian");
 var convertDataviewArrayOfLinkToArrayOfPath = (arr) => {
   return arr.reduce((acc, cur) => {
     if (!cur || !cur.path)
@@ -3461,7 +3619,7 @@ var getFiles = (plugin, field, dvQueryString, currentFile) => {
     try {
       return new Function("dv", "current", `return ${dvQueryString}`)(api, currentFile ? api.page(currentFile.path) : void 0);
     } catch (error) {
-      new import_obsidian15.Notice(`Wrong query for field <${field.name}>
+      new import_obsidian16.Notice(`Wrong query for field <${field.name}>
 check your settings`, 3e3);
     }
   };
@@ -3511,18 +3669,18 @@ var AbstractFileBasedField = class extends FieldManager2 {
         id: `update_${name}`,
         actionLabel: `<span>Update <b>${name}</b></span>`,
         action,
-        icon: FieldIcon["File" /* File */]
+        icon: FieldIcon[this.type]
       });
     } else if (AbstractFileBasedField.isFieldOptions(location)) {
       location.addOption(FieldIcon["File" /* File */], action, `Update ${name}'s value`);
     }
     ;
   }
-  createFileContainer(container) {
+  createQueryContainer(container) {
     const dvQueryStringTopContainer = container.createDiv({ cls: "vstacked" });
     dvQueryStringTopContainer.createEl("span", { text: "Dataview Query (optional)", cls: "field-option" });
     const dvQueryStringContainer = dvQueryStringTopContainer.createDiv({ cls: "field-container" });
-    this.dvQueryString = new import_obsidian15.TextAreaComponent(dvQueryStringContainer);
+    this.dvQueryString = new import_obsidian16.TextAreaComponent(dvQueryStringContainer);
     this.dvQueryString.inputEl.cols = 50;
     this.dvQueryString.inputEl.rows = 4;
     this.dvQueryString.setValue(this.field.options.dvQueryString || "");
@@ -3531,14 +3689,16 @@ var AbstractFileBasedField = class extends FieldManager2 {
       this.field.options.dvQueryString = value;
       FieldSettingsModal.removeValidationError(this.dvQueryString);
     });
-    const customeRenderingTopContainer = container.createDiv({ cls: "vstacked" });
-    customeRenderingTopContainer.createEl("span", { text: "Alias" });
-    customeRenderingTopContainer.createEl("span", { text: "Personalise the rendering of your links' aliases with a function returning a string (<page> object is available)", cls: "sub-text" });
-    customeRenderingTopContainer.createEl("code", {
+  }
+  createCustomRenderingContainer(container) {
+    const customRenderingTopContainer = container.createDiv({ cls: "vstacked" });
+    customRenderingTopContainer.createEl("span", { text: "Alias" });
+    customRenderingTopContainer.createEl("span", { text: "Personalise the rendering of your links' aliases with a function returning a string (<page> object is available)", cls: "sub-text" });
+    customRenderingTopContainer.createEl("code", {
       text: `function(page) { return <function using "page">; }`
     });
-    const customeRenderingContainer = customeRenderingTopContainer.createDiv({ cls: "field-container" });
-    const customRendering = new import_obsidian15.TextAreaComponent(customeRenderingContainer);
+    const customeRenderingContainer = customRenderingTopContainer.createDiv({ cls: "field-container" });
+    const customRendering = new import_obsidian16.TextAreaComponent(customeRenderingContainer);
     customRendering.inputEl.cols = 50;
     customRendering.inputEl.rows = 4;
     customRendering.inputEl.addClass("full-width");
@@ -3548,6 +3708,8 @@ var AbstractFileBasedField = class extends FieldManager2 {
       this.field.options.customRendering = value;
       FieldSettingsModal.removeValidationError(customRendering);
     });
+  }
+  createCustomSortingContainer(container) {
     const customSortingTopContainer = container.createDiv({ cls: "vstacked" });
     customSortingTopContainer.createEl("span", { text: "Sorting order" });
     customSortingTopContainer.createEl("span", { text: "Personalise the sorting order of your links with a instruction taking 2 files (a, b) and returning -1, 0 or 1", cls: "sub-text" });
@@ -3555,7 +3717,7 @@ var AbstractFileBasedField = class extends FieldManager2 {
       text: `(a: TFile, b: TFile): number`
     });
     const customSortingContainer = customSortingTopContainer.createDiv({ cls: "field-container" });
-    const customSorting = new import_obsidian15.TextAreaComponent(customSortingContainer);
+    const customSorting = new import_obsidian16.TextAreaComponent(customSortingContainer);
     customSorting.inputEl.cols = 50;
     customSorting.inputEl.rows = 4;
     customSorting.inputEl.addClass("full-width");
@@ -3566,8 +3728,10 @@ var AbstractFileBasedField = class extends FieldManager2 {
       FieldSettingsModal.removeValidationError(customSorting);
     });
   }
-  createSettingContainer(parentContainer, plugin, location) {
-    this.createFileContainer(parentContainer);
+  createSettingContainer(container, plugin, location) {
+    this.createQueryContainer(container);
+    this.createCustomRenderingContainer(container);
+    this.createCustomSortingContainer(container);
   }
   getOptionsStr() {
     return this.field.options.dvQueryString || "";
@@ -3583,13 +3747,31 @@ var AbstractFileBasedField = class extends FieldManager2 {
   createDvField(dv, p, fieldContainer, attrs = {}) {
     var _a;
     attrs.cls = "value-container";
-    fieldContainer.appendChild(dv.el("span", p[this.field.name] || "", attrs));
+    const values = p[this.field.name];
+    const buildItem = (_value) => {
+      if ((_value == null ? void 0 : _value.path) && ["Media" /* Media */, "MultiMedia" /* MultiMedia */].includes(this.field.type)) {
+        const src = this.plugin.app.vault.adapter.getResourcePath(_value.path);
+        if (src) {
+          const image = fieldContainer.createEl("img");
+          image.src = src;
+          fieldContainer.appendChild(image);
+        } else {
+          fieldContainer.appendChild(dv.el("span", "?"));
+        }
+      } else {
+        fieldContainer.appendChild(dv.el("span", _value || "", attrs));
+      }
+    };
+    if (Array.isArray(values))
+      values.forEach((value) => buildItem(value));
+    else
+      buildItem(values);
     const searchBtn = fieldContainer.createEl("button");
-    (0, import_obsidian15.setIcon)(searchBtn, FieldIcon["File" /* File */]);
+    (0, import_obsidian16.setIcon)(searchBtn, FieldIcon["File" /* File */]);
     const spacer = fieldContainer.createEl("div", { cls: "spacer-1" });
     const file = this.plugin.app.vault.getAbstractFileByPath(p["file"]["path"]);
-    if (file instanceof import_obsidian15.TFile && file.extension == "md") {
-      searchBtn.onclick = async () => await this.buildAndOpenModal(file);
+    if (file instanceof import_obsidian16.TFile && file.extension == "md") {
+      searchBtn.onclick = async () => await this.buildAndOpenModal(file, this.field.id);
     } else {
       searchBtn.onclick = async () => {
       };
@@ -3610,8 +3792,8 @@ var AbstractFileBasedField = class extends FieldManager2 {
 };
 
 // src/modals/fields/SingleFileModal.ts
-var import_obsidian16 = require("obsidian");
-var FileFuzzySuggester = class extends import_obsidian16.FuzzySuggestModal {
+var import_obsidian17 = require("obsidian");
+var FileFuzzySuggester = class extends import_obsidian17.FuzzySuggestModal {
   constructor(plugin, file, field, eF, indexedPath, lineNumber = -1, asList = false, asBlockquote = false, previousModal) {
     var _a;
     super(plugin.app);
@@ -3628,7 +3810,7 @@ var FileFuzzySuggester = class extends import_obsidian16.FuzzySuggestModal {
     const link = getLink(initialValueObject, this.file);
     if (link) {
       const file2 = this.plugin.app.vault.getAbstractFileByPath(link.path);
-      if (file2 instanceof import_obsidian16.TFile)
+      if (file2 instanceof import_obsidian17.TFile)
         this.selectedFile = file2;
     }
     this.containerEl.addClass("metadata-menu");
@@ -3671,7 +3853,7 @@ var FileFuzzySuggester = class extends import_obsidian16.FuzzySuggestModal {
     if (((_b = this.selectedFile) == null ? void 0 : _b.path) === value.item.path) {
       el.addClass("value-checked");
       const iconContainer = el.createDiv({ cls: "icon-container" });
-      (0, import_obsidian16.setIcon)(iconContainer, "check-circle");
+      (0, import_obsidian17.setIcon)(iconContainer, "check-circle");
     }
     this.inputEl.focus();
   }
@@ -3683,7 +3865,7 @@ var FileFuzzySuggester = class extends import_obsidian16.FuzzySuggestModal {
       alias = new Function("page", `return ${this.field.options.customRendering}`)(dvApi.page(item.path));
     }
     const value = FileField.buildMarkDownLink(this.plugin, this.file, item.basename, void 0, alias);
-    await postValues(this.plugin, [{ id: this.indexedPath || this.field.id, payload: { value } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
+    await postValues(this.plugin, [{ indexedPath: this.indexedPath || this.field.id, payload: { value } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
     (_b = this.previousModal) == null ? void 0 : _b.open();
   }
 };
@@ -3732,7 +3914,7 @@ var displayIcon = {
   __notFound__: "x-circle",
   __existing__: "circle-dot"
 };
-var OptionsMultiSelectModal = class extends import_obsidian17.SuggestModal {
+var OptionsMultiSelectModal = class extends import_obsidian18.SuggestModal {
   constructor(plugin, fileClassFile, field, parentFieldSet) {
     super(plugin.app);
     this.plugin = plugin;
@@ -3826,11 +4008,11 @@ var OptionsMultiSelectModal = class extends import_obsidian17.SuggestModal {
   buildFooterActions(footerActionsContainer) {
     footerActionsContainer.createDiv({ cls: "spacer" });
     this.buildConfirm(footerActionsContainer);
-    const cancelButton = new import_obsidian17.ButtonComponent(footerActionsContainer);
+    const cancelButton = new import_obsidian18.ButtonComponent(footerActionsContainer);
     cancelButton.setIcon("cross");
     cancelButton.onClick(() => this.close());
     cancelButton.setTooltip("Cancel");
-    const clearButton = new import_obsidian17.ButtonComponent(footerActionsContainer);
+    const clearButton = new import_obsidian18.ButtonComponent(footerActionsContainer);
     clearButton.setIcon("filter-x");
     clearButton.setTooltip("Clear filtered value(s)");
     clearButton.onClick(async () => {
@@ -3845,7 +4027,7 @@ var OptionsMultiSelectModal = class extends import_obsidian17.SuggestModal {
   buildConfirm(footerActionsContainer) {
     const infoContainer = footerActionsContainer.createDiv({ cls: "info" });
     infoContainer.setText("Alt+Enter to save");
-    const confirmButton = new import_obsidian17.ButtonComponent(footerActionsContainer);
+    const confirmButton = new import_obsidian18.ButtonComponent(footerActionsContainer);
     confirmButton.setIcon("checkmark");
     confirmButton.onClick(async () => {
       await this.replaceValues();
@@ -3868,7 +4050,7 @@ var OptionsMultiSelectModal = class extends import_obsidian17.SuggestModal {
         s.addClass("value-checked");
         if (s.querySelectorAll(".icon-container").length == 0) {
           const iconContainer = s.createDiv({ cls: "icon-container" });
-          (0, import_obsidian17.setIcon)(iconContainer, "check-circle");
+          (0, import_obsidian18.setIcon)(iconContainer, "check-circle");
         }
       } else {
         s.removeClass("value-checked");
@@ -3880,7 +4062,7 @@ var OptionsMultiSelectModal = class extends import_obsidian17.SuggestModal {
     const labelContainer = el.createDiv({ cls: "label-with-icon-container" });
     const icon = labelContainer.createDiv({ cls: "icon" });
     if (Object.keys(fieldStates).includes(value)) {
-      (0, import_obsidian17.setIcon)(icon, displayIcon[value]);
+      (0, import_obsidian18.setIcon)(icon, displayIcon[value]);
     }
     const label = labelContainer.createDiv({ cls: "label" });
     let labelText = "";
@@ -3896,7 +4078,7 @@ var OptionsMultiSelectModal = class extends import_obsidian17.SuggestModal {
     if (this.selectedOptions.includes(value.toString())) {
       el.addClass("value-checked");
       const iconContainer = el.createDiv({ cls: "icon-container" });
-      (0, import_obsidian17.setIcon)(iconContainer, "check-circle");
+      (0, import_obsidian18.setIcon)(iconContainer, "check-circle");
     }
     this.inputEl.focus();
   }
@@ -3918,8 +4100,8 @@ var OptionsMultiSelectModal = class extends import_obsidian17.SuggestModal {
 };
 
 // src/fileClass/views/tableViewComponents/CustomFilterModal.ts
-var import_obsidian18 = require("obsidian");
-var CustomFilterModal = class extends import_obsidian18.Modal {
+var import_obsidian19 = require("obsidian");
+var CustomFilterModal = class extends import_obsidian19.Modal {
   constructor(plugin, parentFieldSet, filterComponent) {
     super(plugin.app);
     this.plugin = plugin;
@@ -3943,7 +4125,7 @@ var CustomFilterModal = class extends import_obsidian18.Modal {
     this.contentEl.createDiv({ cls: "info-code" }).createEl("code", { text: `return value < current.priority;` });
     this.contentEl.createDiv({ cls: "info-code" }).createEl("code", { text: `*/` });
     const subContent = this.contentEl.createDiv({ cls: "field-container" });
-    this.filterFunctionInput = new import_obsidian18.TextAreaComponent(subContent).setValue(this.filterComponent.customFilter || "").onChange(() => {
+    this.filterFunctionInput = new import_obsidian19.TextAreaComponent(subContent).setValue(this.filterComponent.customFilter || "").onChange(() => {
       this.confirmButton.setCta();
     });
     this.filterFunctionInput.inputEl.rows = 6;
@@ -3959,7 +4141,7 @@ var CustomFilterModal = class extends import_obsidian18.Modal {
   buildConfirm(footerActionsContainer) {
     const infoContainer = footerActionsContainer.createDiv({ cls: "info" });
     infoContainer.setText("Alt+Enter to save");
-    this.confirmButton = new import_obsidian18.ButtonComponent(footerActionsContainer);
+    this.confirmButton = new import_obsidian19.ButtonComponent(footerActionsContainer);
     this.confirmButton.setIcon("checkmark");
     this.confirmButton.onClick(() => {
       if (true)
@@ -3970,18 +4152,18 @@ var CustomFilterModal = class extends import_obsidian18.Modal {
   buildFooterActions(footerActionsContainer) {
     footerActionsContainer.createDiv({ cls: "spacer" });
     this.buildConfirm(footerActionsContainer);
-    const cancelButton = new import_obsidian18.ButtonComponent(footerActionsContainer);
+    const cancelButton = new import_obsidian19.ButtonComponent(footerActionsContainer);
     cancelButton.setIcon("cross");
     cancelButton.onClick(() => this.close());
     cancelButton.setTooltip("Cancel");
-    const refreshButton = new import_obsidian18.ButtonComponent(footerActionsContainer);
+    const refreshButton = new import_obsidian19.ButtonComponent(footerActionsContainer);
     refreshButton.setIcon("refresh-ccw");
     refreshButton.setTooltip("Cancel changes");
     refreshButton.onClick(async () => {
       this.filterFunctionInput.setValue(this.filterComponent.customFilter);
       this.confirmButton.removeCta();
     });
-    const resetButton = new import_obsidian18.ButtonComponent(footerActionsContainer);
+    const resetButton = new import_obsidian19.ButtonComponent(footerActionsContainer);
     resetButton.setIcon("eraser");
     resetButton.setTooltip("Reset initial ordering");
     resetButton.onClick(async () => {
@@ -4005,7 +4187,7 @@ var FilterComponent = class {
     this.build();
   }
   build() {
-    this.filter = new import_obsidian19.TextComponent(this.container);
+    this.filter = new import_obsidian20.TextComponent(this.container);
     this.container.addClass("filter-with-dropdown");
     this.filter.setValue("");
     this.filter.onChange((value) => {
@@ -4021,7 +4203,7 @@ var FilterComponent = class {
     var _a;
     const button = this.container.createEl("button", { cls: "infield-button" });
     (_a = this.filter.inputEl.parentElement) == null ? void 0 : _a.appendChild(button);
-    (0, import_obsidian19.setIcon)(button, "chevron-down");
+    (0, import_obsidian20.setIcon)(button, "chevron-down");
     button.onclick = () => {
       var _a2;
       const plugin = this.parentFieldSet.plugin;
@@ -4038,7 +4220,7 @@ var FilterComponent = class {
   }
   buildCustomFilterBtn() {
     var _a;
-    this.filterBtn = new import_obsidian19.ButtonComponent(this.container);
+    this.filterBtn = new import_obsidian20.ButtonComponent(this.container);
     this.filterBtn.buttonEl.addClass("infield-button");
     (_a = this.filter.inputEl.parentElement) == null ? void 0 : _a.appendChild(this.filterBtn.buttonEl);
     this.filterBtn.setIcon("code-2");
@@ -4072,7 +4254,7 @@ var FieldComponent = class {
   }
   buildColumnMoverBtn(component) {
     const buildBtn = (direction) => {
-      const btn = new import_obsidian20.ButtonComponent(component);
+      const btn = new import_obsidian21.ButtonComponent(component);
       btn.setIcon(btnIcons[direction]);
       btn.onClick(() => {
         if (this.canMove(direction)) {
@@ -4113,7 +4295,7 @@ var FieldComponent = class {
     this.visibilityButton.setIcon(this.isColumnHidden ? "eye-off" : "eye");
   }
   buildVisibilityBtn(component) {
-    this.visibilityButton = new import_obsidian20.ButtonComponent(component).setIcon(this.isColumnHidden ? "eye-off" : "eye").onClick(() => {
+    this.visibilityButton = new import_obsidian21.ButtonComponent(component).setIcon(this.isColumnHidden ? "eye-off" : "eye").onClick(() => {
       this.setVisibilityButtonState(!this.isColumnHidden);
       this.parentFieldSet.tableView.update();
       this.parentFieldSet.tableView.saveViewBtn.setCta();
@@ -4144,7 +4326,7 @@ var FieldComponent = class {
   buildFieldComponent() {
     var _a;
     const field = (_a = this.parentFieldSet.plugin.fieldIndex.fileClassesFields.get(this.parentFieldSet.fileClass.name)) == null ? void 0 : _a.find((f) => f.name === this.name);
-    const debounced = (0, import_obsidian20.debounce)((fieldset) => {
+    const debounced = (0, import_obsidian21.debounce)((fieldset) => {
       fieldset.tableView.update();
       this.parentFieldSet.tableView.saveViewBtn.setCta();
     }, 1e3, true);
@@ -4175,19 +4357,21 @@ var FieldSet4 = class {
     this.children = children || this.fileClass.getViewChildren(this.tableView.manager.selectedView);
     this.fileClasses = [this.fileClass, ...this.children.map((c) => c.fileClass)];
     this.container.replaceChildren();
+    this.buildFieldComponents();
+  }
+  buildFieldComponents() {
     this.fieldComponents = [];
     const fileFieldContainer = this.container.createDiv({ cls: "field-container" });
     const fieldComponent = new FieldComponent(this.fileClass, fileFieldContainer, this, "file", "File Name", 0);
     this.fieldComponents.push(fieldComponent);
     let index = 0;
-    [this.fileClass, ...this.children.map((c) => c.fileClass)].forEach((_fC) => {
-      var _a;
-      const fields = ((_a = this.plugin.fieldIndex.fileClassesFields.get(_fC.name)) == null ? void 0 : _a.filter((_f) => _f.isRoot())) || [];
-      for (const [_index, field] of fields.entries()) {
+    this.fileClasses.forEach((_fC) => {
+      const sortedFields = FileClass.getSortedRootFields(this.plugin, _fC);
+      for (const [_index, field] of sortedFields.entries()) {
         const fieldContainer = this.container.createDiv({ cls: "field-container" });
         this.fieldComponents.push(new FieldComponent(_fC, fieldContainer, this, field.name, field.name, _index + index + 1));
       }
-      index += fields.length;
+      index += sortedFields.length;
     });
   }
   reorderFields() {
@@ -4346,7 +4530,7 @@ var FieldSet4 = class {
 };
 
 // src/fileClass/views/tableViewComponents/saveViewModal.ts
-var import_obsidian21 = require("obsidian");
+var import_obsidian22 = require("obsidian");
 var SavedView = class {
   constructor(name) {
     this.name = name;
@@ -4391,7 +4575,7 @@ var SavedView = class {
     });
   }
 };
-var CreateSavedViewModal = class extends import_obsidian21.Modal {
+var CreateSavedViewModal = class extends import_obsidian22.Modal {
   constructor(plugin, view) {
     super(plugin.app);
     this.view = view;
@@ -4415,7 +4599,7 @@ var CreateSavedViewModal = class extends import_obsidian21.Modal {
   buildModal() {
     const nameContainer = this.contentEl.createDiv({ cls: "field-container" });
     nameContainer.createDiv({ text: `Saved view name`, cls: "label" });
-    const nameInput = new import_obsidian21.TextComponent(nameContainer);
+    const nameInput = new import_obsidian22.TextComponent(nameContainer);
     nameInput.inputEl.addClass("with-label");
     nameInput.inputEl.addClass("full-width");
     const nameErrorContainer = this.contentEl.createDiv({ cls: "field-error", text: `This ${this.savedView.name} view name already exists` });
@@ -4424,7 +4608,7 @@ var CreateSavedViewModal = class extends import_obsidian21.Modal {
     actionsContainer.createDiv({ cls: "spacer" });
     const infoContainer = actionsContainer.createDiv({ cls: "info" });
     infoContainer.setText("Alt+Enter to save");
-    const saveBtn = new import_obsidian21.ButtonComponent(actionsContainer);
+    const saveBtn = new import_obsidian22.ButtonComponent(actionsContainer);
     saveBtn.setDisabled(true);
     saveBtn.setIcon("file-plus-2");
     nameErrorContainer.hide();
@@ -4458,7 +4642,7 @@ var CreateSavedViewModal = class extends import_obsidian21.Modal {
 };
 
 // src/fileClass/views/tableViewComponents/fileClassDataviewTable.ts
-var import_obsidian22 = require("obsidian");
+var import_obsidian23 = require("obsidian");
 var FileClassDataviewTable = class {
   constructor(viewConfiguration, view, fileClass, maxRow, sliceStart = 0, ctx) {
     this.viewConfiguration = viewConfiguration;
@@ -4554,6 +4738,26 @@ var FileClassDataviewTable = class {
       }
     }
   }
+  setTableViewObserver(observed) {
+    var targetNode = observed;
+    var config = { attributes: true, childList: true };
+    var callback = function(mutationsList, table) {
+      for (var mutation of mutationsList) {
+        if (mutation.type == "childList") {
+          for (const node of mutation.addedNodes) {
+            if ("className" in node && node.className.includes("field-name")) {
+              const fileLink = node.querySelector("span a.internal-link");
+              if (fileLink)
+                table.addClickEventToLink(fileLink);
+            }
+          }
+        }
+      }
+    };
+    this.observer = new MutationObserver((mutationList) => callback(mutationList, this));
+    if (targetNode)
+      this.observer.observe(targetNode, config);
+  }
   buildTable(tableContainer) {
     var _a;
     tableContainer.onscroll = (e) => {
@@ -4589,8 +4793,11 @@ var FileClassDataviewTable = class {
     if (dvApi) {
       dvApi.executeJs(this.buildDvJSRendering(), tableContainer, this.view.manager, this.fileClass.getClassFile().path);
     }
-    if (this.view instanceof FileClassTableView)
-      this.addClickEventToLink(tableContainer);
+    if (this.view instanceof FileClassTableView) {
+      for (const link of tableContainer.querySelectorAll("a.internal-link"))
+        this.addClickEventToLink(link);
+      this.setTableViewObserver(tableContainer);
+    }
   }
   buidFileClassViewBtn() {
     const id = this.view.tableId;
@@ -4605,7 +4812,7 @@ var FileClassDataviewTable = class {
         }
       });
       const button = firstColHeaderContainer.createDiv({ cls: "fileclass-icon" });
-      (0, import_obsidian22.setIcon)(button, this.fileClass.getIcon());
+      (0, import_obsidian23.setIcon)(button, this.fileClass.getIcon());
       button.onclick = () => {
         const fileClassViewManager = new FileClassViewManager(this.plugin, this.fileClass, "tableOption", true, this.view.selectedView);
         this.plugin.addChild(fileClassViewManager);
@@ -4614,17 +4821,15 @@ var FileClassDataviewTable = class {
       firstColHeaderContainer == null ? void 0 : firstColHeaderContainer.prepend(button);
     }
   }
-  addClickEventToLink(tableContainer) {
-    tableContainer.querySelectorAll("a.internal-link").forEach((link) => {
-      link.addEventListener("click", () => {
-        var _a;
-        return this.plugin.app.workspace.openLinkText(
-          //@ts-ignore
-          (_a = link.getAttr("data-href")) == null ? void 0 : _a.replace(/(.*).md/, "$1"),
-          this.fileClass.getClassFile().path,
-          "tab"
-        );
-      });
+  addClickEventToLink(link) {
+    link.addEventListener("click", () => {
+      var _a;
+      return this.plugin.app.workspace.openLinkText(
+        //@ts-ignore
+        (_a = link.getAttr("data-href")) == null ? void 0 : _a.replace(/(.*).md/, "$1"),
+        this.fileClass.getClassFile().path,
+        "tab"
+      );
     });
   }
   buildFilterQuery() {
@@ -4810,8 +5015,8 @@ dv.table([
 };
 
 // src/fileClass/views/tableViewComponents/ChildrenMultiSelectModal.ts
-var import_obsidian23 = require("obsidian");
-var ChildrenMultiSelectModal = class extends import_obsidian23.SuggestModal {
+var import_obsidian24 = require("obsidian");
+var ChildrenMultiSelectModal = class extends import_obsidian24.SuggestModal {
   constructor(plugin, fileClass, parentFieldSet) {
     super(plugin.app);
     this.plugin = plugin;
@@ -4845,11 +5050,11 @@ var ChildrenMultiSelectModal = class extends import_obsidian23.SuggestModal {
   buildFooterActions(footerActionsContainer) {
     footerActionsContainer.createDiv({ cls: "spacer" });
     this.buildConfirm(footerActionsContainer);
-    const cancelButton = new import_obsidian23.ButtonComponent(footerActionsContainer);
+    const cancelButton = new import_obsidian24.ButtonComponent(footerActionsContainer);
     cancelButton.setIcon("cross");
     cancelButton.onClick(() => this.close());
     cancelButton.setTooltip("Cancel");
-    const clearButton = new import_obsidian23.ButtonComponent(footerActionsContainer);
+    const clearButton = new import_obsidian24.ButtonComponent(footerActionsContainer);
     clearButton.setIcon("filter-x");
     clearButton.setTooltip("Clear filtered value(s)");
     clearButton.onClick(async () => {
@@ -4867,7 +5072,7 @@ var ChildrenMultiSelectModal = class extends import_obsidian23.SuggestModal {
   buildConfirm(footerActionsContainer) {
     const infoContainer = footerActionsContainer.createDiv({ cls: "info" });
     infoContainer.setText("Alt+Enter to save");
-    const confirmButton = new import_obsidian23.ButtonComponent(footerActionsContainer);
+    const confirmButton = new import_obsidian24.ButtonComponent(footerActionsContainer);
     confirmButton.setIcon("checkmark");
     confirmButton.onClick(async () => {
       this.parentFieldSet.reset(this.selectedChildren);
@@ -4883,7 +5088,7 @@ var ChildrenMultiSelectModal = class extends import_obsidian23.SuggestModal {
         s.addClass("value-checked");
         if (s.querySelectorAll(".icon-container").length == 0) {
           const iconContainer = s.createDiv({ cls: "icon-container" });
-          (0, import_obsidian23.setIcon)(iconContainer, "check-circle");
+          (0, import_obsidian24.setIcon)(iconContainer, "check-circle");
         }
       } else {
         s.removeClass("value-checked");
@@ -4894,7 +5099,7 @@ var ChildrenMultiSelectModal = class extends import_obsidian23.SuggestModal {
   renderSuggestion(value, el) {
     const labelContainer = el.createDiv({ cls: "label-with-icon-container" });
     const icon = labelContainer.createDiv({ cls: "icon" });
-    (0, import_obsidian23.setIcon)(icon, value.fileClass.getIcon());
+    (0, import_obsidian24.setIcon)(icon, value.fileClass.getIcon());
     const label = labelContainer.createDiv({ cls: "label" });
     label.setText(`${value.path.join(" > ")}`);
     el.addClass("value-container");
@@ -4903,7 +5108,7 @@ var ChildrenMultiSelectModal = class extends import_obsidian23.SuggestModal {
     if (this.isSelected(value)) {
       el.addClass("value-checked");
       const iconContainer = el.createDiv({ cls: "icon-container" });
-      (0, import_obsidian23.setIcon)(iconContainer, "check-circle");
+      (0, import_obsidian24.setIcon)(iconContainer, "check-circle");
     }
     this.inputEl.focus();
   }
@@ -4980,9 +5185,9 @@ var FileClassTableView = class {
   buildLimitManager(container) {
     container.replaceChildren();
     container.createDiv({ text: "Results per page: ", cls: "label" });
-    const limitInput = new import_obsidian24.TextComponent(container);
+    const limitInput = new import_obsidian25.TextComponent(container);
     limitInput.setValue(`${this.limit}`);
-    const debounced = (0, import_obsidian24.debounce)((fieldset) => fieldset.tableView.update(this.limit), 1e3, true);
+    const debounced = (0, import_obsidian25.debounce)((fieldset) => fieldset.tableView.update(this.limit), 1e3, true);
     limitInput.onChange((value) => {
       this.limit = parseInt(value) || this.limit;
       this.saveViewBtn.setCta();
@@ -5020,7 +5225,7 @@ var FileClassTableView = class {
     this.viewSelectContainer.replaceChildren();
     const options2 = this.fileClass.getFileClassOptions();
     const savedViews = options2.savedViews || [];
-    this.viewSelect = new import_obsidian24.DropdownComponent(this.viewSelectContainer);
+    this.viewSelect = new import_obsidian25.DropdownComponent(this.viewSelectContainer);
     if (!savedViews.length) {
       this.viewSelect.addOption("", "No saved view");
       this.viewSelect.setDisabled(true);
@@ -5033,7 +5238,7 @@ var FileClassTableView = class {
   }
   buildSavedViewRemoveButton(container) {
     const btnContainer = container.createDiv({ cls: "cell" });
-    this.viewRemoveBtn = new import_obsidian24.ButtonComponent(btnContainer).setIcon("trash").setClass("remove-button").setDisabled(!this.selectedView).setTooltip(`Remove ${this.selectedView} view from the saved views`).onClick(async () => {
+    this.viewRemoveBtn = new import_obsidian25.ButtonComponent(btnContainer).setIcon("trash").setClass("remove-button").setDisabled(!this.selectedView).setTooltip(`Remove ${this.selectedView} view from the saved views`).onClick(async () => {
       var _a;
       const options2 = this.fileClass.getFileClassOptions();
       if (options2.favoriteView === this.selectedView)
@@ -5068,7 +5273,7 @@ var FileClassTableView = class {
   }
   buildFavoriteViewManager(container) {
     const btnContainer = container.createDiv({ cls: "cell" });
-    this.favoriteBtn = new import_obsidian24.ButtonComponent(btnContainer);
+    this.favoriteBtn = new import_obsidian25.ButtonComponent(btnContainer);
     this.favoriteBtn.setClass("favorite-button");
     this.favoriteBtn.setIcon("star");
     this.toggleFavoriteBtnState();
@@ -5089,18 +5294,18 @@ var FileClassTableView = class {
   }
   buildCleanFields(container) {
     const btnContainer = container.createDiv({ cls: "cell" });
-    const cleanFilterBtn = new import_obsidian24.ButtonComponent(btnContainer);
+    const cleanFilterBtn = new import_obsidian25.ButtonComponent(btnContainer);
     cleanFilterBtn.setIcon("eraser");
     cleanFilterBtn.setTooltip("Clear all filters, sorters and ordering");
     cleanFilterBtn.onClick(() => this.fieldSet.reset());
   }
   buildSaveView(container) {
     const btnContainer = container.createDiv({ cls: "cell" });
-    this.saveViewBtn = new import_obsidian24.ButtonComponent(btnContainer).setIcon("save").setTooltip("Save current view (filters and sorters)").onClick(() => new CreateSavedViewModal(this.plugin, this).open());
+    this.saveViewBtn = new import_obsidian25.ButtonComponent(btnContainer).setIcon("save").setTooltip("Save current view (filters and sorters)").onClick(() => new CreateSavedViewModal(this.plugin, this).open());
   }
   buildHideFilters(container) {
     const btnContainer = container.createDiv({ cls: "cell" });
-    const hideFilterBtn = new import_obsidian24.ButtonComponent(btnContainer);
+    const hideFilterBtn = new import_obsidian25.ButtonComponent(btnContainer);
     this.fieldsContainer.style.display = "none";
     hideFilterBtn.setIcon("list-end");
     hideFilterBtn.setTooltip("display filters");
@@ -5119,7 +5324,7 @@ var FileClassTableView = class {
   }
   buildHideInsertFieldBtn(container) {
     const btnContainer = container.createDiv({ cls: "cell" });
-    const hideInsertBtn = new import_obsidian24.ButtonComponent(btnContainer);
+    const hideInsertBtn = new import_obsidian25.ButtonComponent(btnContainer);
     hideInsertBtn.setIcon("plus-circle");
     hideInsertBtn.setTooltip("Show insert field button in each cell (slower)");
     const toggleState = () => {
@@ -5142,13 +5347,13 @@ var FileClassTableView = class {
   }
   buildRefreshBtn(container) {
     const btnContainer = container.createDiv({ cls: "cell" });
-    this.refreshBtn = new import_obsidian24.ButtonComponent(btnContainer);
+    this.refreshBtn = new import_obsidian25.ButtonComponent(btnContainer);
     this.refreshBtn.setIcon("refresh-cw");
     this.refreshBtn.setTooltip("Refresh table results");
     this.refreshBtn.buttonEl.hide();
     this.refreshBtn.onClick(() => {
       this.refreshBtn.removeCta();
-      this.update();
+      this.build();
       this.refreshBtn.buttonEl.hide();
     });
   }
@@ -5157,7 +5362,7 @@ var FileClassTableView = class {
   */
   buildChildrenSelector(container) {
     const btnContainer = container.createDiv({ cls: "cell" });
-    const childrenBtn = new import_obsidian24.ButtonComponent(btnContainer);
+    const childrenBtn = new import_obsidian25.ButtonComponent(btnContainer);
     childrenBtn.setIcon("network");
     childrenBtn.setTooltip("display children selector");
     childrenBtn.onClick(() => {
@@ -5201,7 +5406,7 @@ var MenuOption = class {
     this.relatedView.show();
   }
 };
-var FileClassView = class extends import_obsidian25.ItemView {
+var FileClassView = class extends import_obsidian26.ItemView {
   constructor(leaf, plugin, tableId, component, name, fileClass, onOpenTabDisplay = "tableOption", selectedView) {
     super(leaf);
     this.leaf = leaf;
@@ -5277,8 +5482,8 @@ var FileClassView = class extends import_obsidian25.ItemView {
 };
 
 // src/fileClass/fileClassChoiceModal.ts
-var import_obsidian26 = require("obsidian");
-var FileClassChoiceModal = class extends import_obsidian26.SuggestModal {
+var import_obsidian27 = require("obsidian");
+var FileClassChoiceModal = class extends import_obsidian27.SuggestModal {
   constructor(plugin, fileClassManager, tagsAndFileClasses) {
     super(plugin.app);
     this.plugin = plugin;
@@ -5325,7 +5530,7 @@ var FileClassChoiceModal = class extends import_obsidian26.SuggestModal {
 };
 
 // src/components/FileClassViewManager.ts
-var FileClassViewManager = class extends import_obsidian27.Component {
+var FileClassViewManager = class extends import_obsidian28.Component {
   constructor(plugin, fileClass, onOpenTabDisplay = "tableOption", revealAfterOpen = true, selectedView) {
     super();
     this.plugin = plugin;
@@ -5492,7 +5697,7 @@ var FileClassOptionsList = class {
     const fileClass = this.fileClass;
     const currentFieldsNames = [];
     let addMissingFieldsAction = () => {
-      new import_obsidian28.Notice("Something went wrong, please check your fileClass definitions");
+      new import_obsidian29.Notice("Something went wrong, please check your fileClass definitions");
     };
     if (this.fromFile) {
       const dvApi = (_a = this.plugin.app.plugins.plugins.dataview) == null ? void 0 : _a.api;
@@ -5669,7 +5874,7 @@ var OptionsList = class {
           break;
       }
     } else {
-      new import_obsidian29.Notice("No field with definition at this position", 2e3);
+      new import_obsidian30.Notice("No field with definition at this position", 2e3);
     }
   }
   createContextMenuOptionsList() {
@@ -5786,10 +5991,10 @@ var OptionsList = class {
         });
         item.setSection("metadata-menu");
       });
-      const view = this.plugin.app.workspace.getActiveViewOfType(import_obsidian29.MarkdownView);
+      const view = this.plugin.app.workspace.getActiveViewOfType(import_obsidian30.MarkdownView);
       if (view == null ? void 0 : view.editor) {
         const action = async () => {
-          if (!view.file || !(view.file instanceof import_obsidian29.TFile))
+          if (!view.file || !(view.file instanceof import_obsidian30.TFile))
             return;
           const optionsList = new OptionsList(this.plugin, view.file, "ManageAtCursorCommand");
           const note = await Note.buildNote(this.plugin, view.file);
@@ -5797,7 +6002,7 @@ var OptionsList = class {
           if (node)
             optionsList.createAndOpenFieldModal(node);
           else
-            new import_obsidian29.Notice("No field with definition at this position", 2e3);
+            new import_obsidian30.Notice("No field with definition at this position", 2e3);
         };
         this.location.addItem((item) => {
           item.setIcon("map-pin");
@@ -5912,7 +6117,7 @@ var OptionsList = class {
   }
   addFieldAtCurrentPositionOption() {
     var _a;
-    const currentView = this.plugin.app.workspace.getActiveViewOfType(import_obsidian29.MarkdownView);
+    const currentView = this.plugin.app.workspace.getActiveViewOfType(import_obsidian30.MarkdownView);
     const currentLineNumber = currentView == null ? void 0 : currentView.editor.getCursor().line;
     if (currentLineNumber !== void 0 && this.file.path == (currentView == null ? void 0 : currentView.file.path)) {
       const frontmatter = (_a = this.plugin.app.metadataCache.getFileCache(this.file)) == null ? void 0 : _a.frontmatter;
@@ -6051,10 +6256,10 @@ var ObjectField = class extends FieldManager2 {
     const fieldValue = dv.el("span", "{...}", { ...attrs, cls: "value-container" });
     fieldContainer.appendChild(fieldValue);
     const editBtn = fieldContainer.createEl("button");
-    (0, import_obsidian30.setIcon)(editBtn, FieldIcon[this.field.type]);
+    (0, import_obsidian31.setIcon)(editBtn, FieldIcon[this.field.type]);
     editBtn.onclick = async () => {
       const file = this.plugin.app.vault.getAbstractFileByPath(p["file"]["path"]);
-      const _eF = file instanceof import_obsidian30.TFile && await Note.getExistingFieldForIndexedPath(this.plugin, file, this.field.id);
+      const _eF = file instanceof import_obsidian31.TFile && await Note.getExistingFieldForIndexedPath(this.plugin, file, this.field.id);
       if (_eF)
         this.createAndOpenFieldModal(file, this.field.name, _eF, _eF.indexedPath);
     };
@@ -6082,9 +6287,9 @@ var ObjectField = class extends FieldManager2 {
   }
 };
 
-// src/modals/BaseObjectModal.ts
-var import_obsidian31 = require("obsidian");
-var BaseSuggestModal = class extends import_obsidian31.SuggestModal {
+// src/modals/baseFieldModals/BaseObjectModal.ts
+var import_obsidian32 = require("obsidian");
+var BaseSuggestModal = class extends import_obsidian32.SuggestModal {
   constructor(plugin, file, eF, indexedPath, previousModal) {
     super(plugin.app);
     this.plugin = plugin;
@@ -6116,7 +6321,7 @@ var BaseSuggestModal = class extends import_obsidian31.SuggestModal {
     };
   }
   buildBackButton(container) {
-    const backButton = new import_obsidian31.ButtonComponent(container);
+    const backButton = new import_obsidian32.ButtonComponent(container);
     backButton.setIcon("left-arrow");
     backButton.onClick(async () => {
       this.onEscape();
@@ -6167,12 +6372,10 @@ var ObjectModal = class extends BaseSuggestModal {
   }
   async onOpen() {
     if (this.indexedPath) {
-      const upperPath = Field_default.upperIndexedPathObjectPath(this.indexedPath);
-      const { index: upperFieldIndex } = Field_default.getIdAndIndex(upperPath.split("____").last());
       const { existingFields, missingFields } = await ObjectField.getExistingAndMissingFields(
         this.plugin,
         this.file,
-        upperFieldIndex !== void 0 ? upperPath : this.indexedPath
+        this.indexedPath
       );
       this.existingFields = existingFields;
       this.missingFields = missingFields;
@@ -6227,10 +6430,10 @@ var ObjectModal = class extends BaseSuggestModal {
       }
     } else {
       if (item.type === "ObjectList" /* ObjectList */) {
-        await postValues(this.plugin, [{ id: `${this.indexedPath}____${item.id}`, payload: { value: "" } }], this.file);
+        await postValues(this.plugin, [{ indexedPath: `${this.indexedPath}____${item.id}`, payload: { value: "" } }], this.file);
         this.open();
       } else if (item.type === "Object" /* Object */) {
-        await postValues(this.plugin, [{ id: `${this.indexedPath}____${item.id}`, payload: { value: "" } }], this.file);
+        await postValues(this.plugin, [{ indexedPath: `${this.indexedPath}____${item.id}`, payload: { value: "" } }], this.file);
         await this.plugin.fieldIndex.indexFields();
         const fieldManager = new FieldManager[item.type](this.plugin, item);
         fieldManager.createAndOpenFieldModal(this.file, item.name, void 0, `${this.indexedPath}____${item.id}`, this.lineNumber, this.asList, this.asBlockquote, this);
@@ -6242,8 +6445,8 @@ var ObjectModal = class extends BaseSuggestModal {
   }
 };
 
-// src/modals/BaseModal.ts
-var BaseModal = class extends import_obsidian32.Modal {
+// src/modals/baseFieldModals/BaseModal.ts
+var BaseModal = class extends import_obsidian33.Modal {
   constructor(plugin, file, previousModal, indexedPath) {
     super(plugin.app);
     this.plugin = plugin;
@@ -6270,7 +6473,7 @@ var BaseModal = class extends import_obsidian32.Modal {
     fieldContainer.createDiv({ cls: "spacer" });
     const infoContainer = fieldContainer.createDiv({ cls: "info" });
     infoContainer.setText("Alt+Enter to save");
-    const saveBtn = new import_obsidian32.ButtonComponent(fieldContainer);
+    const saveBtn = new import_obsidian33.ButtonComponent(fieldContainer);
     saveBtn.setIcon("checkmark");
     saveBtn.onClick(async () => {
       await this.save();
@@ -6281,13 +6484,13 @@ var BaseModal = class extends import_obsidian32.Modal {
     buttonContainer.createDiv({ cls: "spacer" });
     const infoContainer = buttonContainer.createDiv({ cls: "info" });
     infoContainer.setText("Alt+Enter to save");
-    const confirmButton = new import_obsidian32.ButtonComponent(buttonContainer);
+    const confirmButton = new import_obsidian33.ButtonComponent(buttonContainer);
     confirmButton.setIcon("checkmark");
     confirmButton.onClick(async () => {
       await this.save();
       this.close();
     });
-    const cancelButton = new import_obsidian32.ButtonComponent(buttonContainer);
+    const cancelButton = new import_obsidian33.ButtonComponent(buttonContainer);
     cancelButton.setIcon("cross");
     cancelButton.onClick(() => {
       this.close();
@@ -6376,7 +6579,7 @@ var InputModal = class extends BaseModal {
               const notice = `{{${name}}} field definition is not a valid JSON 
 in <${this.field.name}> ${this.field.fileClassName ? this.field.fileClassName : "Metadata Menu"} settings`;
               if (errorName === "SyntaxError")
-                new import_obsidian33.Notice(notice, 5e3);
+                new import_obsidian34.Notice(notice, 5e3);
             }
           } else {
             this.buildTemplateInputItem(this.contentEl.createDiv({ cls: "field-container" }), name);
@@ -6407,7 +6610,7 @@ in <${this.field.name}> ${this.field.fileClassName ? this.field.fileClassName : 
   }
   buildTemplateInputItem(fieldContainer, name) {
     fieldContainer.createDiv({ cls: "label", text: name });
-    const input = new import_obsidian33.TextComponent(fieldContainer);
+    const input = new import_obsidian34.TextComponent(fieldContainer);
     input.inputEl.addClass("with-label");
     input.inputEl.addClass("full-width");
     input.setPlaceholder(`Enter a value for ${name}`);
@@ -6419,7 +6622,7 @@ in <${this.field.name}> ${this.field.fileClassName ? this.field.fileClassName : 
   buildTemplateSelectItem(fieldContainer, name, options2) {
     fieldContainer.createDiv({ text: name, cls: "label" });
     fieldContainer.createDiv({ cls: "spacer" });
-    const selectEl = new import_obsidian33.DropdownComponent(fieldContainer);
+    const selectEl = new import_obsidian34.DropdownComponent(fieldContainer);
     selectEl.addOption("", "--select--");
     options2.forEach((o) => selectEl.addOption(o, o));
     selectEl.onChange((value) => {
@@ -6428,14 +6631,14 @@ in <${this.field.name}> ${this.field.fileClassName ? this.field.fileClassName : 
     });
   }
   buildResultPreview(fieldContainer) {
-    this.renderedValue = new import_obsidian33.TextAreaComponent(fieldContainer);
+    this.renderedValue = new import_obsidian34.TextAreaComponent(fieldContainer);
     this.renderedValue.inputEl.addClass("full-width");
     this.renderedValue.inputEl.rows = 3;
     this.renderedValue.setValue(this.value);
     this.renderedValue.onChange((value) => this.newValue = value);
   }
   buildInputEl(container) {
-    const inputEl = new import_obsidian33.TextAreaComponent(container);
+    const inputEl = new import_obsidian34.TextAreaComponent(container);
     inputEl.inputEl.rows = 3;
     inputEl.inputEl.focus();
     inputEl.inputEl.addClass("full-width");
@@ -6443,7 +6646,7 @@ in <${this.field.name}> ${this.field.fileClassName ? this.field.fileClassName : 
     inputEl.onChange((value) => this.newValue = value);
   }
   async save() {
-    await postValues(this.plugin, [{ id: this.indexedPath || this.field.id, payload: { value: this.newValue } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
+    await postValues(this.plugin, [{ indexedPath: this.indexedPath || this.field.id, payload: { value: this.newValue } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
     this.saved = true;
     if (this.previousModal)
       await this.goToPreviousModal();
@@ -6483,7 +6686,7 @@ var InputField = class extends FieldManager2 {
   createSettingContainer(container, plugin) {
     container.createEl("span", { text: "Template", cls: "label" });
     const templateContainer = container.createDiv({ cls: "field-container" });
-    const templateValue = new import_obsidian34.TextAreaComponent(templateContainer);
+    const templateValue = new import_obsidian35.TextAreaComponent(templateContainer);
     templateValue.inputEl.cols = 50;
     templateValue.inputEl.rows = 4;
     templateValue.inputEl.addClass("full-width");
@@ -6513,7 +6716,7 @@ var InputField = class extends FieldManager2 {
     const spacer = fieldContainer.createDiv({ cls: "spacer-1" });
     if ((_a = attrs.options) == null ? void 0 : _a.alwaysOn)
       spacer.hide();
-    (0, import_obsidian34.setIcon)(editBtn, FieldIcon["Input" /* Input */]);
+    (0, import_obsidian35.setIcon)(editBtn, FieldIcon["Input" /* Input */]);
     if (!((_b = attrs == null ? void 0 : attrs.options) == null ? void 0 : _b.alwaysOn)) {
       editBtn.hide();
       spacer.show();
@@ -6531,13 +6734,13 @@ var InputField = class extends FieldManager2 {
       };
     }
     const validateIcon = inputContainer.createEl("button");
-    (0, import_obsidian34.setIcon)(validateIcon, "checkmark");
+    (0, import_obsidian35.setIcon)(validateIcon, "checkmark");
     validateIcon.onclick = (e) => {
       InputField.replaceValues(this.plugin, p.file.path, this.field.id, input.value);
       inputContainer.hide();
     };
     const cancelIcon = inputContainer.createEl("button");
-    (0, import_obsidian34.setIcon)(cancelIcon, "cross");
+    (0, import_obsidian35.setIcon)(cancelIcon, "cross");
     cancelIcon.onclick = (e) => {
       var _a2;
       inputContainer.hide();
@@ -6564,7 +6767,7 @@ var InputField = class extends FieldManager2 {
     editBtn.onclick = async () => {
       if (this.field.options.template) {
         const file = this.plugin.app.vault.getAbstractFileByPath(p.file.path);
-        if (file instanceof import_obsidian34.TFile && file.extension === "md") {
+        if (file instanceof import_obsidian35.TFile && file.extension === "md") {
           await this.buildAndOpenModal(file, this.field.id);
         }
       } else {
@@ -6579,7 +6782,7 @@ var InputField = class extends FieldManager2 {
 };
 
 // src/modals/fields/BooleanModal.ts
-var import_obsidian35 = require("obsidian");
+var import_obsidian36 = require("obsidian");
 var BooleanModal = class extends BaseModal {
   constructor(plugin, file, field, eF, indexedPath, lineNumber = -1, asList = false, asBlockquote = false, previousModal) {
     super(plugin, file, previousModal, indexedPath);
@@ -6600,11 +6803,11 @@ var BooleanModal = class extends BaseModal {
   buildToggleEl() {
     const choicesContainer = this.contentEl.createDiv({ cls: "value-container" });
     choicesContainer.createDiv({ cls: "spacer" });
-    const trueButton = new import_obsidian35.ButtonComponent(choicesContainer);
+    const trueButton = new import_obsidian36.ButtonComponent(choicesContainer);
     trueButton.setButtonText("True");
     trueButton.setClass("left");
     choicesContainer.createDiv({ cls: "spacer" });
-    const falseButton = new import_obsidian35.ButtonComponent(choicesContainer);
+    const falseButton = new import_obsidian36.ButtonComponent(choicesContainer);
     falseButton.setButtonText("False");
     choicesContainer.createDiv({ cls: "spacer" });
     if (this.value) {
@@ -6628,7 +6831,7 @@ var BooleanModal = class extends BaseModal {
   }
   async save() {
     const value = this.value.toString();
-    await postValues(this.plugin, [{ id: this.indexedPath || this.field.id, payload: { value } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
+    await postValues(this.plugin, [{ indexedPath: this.indexedPath || this.field.id, payload: { value } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
     this.saved = true;
     if (this.previousModal)
       await this.goToPreviousModal();
@@ -6646,7 +6849,7 @@ var BooleanField = class extends FieldManager2 {
     const eF = await Note.getExistingFieldForIndexedPath(this.plugin, file, indexedPath);
     const value = BooleanField.stringToBoolean(eF == null ? void 0 : eF.value);
     const postValue = !value ? "true" : "false";
-    await postValues(this.plugin, [{ id: indexedPath || this.field.id, payload: { value: postValue } }], file);
+    await postValues(this.plugin, [{ indexedPath: indexedPath || this.field.id, payload: { value: postValue } }], file);
   }
   addFieldOption(file, location, indexedPath) {
     const name = this.field.name;
@@ -6704,10 +6907,10 @@ var BooleanField = class extends FieldManager2 {
 };
 
 // src/fields/fieldManagers/NumberField.ts
-var import_obsidian37 = require("obsidian");
+var import_obsidian38 = require("obsidian");
 
 // src/modals/fields/NumberModal.ts
-var import_obsidian36 = require("obsidian");
+var import_obsidian37 = require("obsidian");
 var NumberModal = class extends BaseModal {
   constructor(plugin, file, field, eF, indexedPath, lineNumber = -1, asList = false, asBlockquote = false, previousModal) {
     var _a;
@@ -6767,14 +6970,14 @@ var NumberModal = class extends BaseModal {
     const { step } = this.field.options;
     cleanActions(this.contentEl, ".field-container");
     const fieldContainer = this.contentEl.createEl("div", { cls: "field-container" });
-    this.numberInput = new import_obsidian36.TextComponent(fieldContainer);
+    this.numberInput = new import_obsidian37.TextComponent(fieldContainer);
     const numberInput = this.numberInput;
     numberInput.inputEl.focus();
     numberInput.setValue(`${this.value || ""}`);
-    const minusBtn = new import_obsidian36.ButtonComponent(fieldContainer);
+    const minusBtn = new import_obsidian37.ButtonComponent(fieldContainer);
     minusBtn.setButtonText(`- ${!!step ? step : 1}`);
     minusBtn.setDisabled(!this.fieldManager.canDecrement(numberInput.getValue()));
-    const plusBtn = new import_obsidian36.ButtonComponent(fieldContainer);
+    const plusBtn = new import_obsidian37.ButtonComponent(fieldContainer);
     plusBtn.setButtonText(`+ ${!!step ? step : 1}`);
     plusBtn.setDisabled(!this.fieldManager.canIncrement(numberInput.getValue()));
     fieldContainer.createDiv({ cls: "spacer" });
@@ -6809,7 +7012,7 @@ var NumberModal = class extends BaseModal {
       this.numberInput.inputEl.setAttr("class", "is-invalid");
       return;
     }
-    await postValues(this.plugin, [{ id: this.indexedPath || this.field.id, payload: { value: inputValue } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
+    await postValues(this.plugin, [{ indexedPath: this.indexedPath || this.field.id, payload: { value: inputValue } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
     this.saved = true;
     if (this.previousModal)
       await this.goToPreviousModal();
@@ -6835,14 +7038,14 @@ var NumberField = class extends FieldManager2 {
     const fStep = parseFloat(step);
     const fMin = parseFloat(min2);
     return !//isNaN(parseFloat(value)) ||
-    (!isNaN(fMin) && (!isNaN(fStep) && (parseFloat(value) - fStep < fMin || parseFloat(value) - 1 < fMin)));
+    (!isNaN(fMin) && (!isNaN(fStep) && ((parseFloat(value) || 0) - fStep < fMin || (parseFloat(value) || 0) - 1 < fMin)));
   }
   canIncrement(value) {
     const { step, max: max2 } = this.field.options;
     const fStep = parseFloat(step);
     const fMax = parseFloat(max2);
     return !//isNaN(parseFloat(value)) ||
-    (!isNaN(fMax) && (!isNaN(fStep) && (parseFloat(value) + fStep > fMax || parseFloat(value) + 1 > fMax)));
+    (!isNaN(fMax) && (!isNaN(fStep) && ((parseFloat(value) || 0) + fStep > fMax || (parseFloat(value) || 0) + 1 > fMax)));
   }
   validateValue(value) {
     const { min: min2, max: max2 } = this.field.options;
@@ -6864,21 +7067,19 @@ var NumberField = class extends FieldManager2 {
     const fStep = parseFloat(step);
     const eF = await Note.getExistingFieldForIndexedPath(this.plugin, file, indexedPath);
     const value = (eF == null ? void 0 : eF.value) || "";
-    const fValue = parseFloat(value);
-    if (!isNaN(fValue)) {
-      switch (direction) {
-        case "decrease":
-          if (!isNaN(fMin) && fValue - fStep >= fMin) {
-            await postValues(this.plugin, [{ id: indexedPath || this.field.id, payload: { value: (fValue - fStep).toString() } }], file);
-          }
-          break;
-        case "increase":
-          if (!isNaN(fMax) && fValue + fStep <= fMax) {
-            await postValues(this.plugin, [{ id: indexedPath || this.field.id, payload: { value: (fValue + fStep).toString() } }], file);
-          }
-        default:
-          break;
-      }
+    const fValue = parseFloat(value) || 0;
+    switch (direction) {
+      case "decrease":
+        if (!isNaN(fMin) && fValue - fStep >= fMin) {
+          await postValues(this.plugin, [{ indexedPath: indexedPath || this.field.id, payload: { value: (fValue - fStep).toString() } }], file);
+        }
+        break;
+      case "increase":
+        if (!isNaN(fMax) && fValue + fStep <= fMax) {
+          await postValues(this.plugin, [{ indexedPath: indexedPath || this.field.id, payload: { value: (fValue + fStep).toString() } }], file);
+        }
+      default:
+        break;
     }
   }
   addFieldOption(file, location, indexedPath) {
@@ -6908,21 +7109,21 @@ var NumberField = class extends FieldManager2 {
     const numberStepValueContainer = container.createDiv({ cls: "field-container" });
     numberStepValueContainer.createEl("span", { text: "Step (optional)", cls: "label" });
     numberStepValueContainer.createDiv({ cls: "spacer" });
-    this.numberStepValue = new import_obsidian37.TextComponent(numberStepValueContainer);
+    this.numberStepValue = new import_obsidian38.TextComponent(numberStepValueContainer);
     this.numberStepValue.inputEl.addClass("with-label");
-    this.numberStepValue.setValue(`${this.field.options.step}` || "");
+    this.numberStepValue.setValue(`${this.field.options.step || ""}`);
     const numberMinValueContainer = container.createDiv({ cls: "field-container" });
     numberMinValueContainer.createEl("span", { text: "Min value (optional)", cls: "label" });
-    this.numberMinValue = new import_obsidian37.TextComponent(numberMinValueContainer);
+    this.numberMinValue = new import_obsidian38.TextComponent(numberMinValueContainer);
     this.numberMinValue.inputEl.addClass("full-width");
     this.numberMinValue.inputEl.addClass("with-label");
-    this.numberMinValue.setValue(`${this.field.options.min}` || "");
+    this.numberMinValue.setValue(`${this.field.options.min || ""}`);
     const numberMaxValueContainer = container.createDiv({ cls: "field-container" });
     numberMaxValueContainer.createEl("span", { text: "Max value (optional)", cls: "label" });
-    this.numberMaxValue = new import_obsidian37.TextComponent(numberMaxValueContainer);
+    this.numberMaxValue = new import_obsidian38.TextComponent(numberMaxValueContainer);
     this.numberMaxValue.inputEl.addClass("full-width");
     this.numberMaxValue.inputEl.addClass("with-label");
-    this.numberMaxValue.setValue(`${this.field.options.max}` || "");
+    this.numberMaxValue.setValue(`${this.field.options.max || ""}`);
     this.numberStepValue.onChange((value) => {
       this.field.options.step = parseFloat(value);
       FieldSettingsModal.removeValidationError(this.numberStepValue);
@@ -6992,11 +7193,11 @@ var NumberField = class extends FieldManager2 {
     input.value = p[this.field.name] || "";
     const tripleSpacer = fieldContainer.createDiv({ cls: "spacer-3" });
     const editButton = fieldContainer.createEl("button");
-    (0, import_obsidian37.setIcon)(editButton, FieldIcon["Number" /* Number */]);
+    (0, import_obsidian38.setIcon)(editButton, FieldIcon["Number" /* Number */]);
     const decrementButton = fieldContainer.createEl("button");
-    (0, import_obsidian37.setIcon)(decrementButton, "left-arrow");
+    (0, import_obsidian38.setIcon)(decrementButton, "left-arrow");
     const incrementButton = fieldContainer.createEl("button");
-    (0, import_obsidian37.setIcon)(incrementButton, "right-arrow");
+    (0, import_obsidian38.setIcon)(incrementButton, "right-arrow");
     if (!((_a = attrs == null ? void 0 : attrs.options) == null ? void 0 : _a.alwaysOn)) {
       editButton.hide();
       decrementButton.hide();
@@ -7016,12 +7217,12 @@ var NumberField = class extends FieldManager2 {
       };
     }
     const validateIcon = fieldContainer.createEl("button");
-    (0, import_obsidian37.setIcon)(validateIcon, "checkmark");
+    (0, import_obsidian38.setIcon)(validateIcon, "checkmark");
     validateIcon.onclick = async () => {
       if (this.validateValue(input.value)) {
         const file = this.plugin.app.vault.getAbstractFileByPath(p.file.path);
-        if (file instanceof import_obsidian37.TFile && file.extension == "md") {
-          await postValues(this.plugin, [{ id: this.field.id, payload: { value: input.value } }], file);
+        if (file instanceof import_obsidian38.TFile && file.extension == "md") {
+          await postValues(this.plugin, [{ indexedPath: this.field.id, payload: { value: input.value } }], file);
           this.toggleDvButtons(decrementButton, incrementButton, input.value);
         }
         fieldContainer.removeChild(inputContainer);
@@ -7029,7 +7230,7 @@ var NumberField = class extends FieldManager2 {
     };
     inputContainer == null ? void 0 : inputContainer.appendChild(validateIcon);
     const cancelIcon = fieldContainer.createEl("button");
-    (0, import_obsidian37.setIcon)(cancelIcon, "cross");
+    (0, import_obsidian38.setIcon)(cancelIcon, "cross");
     cancelIcon.onclick = (e) => {
       fieldContainer.removeChild(inputContainer);
       fieldContainer.appendChild(fieldValue);
@@ -7053,8 +7254,8 @@ var NumberField = class extends FieldManager2 {
       if (e.key === "Enter") {
         if (this.validateValue(input.value)) {
           const file = this.plugin.app.vault.getAbstractFileByPath(p.file.path);
-          if (file instanceof import_obsidian37.TFile && file.extension == "md") {
-            await postValues(this.plugin, [{ id: this.field.id, payload: { value: input.value } }], file);
+          if (file instanceof import_obsidian38.TFile && file.extension == "md") {
+            await postValues(this.plugin, [{ indexedPath: this.field.id, payload: { value: input.value } }], file);
             this.toggleDvButtons(decrementButton, incrementButton, input.value);
           }
           fieldContainer.removeChild(inputContainer);
@@ -7083,9 +7284,9 @@ var NumberField = class extends FieldManager2 {
         const { step } = this.field.options;
         const fStep = parseFloat(step);
         const file = this.plugin.app.vault.getAbstractFileByPath(p["file"]["path"]);
-        if (file instanceof import_obsidian37.TFile && file.extension == "md") {
+        if (file instanceof import_obsidian38.TFile && file.extension == "md") {
           const newValue = (!!fStep ? p[this.field.name] - fStep : p[this.field.name] - 1).toString();
-          await postValues(this.plugin, [{ id: this.field.id, payload: { value: newValue } }], file);
+          await postValues(this.plugin, [{ indexedPath: this.field.id, payload: { value: newValue } }], file);
           this.toggleDvButtons(decrementButton, incrementButton, newValue);
         }
       }
@@ -7095,9 +7296,9 @@ var NumberField = class extends FieldManager2 {
         const { step } = this.field.options;
         const fStep = parseFloat(step);
         const file = this.plugin.app.vault.getAbstractFileByPath(p["file"]["path"]);
-        if (file instanceof import_obsidian37.TFile && file.extension == "md") {
+        if (file instanceof import_obsidian38.TFile && file.extension == "md") {
           const newValue = (!!fStep ? p[this.field.name] + fStep : p[this.field.name] + 1).toString();
-          await postValues(this.plugin, [{ id: this.field.id, payload: { value: newValue } }], file);
+          await postValues(this.plugin, [{ indexedPath: this.field.id, payload: { value: newValue } }], file);
           this.toggleDvButtons(decrementButton, incrementButton, newValue);
         }
       }
@@ -7113,10 +7314,10 @@ var NumberField = class extends FieldManager2 {
 };
 
 // src/fields/fieldManagers/SelectField.ts
-var import_obsidian42 = require("obsidian");
+var import_obsidian43 = require("obsidian");
 
-// src/modals/BaseSelectModal.ts
-var import_obsidian38 = require("obsidian");
+// src/modals/baseFieldModals/BaseSelectModal.ts
+var import_obsidian39 = require("obsidian");
 
 // src/types/selectValuesSourceTypes.ts
 var Type2 = /* @__PURE__ */ ((Type3) => {
@@ -7136,8 +7337,8 @@ var typeDisplay = {
   "ValuesFromDVQuery": "Values returned from a dataview query"
 };
 
-// src/modals/BaseSelectModal.ts
-var BaseSelecttModal = class extends import_obsidian38.SuggestModal {
+// src/modals/baseFieldModals/BaseSelectModal.ts
+var BaseSelecttModal = class extends import_obsidian39.SuggestModal {
   constructor(plugin, file, field, eF, indexedPath, lineNumber = -1, asList = false, asBlockquote = false, previousModal) {
     super(plugin.app);
     this.plugin = plugin;
@@ -7159,7 +7360,7 @@ var BaseSelecttModal = class extends import_obsidian38.SuggestModal {
     this.buildFooterActions(footerActionsContainer);
   }
   buildAddButton(container) {
-    this.addButton = new import_obsidian38.ButtonComponent(container);
+    this.addButton = new import_obsidian39.ButtonComponent(container);
     this.addButton.setIcon("plus");
     this.addButton.onClick(async () => await this.onAdd());
     this.addButton.setCta();
@@ -7169,11 +7370,11 @@ var BaseSelecttModal = class extends import_obsidian38.SuggestModal {
   buildFooterActions(footerActionsContainer) {
     footerActionsContainer.createDiv({ cls: "spacer" });
     this.buildConfirm(footerActionsContainer);
-    const cancelButton = new import_obsidian38.ButtonComponent(footerActionsContainer);
+    const cancelButton = new import_obsidian39.ButtonComponent(footerActionsContainer);
     cancelButton.setIcon("cross");
     cancelButton.onClick(() => this.close());
     cancelButton.setTooltip("Cancel");
-    const clearButton = new import_obsidian38.ButtonComponent(footerActionsContainer);
+    const clearButton = new import_obsidian39.ButtonComponent(footerActionsContainer);
     clearButton.setIcon("eraser");
     clearButton.setTooltip("Clear field's value(s)");
     clearButton.onClick(async () => {
@@ -7212,7 +7413,7 @@ var BaseSelecttModal = class extends import_obsidian38.SuggestModal {
           await fileClass.updateAttribute(fileClassAttribute.type, fileClassAttribute.name, newOptions, fileClassAttribute);
         } else if (fileClassAttribute.options.sourceType === "ValuesListNotePath" /* ValuesListNotePath */) {
           const valuesFile = this.plugin.app.vault.getAbstractFileByPath(fileClassAttribute.options.valuesListNotePath);
-          if (valuesFile instanceof import_obsidian38.TFile && valuesFile.extension == "md") {
+          if (valuesFile instanceof import_obsidian39.TFile && valuesFile.extension == "md") {
             const result = await this.plugin.app.vault.read(valuesFile);
             this.plugin.app.vault.modify(valuesFile, `${result}
 ${newValue}`);
@@ -7227,7 +7428,7 @@ ${newValue}`);
       const presetField = this.plugin.presetFields.find((field) => field.name === this.field.name);
       if ((presetField == null ? void 0 : presetField.options.sourceType) === "ValuesListNotePath" /* ValuesListNotePath */) {
         const valuesFile = this.plugin.app.vault.getAbstractFileByPath(presetField.options.valuesListNotePath);
-        if (valuesFile instanceof import_obsidian38.TFile && valuesFile.extension == "md") {
+        if (valuesFile instanceof import_obsidian39.TFile && valuesFile.extension == "md") {
           const result = await this.plugin.app.vault.read(valuesFile);
           this.plugin.app.vault.modify(valuesFile, `${result}
 ${newValue}`);
@@ -7243,7 +7444,7 @@ ${newValue}`);
     }
   }
   async clearValues() {
-    await postValues(this.plugin, [{ id: this.indexedPath || this.field.id, payload: { value: "" } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
+    await postValues(this.plugin, [{ indexedPath: this.indexedPath || this.field.id, payload: { value: "" } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
   }
   getSuggestions(query) {
     var _a;
@@ -7294,21 +7495,21 @@ var ValueSuggestModal = class extends BaseSelecttModal {
       el.addClass("value-checked");
   }
   async saveItem(item) {
-    await postValues(this.plugin, [{ id: this.indexedPath || this.field.id, payload: { value: item.toString() } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
+    await postValues(this.plugin, [{ indexedPath: this.indexedPath || this.field.id, payload: { value: item.toString() } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
   }
   async onChooseSuggestion(item, evt) {
     await this.saveItem(item);
   }
 };
 
-// src/fields/fieldManagers/AbstractListBasedField.ts
-var import_obsidian41 = require("obsidian");
+// src/fields/abstractFieldManagers/AbstractListBasedField.ts
+var import_obsidian42 = require("obsidian");
 
 // src/suggester/FileSuggester.ts
-var import_obsidian40 = require("obsidian");
+var import_obsidian41 = require("obsidian");
 
 // src/suggester/suggest.ts
-var import_obsidian39 = require("obsidian");
+var import_obsidian40 = require("obsidian");
 
 // node_modules/@popperjs/core/lib/enums.js
 var top = "top";
@@ -8851,7 +9052,7 @@ var Suggest = class {
 var TextInputSuggest = class {
   constructor(inputEl) {
     this.inputEl = inputEl;
-    this.scope = new import_obsidian39.Scope();
+    this.scope = new import_obsidian40.Scope();
     this.suggestEl = createDiv("suggestion-container");
     const suggestion = this.suggestEl.createDiv("suggestion");
     this.suggest = new Suggest(this, suggestion, this.scope);
@@ -8932,7 +9133,7 @@ var FileSuggest = class extends TextInputSuggest {
     const files = [];
     const lower_input_str = input_str.toLowerCase();
     all_files.forEach((file) => {
-      if (file instanceof import_obsidian40.TFile && file.extension === this.extenstion && file.path.toLowerCase().contains(lower_input_str)) {
+      if (file instanceof import_obsidian41.TFile && file.extension === this.extenstion && file.path.toLowerCase().contains(lower_input_str)) {
         files.push(file);
       }
     });
@@ -8948,7 +9149,7 @@ var FileSuggest = class extends TextInputSuggest {
   }
 };
 
-// src/fields/fieldManagers/AbstractListBasedField.ts
+// src/fields/abstractFieldManagers/AbstractListBasedField.ts
 var AbstractListBasedField = class extends FieldManager2 {
   constructor(plugin, field, type) {
     super(plugin, field, type);
@@ -8956,7 +9157,7 @@ var AbstractListBasedField = class extends FieldManager2 {
   createListNotePathContainer(container, plugin) {
     const valuesListNotePathContainer = container.createDiv({ cls: "field-container" });
     valuesListNotePathContainer.createDiv({ text: `Path of the note`, cls: "label" });
-    const input = new import_obsidian41.TextComponent(valuesListNotePathContainer);
+    const input = new import_obsidian42.TextComponent(valuesListNotePathContainer);
     input.inputEl.addClass("full-width");
     input.inputEl.addClass("with-label");
     new FileSuggest(
@@ -8995,14 +9196,14 @@ var AbstractListBasedField = class extends FieldManager2 {
     const values = this.field.options.valuesList || {};
     const presetValue = values[key];
     const valueContainer = parentNode.createDiv({ cls: "field-container" });
-    const input = new import_obsidian41.TextComponent(valueContainer);
+    const input = new import_obsidian42.TextComponent(valueContainer);
     input.inputEl.addClass("full-width");
     input.setValue(presetValue);
     input.onChange((value) => {
       this.field.options.valuesList[key] = value;
       FieldSettingsModal.removeValidationError(input);
     });
-    const valueRemoveButton = new import_obsidian41.ButtonComponent(valueContainer);
+    const valueRemoveButton = new import_obsidian42.ButtonComponent(valueContainer);
     valueRemoveButton.setIcon("trash").onClick((evt) => {
       evt.preventDefault();
       FieldSettingsModal.removeValidationError(input);
@@ -9011,8 +9212,8 @@ var AbstractListBasedField = class extends FieldManager2 {
       this.valuesPromptComponents.remove(input);
     });
     if (key != Object.keys(this.field.options)[0]) {
-      const valueUpgradeButton = new import_obsidian41.ButtonComponent(valueContainer);
-      (0, import_obsidian41.setIcon)(valueUpgradeButton.buttonEl, "up-chevron-glyph");
+      const valueUpgradeButton = new import_obsidian42.ButtonComponent(valueContainer);
+      (0, import_obsidian42.setIcon)(valueUpgradeButton.buttonEl, "up-chevron-glyph");
       valueUpgradeButton.onClick((evt) => {
         const thisValue = values[key];
         const inputIndex = this.valuesPromptComponents.indexOf(input);
@@ -9144,7 +9345,7 @@ var AbstractListBasedField = class extends FieldManager2 {
     valuesFromDVQueryTopContainer.createEl("span", { text: "Dataview function" });
     valuesFromDVQueryTopContainer.createEl("span", { text: "Dataview query returning a list of string (<dv> object is available)", cls: "sub-text" });
     const valuesFromDVQueryContainer = valuesFromDVQueryTopContainer.createDiv({ cls: "field-container" });
-    const valuesFromDVQuery = new import_obsidian41.TextAreaComponent(valuesFromDVQueryContainer);
+    const valuesFromDVQuery = new import_obsidian42.TextAreaComponent(valuesFromDVQueryContainer);
     valuesFromDVQuery.inputEl.addClass("full-width");
     valuesFromDVQuery.inputEl.cols = 65;
     valuesFromDVQuery.inputEl.rows = 8;
@@ -9168,7 +9369,7 @@ var AbstractListBasedField = class extends FieldManager2 {
     const sourceTypeContainer = container.createDiv({ cls: "field-container" });
     sourceTypeContainer.createDiv({ text: "Values source type", cls: "label" });
     sourceTypeContainer.createDiv({ cls: "spacer" });
-    const sourceType = new import_obsidian41.DropdownComponent(sourceTypeContainer);
+    const sourceType = new import_obsidian42.DropdownComponent(sourceTypeContainer);
     if (!this.field.options.sourceType) {
       if (typeof this.field.options === "object" && Object.keys(this.field.options).every((key) => !isNaN(parseInt(key)))) {
         const valuesList = {};
@@ -9242,9 +9443,9 @@ var SelectField = class extends AbstractListBasedField {
     fieldContainer.appendChild(dv.el("span", p[this.field.name] || "", attrs));
     const spacer = fieldContainer.createEl("div", { cls: "spacer-1" });
     const dropDownButton = fieldContainer.createEl("button");
-    (0, import_obsidian42.setIcon)(dropDownButton, "down-chevron-glyph");
+    (0, import_obsidian43.setIcon)(dropDownButton, "down-chevron-glyph");
     const file = this.plugin.app.vault.getAbstractFileByPath(p["file"]["path"]);
-    if (file instanceof import_obsidian42.TFile && file.extension == "md") {
+    if (file instanceof import_obsidian43.TFile && file.extension == "md") {
       dropDownButton.onclick = async () => await this.buildAndOpenModal(file);
     } else {
       dropDownButton.onclick = () => {
@@ -9266,7 +9467,7 @@ var SelectField = class extends AbstractListBasedField {
 };
 
 // src/fields/fieldManagers/CycleField.ts
-var import_obsidian43 = require("obsidian");
+var import_obsidian44 = require("obsidian");
 var CycleField = class extends AbstractListBasedField {
   constructor(plugin, field) {
     super(plugin, field, "Cycle" /* Cycle */);
@@ -9277,7 +9478,7 @@ var CycleField = class extends AbstractListBasedField {
     const allowNullValueContainer = container.createDiv({ cls: "field-container" });
     allowNullValueContainer.createDiv({ cls: "label", text: "Cycle begins by a null value" });
     allowNullValueContainer.createDiv({ cls: "spacer" });
-    const allowNullToggler = new import_obsidian43.ToggleComponent(allowNullValueContainer);
+    const allowNullToggler = new import_obsidian44.ToggleComponent(allowNullValueContainer);
     allowNullToggler.setValue(this.field.options.allowNull || false);
     allowNullToggler.onChange((value) => this.field.options.allowNull = value);
     super.createSettingContainer(container, plugin, location);
@@ -9319,7 +9520,7 @@ var CycleField = class extends AbstractListBasedField {
   async next(name, file, indexedPath) {
     const eF = await Note.getExistingFieldForIndexedPath(this.plugin, file, indexedPath);
     const value = (eF == null ? void 0 : eF.value) || "";
-    await postValues(this.plugin, [{ id: indexedPath || this.field.id, payload: { value: this.nextOption(value).toString() } }], file);
+    await postValues(this.plugin, [{ indexedPath: indexedPath || this.field.id, payload: { value: this.nextOption(value).toString() } }], file);
   }
   addFieldOption(file, location, indexedPath) {
     const name = this.field.name;
@@ -9348,7 +9549,7 @@ var CycleField = class extends AbstractListBasedField {
     fieldContainer.appendChild(dv.el("span", p[this.field.name] || "", attrs));
     const spacer = fieldContainer.createEl("div", { cls: "spacer-1" });
     const cycleBtn = fieldContainer.createEl("button");
-    (0, import_obsidian43.setIcon)(cycleBtn, FieldIcon["Cycle" /* Cycle */]);
+    (0, import_obsidian44.setIcon)(cycleBtn, FieldIcon["Cycle" /* Cycle */]);
     if (!((_a = attrs == null ? void 0 : attrs.options) == null ? void 0 : _a.alwaysOn)) {
       cycleBtn.hide();
       spacer.show();
@@ -9364,7 +9565,7 @@ var CycleField = class extends AbstractListBasedField {
     const file = this.plugin.app.vault.getAbstractFileByPath(p.file.path);
     cycleBtn.onclick = async (e) => {
       var _a2;
-      if (!(file instanceof import_obsidian43.TFile))
+      if (!(file instanceof import_obsidian44.TFile))
         return;
       const eF = await Note.getExistingFieldForIndexedPath(this.plugin, file, this.field.id);
       const value = (eF == null ? void 0 : eF.value) || "";
@@ -9379,10 +9580,10 @@ var CycleField = class extends AbstractListBasedField {
 };
 
 // src/fields/fieldManagers/MultiField.ts
-var import_obsidian45 = require("obsidian");
+var import_obsidian46 = require("obsidian");
 
 // src/modals/fields/MultiSelectModal.ts
-var import_obsidian44 = require("obsidian");
+var import_obsidian45 = require("obsidian");
 var MultiSuggestModal = class extends BaseSelecttModal {
   constructor(plugin, file, field, eF, indexedPath, lineNumber = -1, asList = false, asBlockquote = false, previousModal, preSelectedOptions) {
     var _a, _b;
@@ -9437,7 +9638,7 @@ var MultiSuggestModal = class extends BaseSelecttModal {
   buildConfirm(footerActionsContainer) {
     const infoContainer = footerActionsContainer.createDiv({ cls: "info" });
     infoContainer.setText("Alt+Enter to save");
-    const confirmButton = new import_obsidian44.ButtonComponent(footerActionsContainer);
+    const confirmButton = new import_obsidian45.ButtonComponent(footerActionsContainer);
     confirmButton.setIcon("checkmark");
     confirmButton.onClick(async () => {
       await this.replaceValues();
@@ -9454,7 +9655,7 @@ var MultiSuggestModal = class extends BaseSelecttModal {
   }
   async replaceValues() {
     const options2 = this.selectedOptions;
-    await postValues(this.plugin, [{ id: this.indexedPath || this.field.id, payload: { value: options2.join(", ") } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
+    await postValues(this.plugin, [{ indexedPath: this.indexedPath || this.field.id, payload: { value: options2.join(", ") } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
     this.close();
   }
   renderSelected() {
@@ -9466,7 +9667,7 @@ var MultiSuggestModal = class extends BaseSelecttModal {
         s.addClass("value-checked");
         if (s.querySelectorAll(".icon-container").length == 0) {
           const iconContainer = s.createDiv({ cls: "icon-container" });
-          (0, import_obsidian44.setIcon)(iconContainer, "check-circle");
+          (0, import_obsidian45.setIcon)(iconContainer, "check-circle");
         }
       } else {
         s.removeClass("value-checked");
@@ -9481,7 +9682,7 @@ var MultiSuggestModal = class extends BaseSelecttModal {
     if (this.selectedOptions.includes(value.toString())) {
       el.addClass("value-checked");
       const iconContainer = el.createDiv({ cls: "icon-container" });
-      (0, import_obsidian44.setIcon)(iconContainer, "check-circle");
+      (0, import_obsidian45.setIcon)(iconContainer, "check-circle");
     }
     this.inputEl.focus();
   }
@@ -9553,7 +9754,7 @@ var MultiField = class extends AbstractListBasedField {
       const valueContainer = valuesContainer.createDiv({ cls: "item-container" });
       const valueRemoveBtn = valueContainer.createEl("button");
       const valueLabel = valueContainer.createDiv({ cls: "label", text: v });
-      (0, import_obsidian45.setIcon)(valueRemoveBtn, "cross");
+      (0, import_obsidian46.setIcon)(valueRemoveBtn, "cross");
       valueRemoveBtn.hide();
       valueRemoveBtn.onclick = async () => {
         const remainingValues = currentValues.filter((cV) => cV !== v).join(", ");
@@ -9575,9 +9776,9 @@ var MultiField = class extends AbstractListBasedField {
       };
     });
     const addBtn = valuesContainer.createEl("button");
-    (0, import_obsidian45.setIcon)(addBtn, "list-plus");
+    (0, import_obsidian46.setIcon)(addBtn, "list-plus");
     let fieldModal;
-    if (file instanceof import_obsidian45.TFile && file.extension == "md") {
+    if (file instanceof import_obsidian46.TFile && file.extension == "md") {
       addBtn.onclick = async () => await this.buildAndOpenModal(file);
     } else {
       addBtn.onclick = () => {
@@ -9611,2353 +9812,16 @@ var MultiField = class extends AbstractListBasedField {
   }
 };
 
-// src/fields/fieldManagers/DateField.ts
-var import_obsidian48 = require("obsidian");
+// src/fields/abstractFieldManagers/AbstractDateBasedField.ts
+var import_obsidian49 = require("obsidian");
 
 // src/modals/fields/DateModal.ts
-var import_obsidian46 = require("obsidian");
 var import_obsidian47 = require("obsidian");
-
-// node_modules/flatpickr/dist/esm/types/options.js
-var HOOKS = [
-  "onChange",
-  "onClose",
-  "onDayCreate",
-  "onDestroy",
-  "onKeyDown",
-  "onMonthChange",
-  "onOpen",
-  "onParseConfig",
-  "onReady",
-  "onValueUpdate",
-  "onYearChange",
-  "onPreCalendarPosition"
-];
-var defaults = {
-  _disable: [],
-  allowInput: false,
-  allowInvalidPreload: false,
-  altFormat: "F j, Y",
-  altInput: false,
-  altInputClass: "form-control input",
-  animate: typeof window === "object" && window.navigator.userAgent.indexOf("MSIE") === -1,
-  ariaDateFormat: "F j, Y",
-  autoFillDefaultTime: true,
-  clickOpens: true,
-  closeOnSelect: true,
-  conjunction: ", ",
-  dateFormat: "Y-m-d",
-  defaultHour: 12,
-  defaultMinute: 0,
-  defaultSeconds: 0,
-  disable: [],
-  disableMobile: false,
-  enableSeconds: false,
-  enableTime: false,
-  errorHandler: function(err) {
-    return typeof console !== "undefined" && console.warn(err);
-  },
-  getWeek: function(givenDate) {
-    var date = new Date(givenDate.getTime());
-    date.setHours(0, 0, 0, 0);
-    date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
-    var week1 = new Date(date.getFullYear(), 0, 4);
-    return 1 + Math.round(((date.getTime() - week1.getTime()) / 864e5 - 3 + (week1.getDay() + 6) % 7) / 7);
-  },
-  hourIncrement: 1,
-  ignoredFocusElements: [],
-  inline: false,
-  locale: "default",
-  minuteIncrement: 5,
-  mode: "single",
-  monthSelectorType: "dropdown",
-  nextArrow: "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 17 17'><g></g><path d='M13.207 8.472l-7.854 7.854-0.707-0.707 7.146-7.146-7.146-7.148 0.707-0.707 7.854 7.854z' /></svg>",
-  noCalendar: false,
-  now: new Date(),
-  onChange: [],
-  onClose: [],
-  onDayCreate: [],
-  onDestroy: [],
-  onKeyDown: [],
-  onMonthChange: [],
-  onOpen: [],
-  onParseConfig: [],
-  onReady: [],
-  onValueUpdate: [],
-  onYearChange: [],
-  onPreCalendarPosition: [],
-  plugins: [],
-  position: "auto",
-  positionElement: void 0,
-  prevArrow: "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 17 17'><g></g><path d='M5.207 8.471l7.146 7.147-0.707 0.707-7.853-7.854 7.854-7.853 0.707 0.707-7.147 7.146z' /></svg>",
-  shorthandCurrentMonth: false,
-  showMonths: 1,
-  static: false,
-  time_24hr: false,
-  weekNumbers: false,
-  wrap: false
+var import_obsidian48 = require("obsidian");
+var inputType = {
+  "Date": "date",
+  "DateTime": "datetime-local"
 };
-
-// node_modules/flatpickr/dist/esm/l10n/default.js
-var english = {
-  weekdays: {
-    shorthand: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-    longhand: [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday"
-    ]
-  },
-  months: {
-    shorthand: [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec"
-    ],
-    longhand: [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December"
-    ]
-  },
-  daysInMonth: [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
-  firstDayOfWeek: 0,
-  ordinal: function(nth) {
-    var s = nth % 100;
-    if (s > 3 && s < 21)
-      return "th";
-    switch (s % 10) {
-      case 1:
-        return "st";
-      case 2:
-        return "nd";
-      case 3:
-        return "rd";
-      default:
-        return "th";
-    }
-  },
-  rangeSeparator: " to ",
-  weekAbbreviation: "Wk",
-  scrollTitle: "Scroll to increment",
-  toggleTitle: "Click to toggle",
-  amPM: ["AM", "PM"],
-  yearAriaLabel: "Year",
-  monthAriaLabel: "Month",
-  hourAriaLabel: "Hour",
-  minuteAriaLabel: "Minute",
-  time_24hr: false
-};
-var default_default = english;
-
-// node_modules/flatpickr/dist/esm/utils/index.js
-var pad = function(number, length) {
-  if (length === void 0) {
-    length = 2;
-  }
-  return ("000" + number).slice(length * -1);
-};
-var int = function(bool) {
-  return bool === true ? 1 : 0;
-};
-function debounce4(fn2, wait) {
-  var t;
-  return function() {
-    var _this = this;
-    var args = arguments;
-    clearTimeout(t);
-    t = setTimeout(function() {
-      return fn2.apply(_this, args);
-    }, wait);
-  };
-}
-var arrayify = function(obj) {
-  return obj instanceof Array ? obj : [obj];
-};
-
-// node_modules/flatpickr/dist/esm/utils/dom.js
-function toggleClass(elem, className, bool) {
-  if (bool === true)
-    return elem.classList.add(className);
-  elem.classList.remove(className);
-}
-function createElement(tag, className, content) {
-  var e = window.document.createElement(tag);
-  className = className || "";
-  content = content || "";
-  e.className = className;
-  if (content !== void 0)
-    e.textContent = content;
-  return e;
-}
-function clearNode(node) {
-  while (node.firstChild)
-    node.removeChild(node.firstChild);
-}
-function findParent(node, condition) {
-  if (condition(node))
-    return node;
-  else if (node.parentNode)
-    return findParent(node.parentNode, condition);
-  return void 0;
-}
-function createNumberInput(inputClassName, opts) {
-  var wrapper = createElement("div", "numInputWrapper"), numInput = createElement("input", "numInput " + inputClassName), arrowUp = createElement("span", "arrowUp"), arrowDown = createElement("span", "arrowDown");
-  if (navigator.userAgent.indexOf("MSIE 9.0") === -1) {
-    numInput.type = "number";
-  } else {
-    numInput.type = "text";
-    numInput.pattern = "\\d*";
-  }
-  if (opts !== void 0)
-    for (var key in opts)
-      numInput.setAttribute(key, opts[key]);
-  wrapper.appendChild(numInput);
-  wrapper.appendChild(arrowUp);
-  wrapper.appendChild(arrowDown);
-  return wrapper;
-}
-function getEventTarget(event) {
-  try {
-    if (typeof event.composedPath === "function") {
-      var path = event.composedPath();
-      return path[0];
-    }
-    return event.target;
-  } catch (error) {
-    return event.target;
-  }
-}
-
-// node_modules/flatpickr/dist/esm/utils/formatting.js
-var doNothing = function() {
-  return void 0;
-};
-var monthToStr = function(monthNumber, shorthand, locale) {
-  return locale.months[shorthand ? "shorthand" : "longhand"][monthNumber];
-};
-var revFormat = {
-  D: doNothing,
-  F: function(dateObj, monthName, locale) {
-    dateObj.setMonth(locale.months.longhand.indexOf(monthName));
-  },
-  G: function(dateObj, hour) {
-    dateObj.setHours((dateObj.getHours() >= 12 ? 12 : 0) + parseFloat(hour));
-  },
-  H: function(dateObj, hour) {
-    dateObj.setHours(parseFloat(hour));
-  },
-  J: function(dateObj, day) {
-    dateObj.setDate(parseFloat(day));
-  },
-  K: function(dateObj, amPM, locale) {
-    dateObj.setHours(dateObj.getHours() % 12 + 12 * int(new RegExp(locale.amPM[1], "i").test(amPM)));
-  },
-  M: function(dateObj, shortMonth, locale) {
-    dateObj.setMonth(locale.months.shorthand.indexOf(shortMonth));
-  },
-  S: function(dateObj, seconds) {
-    dateObj.setSeconds(parseFloat(seconds));
-  },
-  U: function(_, unixSeconds) {
-    return new Date(parseFloat(unixSeconds) * 1e3);
-  },
-  W: function(dateObj, weekNum, locale) {
-    var weekNumber = parseInt(weekNum);
-    var date = new Date(dateObj.getFullYear(), 0, 2 + (weekNumber - 1) * 7, 0, 0, 0, 0);
-    date.setDate(date.getDate() - date.getDay() + locale.firstDayOfWeek);
-    return date;
-  },
-  Y: function(dateObj, year) {
-    dateObj.setFullYear(parseFloat(year));
-  },
-  Z: function(_, ISODate) {
-    return new Date(ISODate);
-  },
-  d: function(dateObj, day) {
-    dateObj.setDate(parseFloat(day));
-  },
-  h: function(dateObj, hour) {
-    dateObj.setHours((dateObj.getHours() >= 12 ? 12 : 0) + parseFloat(hour));
-  },
-  i: function(dateObj, minutes) {
-    dateObj.setMinutes(parseFloat(minutes));
-  },
-  j: function(dateObj, day) {
-    dateObj.setDate(parseFloat(day));
-  },
-  l: doNothing,
-  m: function(dateObj, month) {
-    dateObj.setMonth(parseFloat(month) - 1);
-  },
-  n: function(dateObj, month) {
-    dateObj.setMonth(parseFloat(month) - 1);
-  },
-  s: function(dateObj, seconds) {
-    dateObj.setSeconds(parseFloat(seconds));
-  },
-  u: function(_, unixMillSeconds) {
-    return new Date(parseFloat(unixMillSeconds));
-  },
-  w: doNothing,
-  y: function(dateObj, year) {
-    dateObj.setFullYear(2e3 + parseFloat(year));
-  }
-};
-var tokenRegex = {
-  D: "",
-  F: "",
-  G: "(\\d\\d|\\d)",
-  H: "(\\d\\d|\\d)",
-  J: "(\\d\\d|\\d)\\w+",
-  K: "",
-  M: "",
-  S: "(\\d\\d|\\d)",
-  U: "(.+)",
-  W: "(\\d\\d|\\d)",
-  Y: "(\\d{4})",
-  Z: "(.+)",
-  d: "(\\d\\d|\\d)",
-  h: "(\\d\\d|\\d)",
-  i: "(\\d\\d|\\d)",
-  j: "(\\d\\d|\\d)",
-  l: "",
-  m: "(\\d\\d|\\d)",
-  n: "(\\d\\d|\\d)",
-  s: "(\\d\\d|\\d)",
-  u: "(.+)",
-  w: "(\\d\\d|\\d)",
-  y: "(\\d{2})"
-};
-var formats = {
-  Z: function(date) {
-    return date.toISOString();
-  },
-  D: function(date, locale, options2) {
-    return locale.weekdays.shorthand[formats.w(date, locale, options2)];
-  },
-  F: function(date, locale, options2) {
-    return monthToStr(formats.n(date, locale, options2) - 1, false, locale);
-  },
-  G: function(date, locale, options2) {
-    return pad(formats.h(date, locale, options2));
-  },
-  H: function(date) {
-    return pad(date.getHours());
-  },
-  J: function(date, locale) {
-    return locale.ordinal !== void 0 ? date.getDate() + locale.ordinal(date.getDate()) : date.getDate();
-  },
-  K: function(date, locale) {
-    return locale.amPM[int(date.getHours() > 11)];
-  },
-  M: function(date, locale) {
-    return monthToStr(date.getMonth(), true, locale);
-  },
-  S: function(date) {
-    return pad(date.getSeconds());
-  },
-  U: function(date) {
-    return date.getTime() / 1e3;
-  },
-  W: function(date, _, options2) {
-    return options2.getWeek(date);
-  },
-  Y: function(date) {
-    return pad(date.getFullYear(), 4);
-  },
-  d: function(date) {
-    return pad(date.getDate());
-  },
-  h: function(date) {
-    return date.getHours() % 12 ? date.getHours() % 12 : 12;
-  },
-  i: function(date) {
-    return pad(date.getMinutes());
-  },
-  j: function(date) {
-    return date.getDate();
-  },
-  l: function(date, locale) {
-    return locale.weekdays.longhand[date.getDay()];
-  },
-  m: function(date) {
-    return pad(date.getMonth() + 1);
-  },
-  n: function(date) {
-    return date.getMonth() + 1;
-  },
-  s: function(date) {
-    return date.getSeconds();
-  },
-  u: function(date) {
-    return date.getTime();
-  },
-  w: function(date) {
-    return date.getDay();
-  },
-  y: function(date) {
-    return String(date.getFullYear()).substring(2);
-  }
-};
-
-// node_modules/flatpickr/dist/esm/utils/dates.js
-var createDateFormatter = function(_a) {
-  var _b = _a.config, config = _b === void 0 ? defaults : _b, _c = _a.l10n, l10n = _c === void 0 ? english : _c, _d = _a.isMobile, isMobile = _d === void 0 ? false : _d;
-  return function(dateObj, frmt, overrideLocale) {
-    var locale = overrideLocale || l10n;
-    if (config.formatDate !== void 0 && !isMobile) {
-      return config.formatDate(dateObj, frmt, locale);
-    }
-    return frmt.split("").map(function(c, i, arr) {
-      return formats[c] && arr[i - 1] !== "\\" ? formats[c](dateObj, locale, config) : c !== "\\" ? c : "";
-    }).join("");
-  };
-};
-var createDateParser = function(_a) {
-  var _b = _a.config, config = _b === void 0 ? defaults : _b, _c = _a.l10n, l10n = _c === void 0 ? english : _c;
-  return function(date, givenFormat, timeless, customLocale) {
-    if (date !== 0 && !date)
-      return void 0;
-    var locale = customLocale || l10n;
-    var parsedDate;
-    var dateOrig = date;
-    if (date instanceof Date)
-      parsedDate = new Date(date.getTime());
-    else if (typeof date !== "string" && date.toFixed !== void 0)
-      parsedDate = new Date(date);
-    else if (typeof date === "string") {
-      var format = givenFormat || (config || defaults).dateFormat;
-      var datestr = String(date).trim();
-      if (datestr === "today") {
-        parsedDate = new Date();
-        timeless = true;
-      } else if (config && config.parseDate) {
-        parsedDate = config.parseDate(date, format);
-      } else if (/Z$/.test(datestr) || /GMT$/.test(datestr)) {
-        parsedDate = new Date(date);
-      } else {
-        var matched = void 0, ops = [];
-        for (var i = 0, matchIndex = 0, regexStr = ""; i < format.length; i++) {
-          var token = format[i];
-          var isBackSlash = token === "\\";
-          var escaped = format[i - 1] === "\\" || isBackSlash;
-          if (tokenRegex[token] && !escaped) {
-            regexStr += tokenRegex[token];
-            var match = new RegExp(regexStr).exec(date);
-            if (match && (matched = true)) {
-              ops[token !== "Y" ? "push" : "unshift"]({
-                fn: revFormat[token],
-                val: match[++matchIndex]
-              });
-            }
-          } else if (!isBackSlash)
-            regexStr += ".";
-        }
-        parsedDate = !config || !config.noCalendar ? new Date(new Date().getFullYear(), 0, 1, 0, 0, 0, 0) : new Date(new Date().setHours(0, 0, 0, 0));
-        ops.forEach(function(_a2) {
-          var fn2 = _a2.fn, val = _a2.val;
-          return parsedDate = fn2(parsedDate, val, locale) || parsedDate;
-        });
-        parsedDate = matched ? parsedDate : void 0;
-      }
-    }
-    if (!(parsedDate instanceof Date && !isNaN(parsedDate.getTime()))) {
-      config.errorHandler(new Error("Invalid date provided: " + dateOrig));
-      return void 0;
-    }
-    if (timeless === true)
-      parsedDate.setHours(0, 0, 0, 0);
-    return parsedDate;
-  };
-};
-function compareDates(date1, date2, timeless) {
-  if (timeless === void 0) {
-    timeless = true;
-  }
-  if (timeless !== false) {
-    return new Date(date1.getTime()).setHours(0, 0, 0, 0) - new Date(date2.getTime()).setHours(0, 0, 0, 0);
-  }
-  return date1.getTime() - date2.getTime();
-}
-var isBetween = function(ts, ts1, ts2) {
-  return ts > Math.min(ts1, ts2) && ts < Math.max(ts1, ts2);
-};
-var calculateSecondsSinceMidnight = function(hours, minutes, seconds) {
-  return hours * 3600 + minutes * 60 + seconds;
-};
-var parseSeconds = function(secondsSinceMidnight) {
-  var hours = Math.floor(secondsSinceMidnight / 3600), minutes = (secondsSinceMidnight - hours * 3600) / 60;
-  return [hours, minutes, secondsSinceMidnight - hours * 3600 - minutes * 60];
-};
-var duration = {
-  DAY: 864e5
-};
-function getDefaultHours(config) {
-  var hours = config.defaultHour;
-  var minutes = config.defaultMinute;
-  var seconds = config.defaultSeconds;
-  if (config.minDate !== void 0) {
-    var minHour = config.minDate.getHours();
-    var minMinutes = config.minDate.getMinutes();
-    var minSeconds = config.minDate.getSeconds();
-    if (hours < minHour) {
-      hours = minHour;
-    }
-    if (hours === minHour && minutes < minMinutes) {
-      minutes = minMinutes;
-    }
-    if (hours === minHour && minutes === minMinutes && seconds < minSeconds)
-      seconds = config.minDate.getSeconds();
-  }
-  if (config.maxDate !== void 0) {
-    var maxHr = config.maxDate.getHours();
-    var maxMinutes = config.maxDate.getMinutes();
-    hours = Math.min(hours, maxHr);
-    if (hours === maxHr)
-      minutes = Math.min(maxMinutes, minutes);
-    if (hours === maxHr && minutes === maxMinutes)
-      seconds = config.maxDate.getSeconds();
-  }
-  return { hours, minutes, seconds };
-}
-
-// node_modules/flatpickr/dist/esm/utils/polyfills.js
-if (typeof Object.assign !== "function") {
-  Object.assign = function(target) {
-    var args = [];
-    for (var _i = 1; _i < arguments.length; _i++) {
-      args[_i - 1] = arguments[_i];
-    }
-    if (!target) {
-      throw TypeError("Cannot convert undefined or null to object");
-    }
-    var _loop_1 = function(source2) {
-      if (source2) {
-        Object.keys(source2).forEach(function(key) {
-          return target[key] = source2[key];
-        });
-      }
-    };
-    for (var _a = 0, args_1 = args; _a < args_1.length; _a++) {
-      var source = args_1[_a];
-      _loop_1(source);
-    }
-    return target;
-  };
-}
-
-// node_modules/flatpickr/dist/esm/index.js
-var __assign = function() {
-  __assign = Object.assign || function(t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-      s = arguments[i];
-      for (var p in s)
-        if (Object.prototype.hasOwnProperty.call(s, p))
-          t[p] = s[p];
-    }
-    return t;
-  };
-  return __assign.apply(this, arguments);
-};
-var __spreadArrays = function() {
-  for (var s = 0, i = 0, il = arguments.length; i < il; i++)
-    s += arguments[i].length;
-  for (var r = Array(s), k = 0, i = 0; i < il; i++)
-    for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
-      r[k] = a[j];
-  return r;
-};
-var DEBOUNCED_CHANGE_MS = 300;
-function FlatpickrInstance(element, instanceConfig) {
-  var self = {
-    config: __assign(__assign({}, defaults), flatpickr.defaultConfig),
-    l10n: default_default
-  };
-  self.parseDate = createDateParser({ config: self.config, l10n: self.l10n });
-  self._handlers = [];
-  self.pluginElements = [];
-  self.loadedPlugins = [];
-  self._bind = bind;
-  self._setHoursFromDate = setHoursFromDate;
-  self._positionCalendar = positionCalendar;
-  self.changeMonth = changeMonth;
-  self.changeYear = changeYear;
-  self.clear = clear;
-  self.close = close;
-  self.onMouseOver = onMouseOver;
-  self._createElement = createElement;
-  self.createDay = createDay;
-  self.destroy = destroy;
-  self.isEnabled = isEnabled;
-  self.jumpToDate = jumpToDate;
-  self.updateValue = updateValue;
-  self.open = open;
-  self.redraw = redraw;
-  self.set = set2;
-  self.setDate = setDate;
-  self.toggle = toggle;
-  function setupHelperFunctions() {
-    self.utils = {
-      getDaysInMonth: function(month, yr) {
-        if (month === void 0) {
-          month = self.currentMonth;
-        }
-        if (yr === void 0) {
-          yr = self.currentYear;
-        }
-        if (month === 1 && (yr % 4 === 0 && yr % 100 !== 0 || yr % 400 === 0))
-          return 29;
-        return self.l10n.daysInMonth[month];
-      }
-    };
-  }
-  function init() {
-    self.element = self.input = element;
-    self.isOpen = false;
-    parseConfig();
-    setupLocale();
-    setupInputs();
-    setupDates();
-    setupHelperFunctions();
-    if (!self.isMobile)
-      build();
-    bindEvents();
-    if (self.selectedDates.length || self.config.noCalendar) {
-      if (self.config.enableTime) {
-        setHoursFromDate(self.config.noCalendar ? self.latestSelectedDateObj : void 0);
-      }
-      updateValue(false);
-    }
-    setCalendarWidth();
-    var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    if (!self.isMobile && isSafari) {
-      positionCalendar();
-    }
-    triggerEvent("onReady");
-  }
-  function getClosestActiveElement() {
-    var _a;
-    return ((_a = self.calendarContainer) === null || _a === void 0 ? void 0 : _a.getRootNode()).activeElement || document.activeElement;
-  }
-  function bindToInstance(fn2) {
-    return fn2.bind(self);
-  }
-  function setCalendarWidth() {
-    var config = self.config;
-    if (config.weekNumbers === false && config.showMonths === 1) {
-      return;
-    } else if (config.noCalendar !== true) {
-      window.requestAnimationFrame(function() {
-        if (self.calendarContainer !== void 0) {
-          self.calendarContainer.style.visibility = "hidden";
-          self.calendarContainer.style.display = "block";
-        }
-        if (self.daysContainer !== void 0) {
-          var daysWidth = (self.days.offsetWidth + 1) * config.showMonths;
-          self.daysContainer.style.width = daysWidth + "px";
-          self.calendarContainer.style.width = daysWidth + (self.weekWrapper !== void 0 ? self.weekWrapper.offsetWidth : 0) + "px";
-          self.calendarContainer.style.removeProperty("visibility");
-          self.calendarContainer.style.removeProperty("display");
-        }
-      });
-    }
-  }
-  function updateTime(e) {
-    if (self.selectedDates.length === 0) {
-      var defaultDate = self.config.minDate === void 0 || compareDates(new Date(), self.config.minDate) >= 0 ? new Date() : new Date(self.config.minDate.getTime());
-      var defaults2 = getDefaultHours(self.config);
-      defaultDate.setHours(defaults2.hours, defaults2.minutes, defaults2.seconds, defaultDate.getMilliseconds());
-      self.selectedDates = [defaultDate];
-      self.latestSelectedDateObj = defaultDate;
-    }
-    if (e !== void 0 && e.type !== "blur") {
-      timeWrapper(e);
-    }
-    var prevValue = self._input.value;
-    setHoursFromInputs();
-    updateValue();
-    if (self._input.value !== prevValue) {
-      self._debouncedChange();
-    }
-  }
-  function ampm2military(hour, amPM) {
-    return hour % 12 + 12 * int(amPM === self.l10n.amPM[1]);
-  }
-  function military2ampm(hour) {
-    switch (hour % 24) {
-      case 0:
-      case 12:
-        return 12;
-      default:
-        return hour % 12;
-    }
-  }
-  function setHoursFromInputs() {
-    if (self.hourElement === void 0 || self.minuteElement === void 0)
-      return;
-    var hours = (parseInt(self.hourElement.value.slice(-2), 10) || 0) % 24, minutes = (parseInt(self.minuteElement.value, 10) || 0) % 60, seconds = self.secondElement !== void 0 ? (parseInt(self.secondElement.value, 10) || 0) % 60 : 0;
-    if (self.amPM !== void 0) {
-      hours = ampm2military(hours, self.amPM.textContent);
-    }
-    var limitMinHours = self.config.minTime !== void 0 || self.config.minDate && self.minDateHasTime && self.latestSelectedDateObj && compareDates(self.latestSelectedDateObj, self.config.minDate, true) === 0;
-    var limitMaxHours = self.config.maxTime !== void 0 || self.config.maxDate && self.maxDateHasTime && self.latestSelectedDateObj && compareDates(self.latestSelectedDateObj, self.config.maxDate, true) === 0;
-    if (self.config.maxTime !== void 0 && self.config.minTime !== void 0 && self.config.minTime > self.config.maxTime) {
-      var minBound = calculateSecondsSinceMidnight(self.config.minTime.getHours(), self.config.minTime.getMinutes(), self.config.minTime.getSeconds());
-      var maxBound = calculateSecondsSinceMidnight(self.config.maxTime.getHours(), self.config.maxTime.getMinutes(), self.config.maxTime.getSeconds());
-      var currentTime = calculateSecondsSinceMidnight(hours, minutes, seconds);
-      if (currentTime > maxBound && currentTime < minBound) {
-        var result = parseSeconds(minBound);
-        hours = result[0];
-        minutes = result[1];
-        seconds = result[2];
-      }
-    } else {
-      if (limitMaxHours) {
-        var maxTime = self.config.maxTime !== void 0 ? self.config.maxTime : self.config.maxDate;
-        hours = Math.min(hours, maxTime.getHours());
-        if (hours === maxTime.getHours())
-          minutes = Math.min(minutes, maxTime.getMinutes());
-        if (minutes === maxTime.getMinutes())
-          seconds = Math.min(seconds, maxTime.getSeconds());
-      }
-      if (limitMinHours) {
-        var minTime = self.config.minTime !== void 0 ? self.config.minTime : self.config.minDate;
-        hours = Math.max(hours, minTime.getHours());
-        if (hours === minTime.getHours() && minutes < minTime.getMinutes())
-          minutes = minTime.getMinutes();
-        if (minutes === minTime.getMinutes())
-          seconds = Math.max(seconds, minTime.getSeconds());
-      }
-    }
-    setHours(hours, minutes, seconds);
-  }
-  function setHoursFromDate(dateObj) {
-    var date = dateObj || self.latestSelectedDateObj;
-    if (date && date instanceof Date) {
-      setHours(date.getHours(), date.getMinutes(), date.getSeconds());
-    }
-  }
-  function setHours(hours, minutes, seconds) {
-    if (self.latestSelectedDateObj !== void 0) {
-      self.latestSelectedDateObj.setHours(hours % 24, minutes, seconds || 0, 0);
-    }
-    if (!self.hourElement || !self.minuteElement || self.isMobile)
-      return;
-    self.hourElement.value = pad(!self.config.time_24hr ? (12 + hours) % 12 + 12 * int(hours % 12 === 0) : hours);
-    self.minuteElement.value = pad(minutes);
-    if (self.amPM !== void 0)
-      self.amPM.textContent = self.l10n.amPM[int(hours >= 12)];
-    if (self.secondElement !== void 0)
-      self.secondElement.value = pad(seconds);
-  }
-  function onYearInput(event) {
-    var eventTarget = getEventTarget(event);
-    var year = parseInt(eventTarget.value) + (event.delta || 0);
-    if (year / 1e3 > 1 || event.key === "Enter" && !/[^\d]/.test(year.toString())) {
-      changeYear(year);
-    }
-  }
-  function bind(element2, event, handler, options2) {
-    if (event instanceof Array)
-      return event.forEach(function(ev) {
-        return bind(element2, ev, handler, options2);
-      });
-    if (element2 instanceof Array)
-      return element2.forEach(function(el) {
-        return bind(el, event, handler, options2);
-      });
-    element2.addEventListener(event, handler, options2);
-    self._handlers.push({
-      remove: function() {
-        return element2.removeEventListener(event, handler, options2);
-      }
-    });
-  }
-  function triggerChange() {
-    triggerEvent("onChange");
-  }
-  function bindEvents() {
-    if (self.config.wrap) {
-      ["open", "close", "toggle", "clear"].forEach(function(evt) {
-        Array.prototype.forEach.call(self.element.querySelectorAll("[data-" + evt + "]"), function(el) {
-          return bind(el, "click", self[evt]);
-        });
-      });
-    }
-    if (self.isMobile) {
-      setupMobile();
-      return;
-    }
-    var debouncedResize = debounce4(onResize, 50);
-    self._debouncedChange = debounce4(triggerChange, DEBOUNCED_CHANGE_MS);
-    if (self.daysContainer && !/iPhone|iPad|iPod/i.test(navigator.userAgent))
-      bind(self.daysContainer, "mouseover", function(e) {
-        if (self.config.mode === "range")
-          onMouseOver(getEventTarget(e));
-      });
-    bind(self._input, "keydown", onKeyDown);
-    if (self.calendarContainer !== void 0) {
-      bind(self.calendarContainer, "keydown", onKeyDown);
-    }
-    if (!self.config.inline && !self.config.static)
-      bind(window, "resize", debouncedResize);
-    if (window.ontouchstart !== void 0)
-      bind(window.document, "touchstart", documentClick);
-    else
-      bind(window.document, "mousedown", documentClick);
-    bind(window.document, "focus", documentClick, { capture: true });
-    if (self.config.clickOpens === true) {
-      bind(self._input, "focus", self.open);
-      bind(self._input, "click", self.open);
-    }
-    if (self.daysContainer !== void 0) {
-      bind(self.monthNav, "click", onMonthNavClick);
-      bind(self.monthNav, ["keyup", "increment"], onYearInput);
-      bind(self.daysContainer, "click", selectDate);
-    }
-    if (self.timeContainer !== void 0 && self.minuteElement !== void 0 && self.hourElement !== void 0) {
-      var selText = function(e) {
-        return getEventTarget(e).select();
-      };
-      bind(self.timeContainer, ["increment"], updateTime);
-      bind(self.timeContainer, "blur", updateTime, { capture: true });
-      bind(self.timeContainer, "click", timeIncrement);
-      bind([self.hourElement, self.minuteElement], ["focus", "click"], selText);
-      if (self.secondElement !== void 0)
-        bind(self.secondElement, "focus", function() {
-          return self.secondElement && self.secondElement.select();
-        });
-      if (self.amPM !== void 0) {
-        bind(self.amPM, "click", function(e) {
-          updateTime(e);
-        });
-      }
-    }
-    if (self.config.allowInput) {
-      bind(self._input, "blur", onBlur);
-    }
-  }
-  function jumpToDate(jumpDate, triggerChange2) {
-    var jumpTo = jumpDate !== void 0 ? self.parseDate(jumpDate) : self.latestSelectedDateObj || (self.config.minDate && self.config.minDate > self.now ? self.config.minDate : self.config.maxDate && self.config.maxDate < self.now ? self.config.maxDate : self.now);
-    var oldYear = self.currentYear;
-    var oldMonth = self.currentMonth;
-    try {
-      if (jumpTo !== void 0) {
-        self.currentYear = jumpTo.getFullYear();
-        self.currentMonth = jumpTo.getMonth();
-      }
-    } catch (e) {
-      e.message = "Invalid date supplied: " + jumpTo;
-      self.config.errorHandler(e);
-    }
-    if (triggerChange2 && self.currentYear !== oldYear) {
-      triggerEvent("onYearChange");
-      buildMonthSwitch();
-    }
-    if (triggerChange2 && (self.currentYear !== oldYear || self.currentMonth !== oldMonth)) {
-      triggerEvent("onMonthChange");
-    }
-    self.redraw();
-  }
-  function timeIncrement(e) {
-    var eventTarget = getEventTarget(e);
-    if (~eventTarget.className.indexOf("arrow"))
-      incrementNumInput(e, eventTarget.classList.contains("arrowUp") ? 1 : -1);
-  }
-  function incrementNumInput(e, delta, inputElem) {
-    var target = e && getEventTarget(e);
-    var input = inputElem || target && target.parentNode && target.parentNode.firstChild;
-    var event = createEvent("increment");
-    event.delta = delta;
-    input && input.dispatchEvent(event);
-  }
-  function build() {
-    var fragment = window.document.createDocumentFragment();
-    self.calendarContainer = createElement("div", "flatpickr-calendar");
-    self.calendarContainer.tabIndex = -1;
-    if (!self.config.noCalendar) {
-      fragment.appendChild(buildMonthNav());
-      self.innerContainer = createElement("div", "flatpickr-innerContainer");
-      if (self.config.weekNumbers) {
-        var _a = buildWeeks(), weekWrapper = _a.weekWrapper, weekNumbers = _a.weekNumbers;
-        self.innerContainer.appendChild(weekWrapper);
-        self.weekNumbers = weekNumbers;
-        self.weekWrapper = weekWrapper;
-      }
-      self.rContainer = createElement("div", "flatpickr-rContainer");
-      self.rContainer.appendChild(buildWeekdays());
-      if (!self.daysContainer) {
-        self.daysContainer = createElement("div", "flatpickr-days");
-        self.daysContainer.tabIndex = -1;
-      }
-      buildDays();
-      self.rContainer.appendChild(self.daysContainer);
-      self.innerContainer.appendChild(self.rContainer);
-      fragment.appendChild(self.innerContainer);
-    }
-    if (self.config.enableTime) {
-      fragment.appendChild(buildTime());
-    }
-    toggleClass(self.calendarContainer, "rangeMode", self.config.mode === "range");
-    toggleClass(self.calendarContainer, "animate", self.config.animate === true);
-    toggleClass(self.calendarContainer, "multiMonth", self.config.showMonths > 1);
-    self.calendarContainer.appendChild(fragment);
-    var customAppend = self.config.appendTo !== void 0 && self.config.appendTo.nodeType !== void 0;
-    if (self.config.inline || self.config.static) {
-      self.calendarContainer.classList.add(self.config.inline ? "inline" : "static");
-      if (self.config.inline) {
-        if (!customAppend && self.element.parentNode)
-          self.element.parentNode.insertBefore(self.calendarContainer, self._input.nextSibling);
-        else if (self.config.appendTo !== void 0)
-          self.config.appendTo.appendChild(self.calendarContainer);
-      }
-      if (self.config.static) {
-        var wrapper = createElement("div", "flatpickr-wrapper");
-        if (self.element.parentNode)
-          self.element.parentNode.insertBefore(wrapper, self.element);
-        wrapper.appendChild(self.element);
-        if (self.altInput)
-          wrapper.appendChild(self.altInput);
-        wrapper.appendChild(self.calendarContainer);
-      }
-    }
-    if (!self.config.static && !self.config.inline)
-      (self.config.appendTo !== void 0 ? self.config.appendTo : window.document.body).appendChild(self.calendarContainer);
-  }
-  function createDay(className, date, _dayNumber, i) {
-    var dateIsEnabled = isEnabled(date, true), dayElement = createElement("span", className, date.getDate().toString());
-    dayElement.dateObj = date;
-    dayElement.$i = i;
-    dayElement.setAttribute("aria-label", self.formatDate(date, self.config.ariaDateFormat));
-    if (className.indexOf("hidden") === -1 && compareDates(date, self.now) === 0) {
-      self.todayDateElem = dayElement;
-      dayElement.classList.add("today");
-      dayElement.setAttribute("aria-current", "date");
-    }
-    if (dateIsEnabled) {
-      dayElement.tabIndex = -1;
-      if (isDateSelected(date)) {
-        dayElement.classList.add("selected");
-        self.selectedDateElem = dayElement;
-        if (self.config.mode === "range") {
-          toggleClass(dayElement, "startRange", self.selectedDates[0] && compareDates(date, self.selectedDates[0], true) === 0);
-          toggleClass(dayElement, "endRange", self.selectedDates[1] && compareDates(date, self.selectedDates[1], true) === 0);
-          if (className === "nextMonthDay")
-            dayElement.classList.add("inRange");
-        }
-      }
-    } else {
-      dayElement.classList.add("flatpickr-disabled");
-    }
-    if (self.config.mode === "range") {
-      if (isDateInRange(date) && !isDateSelected(date))
-        dayElement.classList.add("inRange");
-    }
-    if (self.weekNumbers && self.config.showMonths === 1 && className !== "prevMonthDay" && i % 7 === 6) {
-      self.weekNumbers.insertAdjacentHTML("beforeend", "<span class='flatpickr-day'>" + self.config.getWeek(date) + "</span>");
-    }
-    triggerEvent("onDayCreate", dayElement);
-    return dayElement;
-  }
-  function focusOnDayElem(targetNode) {
-    targetNode.focus();
-    if (self.config.mode === "range")
-      onMouseOver(targetNode);
-  }
-  function getFirstAvailableDay(delta) {
-    var startMonth = delta > 0 ? 0 : self.config.showMonths - 1;
-    var endMonth = delta > 0 ? self.config.showMonths : -1;
-    for (var m = startMonth; m != endMonth; m += delta) {
-      var month = self.daysContainer.children[m];
-      var startIndex = delta > 0 ? 0 : month.children.length - 1;
-      var endIndex = delta > 0 ? month.children.length : -1;
-      for (var i = startIndex; i != endIndex; i += delta) {
-        var c = month.children[i];
-        if (c.className.indexOf("hidden") === -1 && isEnabled(c.dateObj))
-          return c;
-      }
-    }
-    return void 0;
-  }
-  function getNextAvailableDay(current, delta) {
-    var givenMonth = current.className.indexOf("Month") === -1 ? current.dateObj.getMonth() : self.currentMonth;
-    var endMonth = delta > 0 ? self.config.showMonths : -1;
-    var loopDelta = delta > 0 ? 1 : -1;
-    for (var m = givenMonth - self.currentMonth; m != endMonth; m += loopDelta) {
-      var month = self.daysContainer.children[m];
-      var startIndex = givenMonth - self.currentMonth === m ? current.$i + delta : delta < 0 ? month.children.length - 1 : 0;
-      var numMonthDays = month.children.length;
-      for (var i = startIndex; i >= 0 && i < numMonthDays && i != (delta > 0 ? numMonthDays : -1); i += loopDelta) {
-        var c = month.children[i];
-        if (c.className.indexOf("hidden") === -1 && isEnabled(c.dateObj) && Math.abs(current.$i - i) >= Math.abs(delta))
-          return focusOnDayElem(c);
-      }
-    }
-    self.changeMonth(loopDelta);
-    focusOnDay(getFirstAvailableDay(loopDelta), 0);
-    return void 0;
-  }
-  function focusOnDay(current, offset2) {
-    var activeElement = getClosestActiveElement();
-    var dayFocused = isInView(activeElement || document.body);
-    var startElem = current !== void 0 ? current : dayFocused ? activeElement : self.selectedDateElem !== void 0 && isInView(self.selectedDateElem) ? self.selectedDateElem : self.todayDateElem !== void 0 && isInView(self.todayDateElem) ? self.todayDateElem : getFirstAvailableDay(offset2 > 0 ? 1 : -1);
-    if (startElem === void 0) {
-      self._input.focus();
-    } else if (!dayFocused) {
-      focusOnDayElem(startElem);
-    } else {
-      getNextAvailableDay(startElem, offset2);
-    }
-  }
-  function buildMonthDays(year, month) {
-    var firstOfMonth = (new Date(year, month, 1).getDay() - self.l10n.firstDayOfWeek + 7) % 7;
-    var prevMonthDays = self.utils.getDaysInMonth((month - 1 + 12) % 12, year);
-    var daysInMonth = self.utils.getDaysInMonth(month, year), days = window.document.createDocumentFragment(), isMultiMonth = self.config.showMonths > 1, prevMonthDayClass = isMultiMonth ? "prevMonthDay hidden" : "prevMonthDay", nextMonthDayClass = isMultiMonth ? "nextMonthDay hidden" : "nextMonthDay";
-    var dayNumber = prevMonthDays + 1 - firstOfMonth, dayIndex = 0;
-    for (; dayNumber <= prevMonthDays; dayNumber++, dayIndex++) {
-      days.appendChild(createDay("flatpickr-day " + prevMonthDayClass, new Date(year, month - 1, dayNumber), dayNumber, dayIndex));
-    }
-    for (dayNumber = 1; dayNumber <= daysInMonth; dayNumber++, dayIndex++) {
-      days.appendChild(createDay("flatpickr-day", new Date(year, month, dayNumber), dayNumber, dayIndex));
-    }
-    for (var dayNum = daysInMonth + 1; dayNum <= 42 - firstOfMonth && (self.config.showMonths === 1 || dayIndex % 7 !== 0); dayNum++, dayIndex++) {
-      days.appendChild(createDay("flatpickr-day " + nextMonthDayClass, new Date(year, month + 1, dayNum % daysInMonth), dayNum, dayIndex));
-    }
-    var dayContainer = createElement("div", "dayContainer");
-    dayContainer.appendChild(days);
-    return dayContainer;
-  }
-  function buildDays() {
-    if (self.daysContainer === void 0) {
-      return;
-    }
-    clearNode(self.daysContainer);
-    if (self.weekNumbers)
-      clearNode(self.weekNumbers);
-    var frag = document.createDocumentFragment();
-    for (var i = 0; i < self.config.showMonths; i++) {
-      var d = new Date(self.currentYear, self.currentMonth, 1);
-      d.setMonth(self.currentMonth + i);
-      frag.appendChild(buildMonthDays(d.getFullYear(), d.getMonth()));
-    }
-    self.daysContainer.appendChild(frag);
-    self.days = self.daysContainer.firstChild;
-    if (self.config.mode === "range" && self.selectedDates.length === 1) {
-      onMouseOver();
-    }
-  }
-  function buildMonthSwitch() {
-    if (self.config.showMonths > 1 || self.config.monthSelectorType !== "dropdown")
-      return;
-    var shouldBuildMonth = function(month2) {
-      if (self.config.minDate !== void 0 && self.currentYear === self.config.minDate.getFullYear() && month2 < self.config.minDate.getMonth()) {
-        return false;
-      }
-      return !(self.config.maxDate !== void 0 && self.currentYear === self.config.maxDate.getFullYear() && month2 > self.config.maxDate.getMonth());
-    };
-    self.monthsDropdownContainer.tabIndex = -1;
-    self.monthsDropdownContainer.innerHTML = "";
-    for (var i = 0; i < 12; i++) {
-      if (!shouldBuildMonth(i))
-        continue;
-      var month = createElement("option", "flatpickr-monthDropdown-month");
-      month.value = new Date(self.currentYear, i).getMonth().toString();
-      month.textContent = monthToStr(i, self.config.shorthandCurrentMonth, self.l10n);
-      month.tabIndex = -1;
-      if (self.currentMonth === i) {
-        month.selected = true;
-      }
-      self.monthsDropdownContainer.appendChild(month);
-    }
-  }
-  function buildMonth() {
-    var container = createElement("div", "flatpickr-month");
-    var monthNavFragment = window.document.createDocumentFragment();
-    var monthElement;
-    if (self.config.showMonths > 1 || self.config.monthSelectorType === "static") {
-      monthElement = createElement("span", "cur-month");
-    } else {
-      self.monthsDropdownContainer = createElement("select", "flatpickr-monthDropdown-months");
-      self.monthsDropdownContainer.setAttribute("aria-label", self.l10n.monthAriaLabel);
-      bind(self.monthsDropdownContainer, "change", function(e) {
-        var target = getEventTarget(e);
-        var selectedMonth = parseInt(target.value, 10);
-        self.changeMonth(selectedMonth - self.currentMonth);
-        triggerEvent("onMonthChange");
-      });
-      buildMonthSwitch();
-      monthElement = self.monthsDropdownContainer;
-    }
-    var yearInput = createNumberInput("cur-year", { tabindex: "-1" });
-    var yearElement = yearInput.getElementsByTagName("input")[0];
-    yearElement.setAttribute("aria-label", self.l10n.yearAriaLabel);
-    if (self.config.minDate) {
-      yearElement.setAttribute("min", self.config.minDate.getFullYear().toString());
-    }
-    if (self.config.maxDate) {
-      yearElement.setAttribute("max", self.config.maxDate.getFullYear().toString());
-      yearElement.disabled = !!self.config.minDate && self.config.minDate.getFullYear() === self.config.maxDate.getFullYear();
-    }
-    var currentMonth = createElement("div", "flatpickr-current-month");
-    currentMonth.appendChild(monthElement);
-    currentMonth.appendChild(yearInput);
-    monthNavFragment.appendChild(currentMonth);
-    container.appendChild(monthNavFragment);
-    return {
-      container,
-      yearElement,
-      monthElement
-    };
-  }
-  function buildMonths() {
-    clearNode(self.monthNav);
-    self.monthNav.appendChild(self.prevMonthNav);
-    if (self.config.showMonths) {
-      self.yearElements = [];
-      self.monthElements = [];
-    }
-    for (var m = self.config.showMonths; m--; ) {
-      var month = buildMonth();
-      self.yearElements.push(month.yearElement);
-      self.monthElements.push(month.monthElement);
-      self.monthNav.appendChild(month.container);
-    }
-    self.monthNav.appendChild(self.nextMonthNav);
-  }
-  function buildMonthNav() {
-    self.monthNav = createElement("div", "flatpickr-months");
-    self.yearElements = [];
-    self.monthElements = [];
-    self.prevMonthNav = createElement("span", "flatpickr-prev-month");
-    self.prevMonthNav.innerHTML = self.config.prevArrow;
-    self.nextMonthNav = createElement("span", "flatpickr-next-month");
-    self.nextMonthNav.innerHTML = self.config.nextArrow;
-    buildMonths();
-    Object.defineProperty(self, "_hidePrevMonthArrow", {
-      get: function() {
-        return self.__hidePrevMonthArrow;
-      },
-      set: function(bool) {
-        if (self.__hidePrevMonthArrow !== bool) {
-          toggleClass(self.prevMonthNav, "flatpickr-disabled", bool);
-          self.__hidePrevMonthArrow = bool;
-        }
-      }
-    });
-    Object.defineProperty(self, "_hideNextMonthArrow", {
-      get: function() {
-        return self.__hideNextMonthArrow;
-      },
-      set: function(bool) {
-        if (self.__hideNextMonthArrow !== bool) {
-          toggleClass(self.nextMonthNav, "flatpickr-disabled", bool);
-          self.__hideNextMonthArrow = bool;
-        }
-      }
-    });
-    self.currentYearElement = self.yearElements[0];
-    updateNavigationCurrentMonth();
-    return self.monthNav;
-  }
-  function buildTime() {
-    self.calendarContainer.classList.add("hasTime");
-    if (self.config.noCalendar)
-      self.calendarContainer.classList.add("noCalendar");
-    var defaults2 = getDefaultHours(self.config);
-    self.timeContainer = createElement("div", "flatpickr-time");
-    self.timeContainer.tabIndex = -1;
-    var separator2 = createElement("span", "flatpickr-time-separator", ":");
-    var hourInput = createNumberInput("flatpickr-hour", {
-      "aria-label": self.l10n.hourAriaLabel
-    });
-    self.hourElement = hourInput.getElementsByTagName("input")[0];
-    var minuteInput = createNumberInput("flatpickr-minute", {
-      "aria-label": self.l10n.minuteAriaLabel
-    });
-    self.minuteElement = minuteInput.getElementsByTagName("input")[0];
-    self.hourElement.tabIndex = self.minuteElement.tabIndex = -1;
-    self.hourElement.value = pad(self.latestSelectedDateObj ? self.latestSelectedDateObj.getHours() : self.config.time_24hr ? defaults2.hours : military2ampm(defaults2.hours));
-    self.minuteElement.value = pad(self.latestSelectedDateObj ? self.latestSelectedDateObj.getMinutes() : defaults2.minutes);
-    self.hourElement.setAttribute("step", self.config.hourIncrement.toString());
-    self.minuteElement.setAttribute("step", self.config.minuteIncrement.toString());
-    self.hourElement.setAttribute("min", self.config.time_24hr ? "0" : "1");
-    self.hourElement.setAttribute("max", self.config.time_24hr ? "23" : "12");
-    self.hourElement.setAttribute("maxlength", "2");
-    self.minuteElement.setAttribute("min", "0");
-    self.minuteElement.setAttribute("max", "59");
-    self.minuteElement.setAttribute("maxlength", "2");
-    self.timeContainer.appendChild(hourInput);
-    self.timeContainer.appendChild(separator2);
-    self.timeContainer.appendChild(minuteInput);
-    if (self.config.time_24hr)
-      self.timeContainer.classList.add("time24hr");
-    if (self.config.enableSeconds) {
-      self.timeContainer.classList.add("hasSeconds");
-      var secondInput = createNumberInput("flatpickr-second");
-      self.secondElement = secondInput.getElementsByTagName("input")[0];
-      self.secondElement.value = pad(self.latestSelectedDateObj ? self.latestSelectedDateObj.getSeconds() : defaults2.seconds);
-      self.secondElement.setAttribute("step", self.minuteElement.getAttribute("step"));
-      self.secondElement.setAttribute("min", "0");
-      self.secondElement.setAttribute("max", "59");
-      self.secondElement.setAttribute("maxlength", "2");
-      self.timeContainer.appendChild(createElement("span", "flatpickr-time-separator", ":"));
-      self.timeContainer.appendChild(secondInput);
-    }
-    if (!self.config.time_24hr) {
-      self.amPM = createElement("span", "flatpickr-am-pm", self.l10n.amPM[int((self.latestSelectedDateObj ? self.hourElement.value : self.config.defaultHour) > 11)]);
-      self.amPM.title = self.l10n.toggleTitle;
-      self.amPM.tabIndex = -1;
-      self.timeContainer.appendChild(self.amPM);
-    }
-    return self.timeContainer;
-  }
-  function buildWeekdays() {
-    if (!self.weekdayContainer)
-      self.weekdayContainer = createElement("div", "flatpickr-weekdays");
-    else
-      clearNode(self.weekdayContainer);
-    for (var i = self.config.showMonths; i--; ) {
-      var container = createElement("div", "flatpickr-weekdaycontainer");
-      self.weekdayContainer.appendChild(container);
-    }
-    updateWeekdays();
-    return self.weekdayContainer;
-  }
-  function updateWeekdays() {
-    if (!self.weekdayContainer) {
-      return;
-    }
-    var firstDayOfWeek = self.l10n.firstDayOfWeek;
-    var weekdays = __spreadArrays(self.l10n.weekdays.shorthand);
-    if (firstDayOfWeek > 0 && firstDayOfWeek < weekdays.length) {
-      weekdays = __spreadArrays(weekdays.splice(firstDayOfWeek, weekdays.length), weekdays.splice(0, firstDayOfWeek));
-    }
-    for (var i = self.config.showMonths; i--; ) {
-      self.weekdayContainer.children[i].innerHTML = "\n      <span class='flatpickr-weekday'>\n        " + weekdays.join("</span><span class='flatpickr-weekday'>") + "\n      </span>\n      ";
-    }
-  }
-  function buildWeeks() {
-    self.calendarContainer.classList.add("hasWeeks");
-    var weekWrapper = createElement("div", "flatpickr-weekwrapper");
-    weekWrapper.appendChild(createElement("span", "flatpickr-weekday", self.l10n.weekAbbreviation));
-    var weekNumbers = createElement("div", "flatpickr-weeks");
-    weekWrapper.appendChild(weekNumbers);
-    return {
-      weekWrapper,
-      weekNumbers
-    };
-  }
-  function changeMonth(value, isOffset) {
-    if (isOffset === void 0) {
-      isOffset = true;
-    }
-    var delta = isOffset ? value : value - self.currentMonth;
-    if (delta < 0 && self._hidePrevMonthArrow === true || delta > 0 && self._hideNextMonthArrow === true)
-      return;
-    self.currentMonth += delta;
-    if (self.currentMonth < 0 || self.currentMonth > 11) {
-      self.currentYear += self.currentMonth > 11 ? 1 : -1;
-      self.currentMonth = (self.currentMonth + 12) % 12;
-      triggerEvent("onYearChange");
-      buildMonthSwitch();
-    }
-    buildDays();
-    triggerEvent("onMonthChange");
-    updateNavigationCurrentMonth();
-  }
-  function clear(triggerChangeEvent, toInitial) {
-    if (triggerChangeEvent === void 0) {
-      triggerChangeEvent = true;
-    }
-    if (toInitial === void 0) {
-      toInitial = true;
-    }
-    self.input.value = "";
-    if (self.altInput !== void 0)
-      self.altInput.value = "";
-    if (self.mobileInput !== void 0)
-      self.mobileInput.value = "";
-    self.selectedDates = [];
-    self.latestSelectedDateObj = void 0;
-    if (toInitial === true) {
-      self.currentYear = self._initialDate.getFullYear();
-      self.currentMonth = self._initialDate.getMonth();
-    }
-    if (self.config.enableTime === true) {
-      var _a = getDefaultHours(self.config), hours = _a.hours, minutes = _a.minutes, seconds = _a.seconds;
-      setHours(hours, minutes, seconds);
-    }
-    self.redraw();
-    if (triggerChangeEvent)
-      triggerEvent("onChange");
-  }
-  function close() {
-    self.isOpen = false;
-    if (!self.isMobile) {
-      if (self.calendarContainer !== void 0) {
-        self.calendarContainer.classList.remove("open");
-      }
-      if (self._input !== void 0) {
-        self._input.classList.remove("active");
-      }
-    }
-    triggerEvent("onClose");
-  }
-  function destroy() {
-    if (self.config !== void 0)
-      triggerEvent("onDestroy");
-    for (var i = self._handlers.length; i--; ) {
-      self._handlers[i].remove();
-    }
-    self._handlers = [];
-    if (self.mobileInput) {
-      if (self.mobileInput.parentNode)
-        self.mobileInput.parentNode.removeChild(self.mobileInput);
-      self.mobileInput = void 0;
-    } else if (self.calendarContainer && self.calendarContainer.parentNode) {
-      if (self.config.static && self.calendarContainer.parentNode) {
-        var wrapper = self.calendarContainer.parentNode;
-        wrapper.lastChild && wrapper.removeChild(wrapper.lastChild);
-        if (wrapper.parentNode) {
-          while (wrapper.firstChild)
-            wrapper.parentNode.insertBefore(wrapper.firstChild, wrapper);
-          wrapper.parentNode.removeChild(wrapper);
-        }
-      } else
-        self.calendarContainer.parentNode.removeChild(self.calendarContainer);
-    }
-    if (self.altInput) {
-      self.input.type = "text";
-      if (self.altInput.parentNode)
-        self.altInput.parentNode.removeChild(self.altInput);
-      delete self.altInput;
-    }
-    if (self.input) {
-      self.input.type = self.input._type;
-      self.input.classList.remove("flatpickr-input");
-      self.input.removeAttribute("readonly");
-    }
-    [
-      "_showTimeInput",
-      "latestSelectedDateObj",
-      "_hideNextMonthArrow",
-      "_hidePrevMonthArrow",
-      "__hideNextMonthArrow",
-      "__hidePrevMonthArrow",
-      "isMobile",
-      "isOpen",
-      "selectedDateElem",
-      "minDateHasTime",
-      "maxDateHasTime",
-      "days",
-      "daysContainer",
-      "_input",
-      "_positionElement",
-      "innerContainer",
-      "rContainer",
-      "monthNav",
-      "todayDateElem",
-      "calendarContainer",
-      "weekdayContainer",
-      "prevMonthNav",
-      "nextMonthNav",
-      "monthsDropdownContainer",
-      "currentMonthElement",
-      "currentYearElement",
-      "navigationCurrentMonth",
-      "selectedDateElem",
-      "config"
-    ].forEach(function(k) {
-      try {
-        delete self[k];
-      } catch (_) {
-      }
-    });
-  }
-  function isCalendarElem(elem) {
-    return self.calendarContainer.contains(elem);
-  }
-  function documentClick(e) {
-    if (self.isOpen && !self.config.inline) {
-      var eventTarget_1 = getEventTarget(e);
-      var isCalendarElement = isCalendarElem(eventTarget_1);
-      var isInput = eventTarget_1 === self.input || eventTarget_1 === self.altInput || self.element.contains(eventTarget_1) || e.path && e.path.indexOf && (~e.path.indexOf(self.input) || ~e.path.indexOf(self.altInput));
-      var lostFocus = !isInput && !isCalendarElement && !isCalendarElem(e.relatedTarget);
-      var isIgnored = !self.config.ignoredFocusElements.some(function(elem) {
-        return elem.contains(eventTarget_1);
-      });
-      if (lostFocus && isIgnored) {
-        if (self.config.allowInput) {
-          self.setDate(self._input.value, false, self.config.altInput ? self.config.altFormat : self.config.dateFormat);
-        }
-        if (self.timeContainer !== void 0 && self.minuteElement !== void 0 && self.hourElement !== void 0 && self.input.value !== "" && self.input.value !== void 0) {
-          updateTime();
-        }
-        self.close();
-        if (self.config && self.config.mode === "range" && self.selectedDates.length === 1)
-          self.clear(false);
-      }
-    }
-  }
-  function changeYear(newYear) {
-    if (!newYear || self.config.minDate && newYear < self.config.minDate.getFullYear() || self.config.maxDate && newYear > self.config.maxDate.getFullYear())
-      return;
-    var newYearNum = newYear, isNewYear = self.currentYear !== newYearNum;
-    self.currentYear = newYearNum || self.currentYear;
-    if (self.config.maxDate && self.currentYear === self.config.maxDate.getFullYear()) {
-      self.currentMonth = Math.min(self.config.maxDate.getMonth(), self.currentMonth);
-    } else if (self.config.minDate && self.currentYear === self.config.minDate.getFullYear()) {
-      self.currentMonth = Math.max(self.config.minDate.getMonth(), self.currentMonth);
-    }
-    if (isNewYear) {
-      self.redraw();
-      triggerEvent("onYearChange");
-      buildMonthSwitch();
-    }
-  }
-  function isEnabled(date, timeless) {
-    var _a;
-    if (timeless === void 0) {
-      timeless = true;
-    }
-    var dateToCheck = self.parseDate(date, void 0, timeless);
-    if (self.config.minDate && dateToCheck && compareDates(dateToCheck, self.config.minDate, timeless !== void 0 ? timeless : !self.minDateHasTime) < 0 || self.config.maxDate && dateToCheck && compareDates(dateToCheck, self.config.maxDate, timeless !== void 0 ? timeless : !self.maxDateHasTime) > 0)
-      return false;
-    if (!self.config.enable && self.config.disable.length === 0)
-      return true;
-    if (dateToCheck === void 0)
-      return false;
-    var bool = !!self.config.enable, array = (_a = self.config.enable) !== null && _a !== void 0 ? _a : self.config.disable;
-    for (var i = 0, d = void 0; i < array.length; i++) {
-      d = array[i];
-      if (typeof d === "function" && d(dateToCheck))
-        return bool;
-      else if (d instanceof Date && dateToCheck !== void 0 && d.getTime() === dateToCheck.getTime())
-        return bool;
-      else if (typeof d === "string") {
-        var parsed = self.parseDate(d, void 0, true);
-        return parsed && parsed.getTime() === dateToCheck.getTime() ? bool : !bool;
-      } else if (typeof d === "object" && dateToCheck !== void 0 && d.from && d.to && dateToCheck.getTime() >= d.from.getTime() && dateToCheck.getTime() <= d.to.getTime())
-        return bool;
-    }
-    return !bool;
-  }
-  function isInView(elem) {
-    if (self.daysContainer !== void 0)
-      return elem.className.indexOf("hidden") === -1 && elem.className.indexOf("flatpickr-disabled") === -1 && self.daysContainer.contains(elem);
-    return false;
-  }
-  function onBlur(e) {
-    var isInput = e.target === self._input;
-    var valueChanged = self._input.value.trimEnd() !== getDateStr();
-    if (isInput && valueChanged && !(e.relatedTarget && isCalendarElem(e.relatedTarget))) {
-      self.setDate(self._input.value, true, e.target === self.altInput ? self.config.altFormat : self.config.dateFormat);
-    }
-  }
-  function onKeyDown(e) {
-    var eventTarget = getEventTarget(e);
-    var isInput = self.config.wrap ? element.contains(eventTarget) : eventTarget === self._input;
-    var allowInput = self.config.allowInput;
-    var allowKeydown = self.isOpen && (!allowInput || !isInput);
-    var allowInlineKeydown = self.config.inline && isInput && !allowInput;
-    if (e.keyCode === 13 && isInput) {
-      if (allowInput) {
-        self.setDate(self._input.value, true, eventTarget === self.altInput ? self.config.altFormat : self.config.dateFormat);
-        self.close();
-        return eventTarget.blur();
-      } else {
-        self.open();
-      }
-    } else if (isCalendarElem(eventTarget) || allowKeydown || allowInlineKeydown) {
-      var isTimeObj = !!self.timeContainer && self.timeContainer.contains(eventTarget);
-      switch (e.keyCode) {
-        case 13:
-          if (isTimeObj) {
-            e.preventDefault();
-            updateTime();
-            focusAndClose();
-          } else
-            selectDate(e);
-          break;
-        case 27:
-          e.preventDefault();
-          focusAndClose();
-          break;
-        case 8:
-        case 46:
-          if (isInput && !self.config.allowInput) {
-            e.preventDefault();
-            self.clear();
-          }
-          break;
-        case 37:
-        case 39:
-          if (!isTimeObj && !isInput) {
-            e.preventDefault();
-            var activeElement = getClosestActiveElement();
-            if (self.daysContainer !== void 0 && (allowInput === false || activeElement && isInView(activeElement))) {
-              var delta_1 = e.keyCode === 39 ? 1 : -1;
-              if (!e.ctrlKey)
-                focusOnDay(void 0, delta_1);
-              else {
-                e.stopPropagation();
-                changeMonth(delta_1);
-                focusOnDay(getFirstAvailableDay(1), 0);
-              }
-            }
-          } else if (self.hourElement)
-            self.hourElement.focus();
-          break;
-        case 38:
-        case 40:
-          e.preventDefault();
-          var delta = e.keyCode === 40 ? 1 : -1;
-          if (self.daysContainer && eventTarget.$i !== void 0 || eventTarget === self.input || eventTarget === self.altInput) {
-            if (e.ctrlKey) {
-              e.stopPropagation();
-              changeYear(self.currentYear - delta);
-              focusOnDay(getFirstAvailableDay(1), 0);
-            } else if (!isTimeObj)
-              focusOnDay(void 0, delta * 7);
-          } else if (eventTarget === self.currentYearElement) {
-            changeYear(self.currentYear - delta);
-          } else if (self.config.enableTime) {
-            if (!isTimeObj && self.hourElement)
-              self.hourElement.focus();
-            updateTime(e);
-            self._debouncedChange();
-          }
-          break;
-        case 9:
-          if (isTimeObj) {
-            var elems = [
-              self.hourElement,
-              self.minuteElement,
-              self.secondElement,
-              self.amPM
-            ].concat(self.pluginElements).filter(function(x) {
-              return x;
-            });
-            var i = elems.indexOf(eventTarget);
-            if (i !== -1) {
-              var target = elems[i + (e.shiftKey ? -1 : 1)];
-              e.preventDefault();
-              (target || self._input).focus();
-            }
-          } else if (!self.config.noCalendar && self.daysContainer && self.daysContainer.contains(eventTarget) && e.shiftKey) {
-            e.preventDefault();
-            self._input.focus();
-          }
-          break;
-        default:
-          break;
-      }
-    }
-    if (self.amPM !== void 0 && eventTarget === self.amPM) {
-      switch (e.key) {
-        case self.l10n.amPM[0].charAt(0):
-        case self.l10n.amPM[0].charAt(0).toLowerCase():
-          self.amPM.textContent = self.l10n.amPM[0];
-          setHoursFromInputs();
-          updateValue();
-          break;
-        case self.l10n.amPM[1].charAt(0):
-        case self.l10n.amPM[1].charAt(0).toLowerCase():
-          self.amPM.textContent = self.l10n.amPM[1];
-          setHoursFromInputs();
-          updateValue();
-          break;
-      }
-    }
-    if (isInput || isCalendarElem(eventTarget)) {
-      triggerEvent("onKeyDown", e);
-    }
-  }
-  function onMouseOver(elem, cellClass) {
-    if (cellClass === void 0) {
-      cellClass = "flatpickr-day";
-    }
-    if (self.selectedDates.length !== 1 || elem && (!elem.classList.contains(cellClass) || elem.classList.contains("flatpickr-disabled")))
-      return;
-    var hoverDate = elem ? elem.dateObj.getTime() : self.days.firstElementChild.dateObj.getTime(), initialDate = self.parseDate(self.selectedDates[0], void 0, true).getTime(), rangeStartDate = Math.min(hoverDate, self.selectedDates[0].getTime()), rangeEndDate = Math.max(hoverDate, self.selectedDates[0].getTime());
-    var containsDisabled = false;
-    var minRange = 0, maxRange = 0;
-    for (var t = rangeStartDate; t < rangeEndDate; t += duration.DAY) {
-      if (!isEnabled(new Date(t), true)) {
-        containsDisabled = containsDisabled || t > rangeStartDate && t < rangeEndDate;
-        if (t < initialDate && (!minRange || t > minRange))
-          minRange = t;
-        else if (t > initialDate && (!maxRange || t < maxRange))
-          maxRange = t;
-      }
-    }
-    var hoverableCells = Array.from(self.rContainer.querySelectorAll("*:nth-child(-n+" + self.config.showMonths + ") > ." + cellClass));
-    hoverableCells.forEach(function(dayElem) {
-      var date = dayElem.dateObj;
-      var timestamp2 = date.getTime();
-      var outOfRange = minRange > 0 && timestamp2 < minRange || maxRange > 0 && timestamp2 > maxRange;
-      if (outOfRange) {
-        dayElem.classList.add("notAllowed");
-        ["inRange", "startRange", "endRange"].forEach(function(c) {
-          dayElem.classList.remove(c);
-        });
-        return;
-      } else if (containsDisabled && !outOfRange)
-        return;
-      ["startRange", "inRange", "endRange", "notAllowed"].forEach(function(c) {
-        dayElem.classList.remove(c);
-      });
-      if (elem !== void 0) {
-        elem.classList.add(hoverDate <= self.selectedDates[0].getTime() ? "startRange" : "endRange");
-        if (initialDate < hoverDate && timestamp2 === initialDate)
-          dayElem.classList.add("startRange");
-        else if (initialDate > hoverDate && timestamp2 === initialDate)
-          dayElem.classList.add("endRange");
-        if (timestamp2 >= minRange && (maxRange === 0 || timestamp2 <= maxRange) && isBetween(timestamp2, initialDate, hoverDate))
-          dayElem.classList.add("inRange");
-      }
-    });
-  }
-  function onResize() {
-    if (self.isOpen && !self.config.static && !self.config.inline)
-      positionCalendar();
-  }
-  function open(e, positionElement) {
-    if (positionElement === void 0) {
-      positionElement = self._positionElement;
-    }
-    if (self.isMobile === true) {
-      if (e) {
-        e.preventDefault();
-        var eventTarget = getEventTarget(e);
-        if (eventTarget) {
-          eventTarget.blur();
-        }
-      }
-      if (self.mobileInput !== void 0) {
-        self.mobileInput.focus();
-        self.mobileInput.click();
-      }
-      triggerEvent("onOpen");
-      return;
-    } else if (self._input.disabled || self.config.inline) {
-      return;
-    }
-    var wasOpen = self.isOpen;
-    self.isOpen = true;
-    if (!wasOpen) {
-      self.calendarContainer.classList.add("open");
-      self._input.classList.add("active");
-      triggerEvent("onOpen");
-      positionCalendar(positionElement);
-    }
-    if (self.config.enableTime === true && self.config.noCalendar === true) {
-      if (self.config.allowInput === false && (e === void 0 || !self.timeContainer.contains(e.relatedTarget))) {
-        setTimeout(function() {
-          return self.hourElement.select();
-        }, 50);
-      }
-    }
-  }
-  function minMaxDateSetter(type) {
-    return function(date) {
-      var dateObj = self.config["_" + type + "Date"] = self.parseDate(date, self.config.dateFormat);
-      var inverseDateObj = self.config["_" + (type === "min" ? "max" : "min") + "Date"];
-      if (dateObj !== void 0) {
-        self[type === "min" ? "minDateHasTime" : "maxDateHasTime"] = dateObj.getHours() > 0 || dateObj.getMinutes() > 0 || dateObj.getSeconds() > 0;
-      }
-      if (self.selectedDates) {
-        self.selectedDates = self.selectedDates.filter(function(d) {
-          return isEnabled(d);
-        });
-        if (!self.selectedDates.length && type === "min")
-          setHoursFromDate(dateObj);
-        updateValue();
-      }
-      if (self.daysContainer) {
-        redraw();
-        if (dateObj !== void 0)
-          self.currentYearElement[type] = dateObj.getFullYear().toString();
-        else
-          self.currentYearElement.removeAttribute(type);
-        self.currentYearElement.disabled = !!inverseDateObj && dateObj !== void 0 && inverseDateObj.getFullYear() === dateObj.getFullYear();
-      }
-    };
-  }
-  function parseConfig() {
-    var boolOpts = [
-      "wrap",
-      "weekNumbers",
-      "allowInput",
-      "allowInvalidPreload",
-      "clickOpens",
-      "time_24hr",
-      "enableTime",
-      "noCalendar",
-      "altInput",
-      "shorthandCurrentMonth",
-      "inline",
-      "static",
-      "enableSeconds",
-      "disableMobile"
-    ];
-    var userConfig = __assign(__assign({}, JSON.parse(JSON.stringify(element.dataset || {}))), instanceConfig);
-    var formats2 = {};
-    self.config.parseDate = userConfig.parseDate;
-    self.config.formatDate = userConfig.formatDate;
-    Object.defineProperty(self.config, "enable", {
-      get: function() {
-        return self.config._enable;
-      },
-      set: function(dates) {
-        self.config._enable = parseDateRules(dates);
-      }
-    });
-    Object.defineProperty(self.config, "disable", {
-      get: function() {
-        return self.config._disable;
-      },
-      set: function(dates) {
-        self.config._disable = parseDateRules(dates);
-      }
-    });
-    var timeMode = userConfig.mode === "time";
-    if (!userConfig.dateFormat && (userConfig.enableTime || timeMode)) {
-      var defaultDateFormat = flatpickr.defaultConfig.dateFormat || defaults.dateFormat;
-      formats2.dateFormat = userConfig.noCalendar || timeMode ? "H:i" + (userConfig.enableSeconds ? ":S" : "") : defaultDateFormat + " H:i" + (userConfig.enableSeconds ? ":S" : "");
-    }
-    if (userConfig.altInput && (userConfig.enableTime || timeMode) && !userConfig.altFormat) {
-      var defaultAltFormat = flatpickr.defaultConfig.altFormat || defaults.altFormat;
-      formats2.altFormat = userConfig.noCalendar || timeMode ? "h:i" + (userConfig.enableSeconds ? ":S K" : " K") : defaultAltFormat + (" h:i" + (userConfig.enableSeconds ? ":S" : "") + " K");
-    }
-    Object.defineProperty(self.config, "minDate", {
-      get: function() {
-        return self.config._minDate;
-      },
-      set: minMaxDateSetter("min")
-    });
-    Object.defineProperty(self.config, "maxDate", {
-      get: function() {
-        return self.config._maxDate;
-      },
-      set: minMaxDateSetter("max")
-    });
-    var minMaxTimeSetter = function(type) {
-      return function(val) {
-        self.config[type === "min" ? "_minTime" : "_maxTime"] = self.parseDate(val, "H:i:S");
-      };
-    };
-    Object.defineProperty(self.config, "minTime", {
-      get: function() {
-        return self.config._minTime;
-      },
-      set: minMaxTimeSetter("min")
-    });
-    Object.defineProperty(self.config, "maxTime", {
-      get: function() {
-        return self.config._maxTime;
-      },
-      set: minMaxTimeSetter("max")
-    });
-    if (userConfig.mode === "time") {
-      self.config.noCalendar = true;
-      self.config.enableTime = true;
-    }
-    Object.assign(self.config, formats2, userConfig);
-    for (var i = 0; i < boolOpts.length; i++)
-      self.config[boolOpts[i]] = self.config[boolOpts[i]] === true || self.config[boolOpts[i]] === "true";
-    HOOKS.filter(function(hook) {
-      return self.config[hook] !== void 0;
-    }).forEach(function(hook) {
-      self.config[hook] = arrayify(self.config[hook] || []).map(bindToInstance);
-    });
-    self.isMobile = !self.config.disableMobile && !self.config.inline && self.config.mode === "single" && !self.config.disable.length && !self.config.enable && !self.config.weekNumbers && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    for (var i = 0; i < self.config.plugins.length; i++) {
-      var pluginConf = self.config.plugins[i](self) || {};
-      for (var key in pluginConf) {
-        if (HOOKS.indexOf(key) > -1) {
-          self.config[key] = arrayify(pluginConf[key]).map(bindToInstance).concat(self.config[key]);
-        } else if (typeof userConfig[key] === "undefined")
-          self.config[key] = pluginConf[key];
-      }
-    }
-    if (!userConfig.altInputClass) {
-      self.config.altInputClass = getInputElem().className + " " + self.config.altInputClass;
-    }
-    triggerEvent("onParseConfig");
-  }
-  function getInputElem() {
-    return self.config.wrap ? element.querySelector("[data-input]") : element;
-  }
-  function setupLocale() {
-    if (typeof self.config.locale !== "object" && typeof flatpickr.l10ns[self.config.locale] === "undefined")
-      self.config.errorHandler(new Error("flatpickr: invalid locale " + self.config.locale));
-    self.l10n = __assign(__assign({}, flatpickr.l10ns.default), typeof self.config.locale === "object" ? self.config.locale : self.config.locale !== "default" ? flatpickr.l10ns[self.config.locale] : void 0);
-    tokenRegex.D = "(" + self.l10n.weekdays.shorthand.join("|") + ")";
-    tokenRegex.l = "(" + self.l10n.weekdays.longhand.join("|") + ")";
-    tokenRegex.M = "(" + self.l10n.months.shorthand.join("|") + ")";
-    tokenRegex.F = "(" + self.l10n.months.longhand.join("|") + ")";
-    tokenRegex.K = "(" + self.l10n.amPM[0] + "|" + self.l10n.amPM[1] + "|" + self.l10n.amPM[0].toLowerCase() + "|" + self.l10n.amPM[1].toLowerCase() + ")";
-    var userConfig = __assign(__assign({}, instanceConfig), JSON.parse(JSON.stringify(element.dataset || {})));
-    if (userConfig.time_24hr === void 0 && flatpickr.defaultConfig.time_24hr === void 0) {
-      self.config.time_24hr = self.l10n.time_24hr;
-    }
-    self.formatDate = createDateFormatter(self);
-    self.parseDate = createDateParser({ config: self.config, l10n: self.l10n });
-  }
-  function positionCalendar(customPositionElement) {
-    if (typeof self.config.position === "function") {
-      return void self.config.position(self, customPositionElement);
-    }
-    if (self.calendarContainer === void 0)
-      return;
-    triggerEvent("onPreCalendarPosition");
-    var positionElement = customPositionElement || self._positionElement;
-    var calendarHeight = Array.prototype.reduce.call(self.calendarContainer.children, function(acc, child) {
-      return acc + child.offsetHeight;
-    }, 0), calendarWidth = self.calendarContainer.offsetWidth, configPos = self.config.position.split(" "), configPosVertical = configPos[0], configPosHorizontal = configPos.length > 1 ? configPos[1] : null, inputBounds = positionElement.getBoundingClientRect(), distanceFromBottom = window.innerHeight - inputBounds.bottom, showOnTop = configPosVertical === "above" || configPosVertical !== "below" && distanceFromBottom < calendarHeight && inputBounds.top > calendarHeight;
-    var top2 = window.pageYOffset + inputBounds.top + (!showOnTop ? positionElement.offsetHeight + 2 : -calendarHeight - 2);
-    toggleClass(self.calendarContainer, "arrowTop", !showOnTop);
-    toggleClass(self.calendarContainer, "arrowBottom", showOnTop);
-    if (self.config.inline)
-      return;
-    var left2 = window.pageXOffset + inputBounds.left;
-    var isCenter = false;
-    var isRight = false;
-    if (configPosHorizontal === "center") {
-      left2 -= (calendarWidth - inputBounds.width) / 2;
-      isCenter = true;
-    } else if (configPosHorizontal === "right") {
-      left2 -= calendarWidth - inputBounds.width;
-      isRight = true;
-    }
-    toggleClass(self.calendarContainer, "arrowLeft", !isCenter && !isRight);
-    toggleClass(self.calendarContainer, "arrowCenter", isCenter);
-    toggleClass(self.calendarContainer, "arrowRight", isRight);
-    var right2 = window.document.body.offsetWidth - (window.pageXOffset + inputBounds.right);
-    var rightMost = left2 + calendarWidth > window.document.body.offsetWidth;
-    var centerMost = right2 + calendarWidth > window.document.body.offsetWidth;
-    toggleClass(self.calendarContainer, "rightMost", rightMost);
-    if (self.config.static)
-      return;
-    self.calendarContainer.style.top = top2 + "px";
-    if (!rightMost) {
-      self.calendarContainer.style.left = left2 + "px";
-      self.calendarContainer.style.right = "auto";
-    } else if (!centerMost) {
-      self.calendarContainer.style.left = "auto";
-      self.calendarContainer.style.right = right2 + "px";
-    } else {
-      var doc = getDocumentStyleSheet();
-      if (doc === void 0)
-        return;
-      var bodyWidth = window.document.body.offsetWidth;
-      var centerLeft = Math.max(0, bodyWidth / 2 - calendarWidth / 2);
-      var centerBefore = ".flatpickr-calendar.centerMost:before";
-      var centerAfter = ".flatpickr-calendar.centerMost:after";
-      var centerIndex = doc.cssRules.length;
-      var centerStyle = "{left:" + inputBounds.left + "px;right:auto;}";
-      toggleClass(self.calendarContainer, "rightMost", false);
-      toggleClass(self.calendarContainer, "centerMost", true);
-      doc.insertRule(centerBefore + "," + centerAfter + centerStyle, centerIndex);
-      self.calendarContainer.style.left = centerLeft + "px";
-      self.calendarContainer.style.right = "auto";
-    }
-  }
-  function getDocumentStyleSheet() {
-    var editableSheet = null;
-    for (var i = 0; i < document.styleSheets.length; i++) {
-      var sheet = document.styleSheets[i];
-      if (!sheet.cssRules)
-        continue;
-      try {
-        sheet.cssRules;
-      } catch (err) {
-        continue;
-      }
-      editableSheet = sheet;
-      break;
-    }
-    return editableSheet != null ? editableSheet : createStyleSheet();
-  }
-  function createStyleSheet() {
-    var style = document.createElement("style");
-    document.head.appendChild(style);
-    return style.sheet;
-  }
-  function redraw() {
-    if (self.config.noCalendar || self.isMobile)
-      return;
-    buildMonthSwitch();
-    updateNavigationCurrentMonth();
-    buildDays();
-  }
-  function focusAndClose() {
-    self._input.focus();
-    if (window.navigator.userAgent.indexOf("MSIE") !== -1 || navigator.msMaxTouchPoints !== void 0) {
-      setTimeout(self.close, 0);
-    } else {
-      self.close();
-    }
-  }
-  function selectDate(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    var isSelectable = function(day) {
-      return day.classList && day.classList.contains("flatpickr-day") && !day.classList.contains("flatpickr-disabled") && !day.classList.contains("notAllowed");
-    };
-    var t = findParent(getEventTarget(e), isSelectable);
-    if (t === void 0)
-      return;
-    var target = t;
-    var selectedDate = self.latestSelectedDateObj = new Date(target.dateObj.getTime());
-    var shouldChangeMonth = (selectedDate.getMonth() < self.currentMonth || selectedDate.getMonth() > self.currentMonth + self.config.showMonths - 1) && self.config.mode !== "range";
-    self.selectedDateElem = target;
-    if (self.config.mode === "single")
-      self.selectedDates = [selectedDate];
-    else if (self.config.mode === "multiple") {
-      var selectedIndex = isDateSelected(selectedDate);
-      if (selectedIndex)
-        self.selectedDates.splice(parseInt(selectedIndex), 1);
-      else
-        self.selectedDates.push(selectedDate);
-    } else if (self.config.mode === "range") {
-      if (self.selectedDates.length === 2) {
-        self.clear(false, false);
-      }
-      self.latestSelectedDateObj = selectedDate;
-      self.selectedDates.push(selectedDate);
-      if (compareDates(selectedDate, self.selectedDates[0], true) !== 0)
-        self.selectedDates.sort(function(a, b) {
-          return a.getTime() - b.getTime();
-        });
-    }
-    setHoursFromInputs();
-    if (shouldChangeMonth) {
-      var isNewYear = self.currentYear !== selectedDate.getFullYear();
-      self.currentYear = selectedDate.getFullYear();
-      self.currentMonth = selectedDate.getMonth();
-      if (isNewYear) {
-        triggerEvent("onYearChange");
-        buildMonthSwitch();
-      }
-      triggerEvent("onMonthChange");
-    }
-    updateNavigationCurrentMonth();
-    buildDays();
-    updateValue();
-    if (!shouldChangeMonth && self.config.mode !== "range" && self.config.showMonths === 1)
-      focusOnDayElem(target);
-    else if (self.selectedDateElem !== void 0 && self.hourElement === void 0) {
-      self.selectedDateElem && self.selectedDateElem.focus();
-    }
-    if (self.hourElement !== void 0)
-      self.hourElement !== void 0 && self.hourElement.focus();
-    if (self.config.closeOnSelect) {
-      var single = self.config.mode === "single" && !self.config.enableTime;
-      var range = self.config.mode === "range" && self.selectedDates.length === 2 && !self.config.enableTime;
-      if (single || range) {
-        focusAndClose();
-      }
-    }
-    triggerChange();
-  }
-  var CALLBACKS = {
-    locale: [setupLocale, updateWeekdays],
-    showMonths: [buildMonths, setCalendarWidth, buildWeekdays],
-    minDate: [jumpToDate],
-    maxDate: [jumpToDate],
-    positionElement: [updatePositionElement],
-    clickOpens: [
-      function() {
-        if (self.config.clickOpens === true) {
-          bind(self._input, "focus", self.open);
-          bind(self._input, "click", self.open);
-        } else {
-          self._input.removeEventListener("focus", self.open);
-          self._input.removeEventListener("click", self.open);
-        }
-      }
-    ]
-  };
-  function set2(option, value) {
-    if (option !== null && typeof option === "object") {
-      Object.assign(self.config, option);
-      for (var key in option) {
-        if (CALLBACKS[key] !== void 0)
-          CALLBACKS[key].forEach(function(x) {
-            return x();
-          });
-      }
-    } else {
-      self.config[option] = value;
-      if (CALLBACKS[option] !== void 0)
-        CALLBACKS[option].forEach(function(x) {
-          return x();
-        });
-      else if (HOOKS.indexOf(option) > -1)
-        self.config[option] = arrayify(value);
-    }
-    self.redraw();
-    updateValue(true);
-  }
-  function setSelectedDate(inputDate, format) {
-    var dates = [];
-    if (inputDate instanceof Array)
-      dates = inputDate.map(function(d) {
-        return self.parseDate(d, format);
-      });
-    else if (inputDate instanceof Date || typeof inputDate === "number")
-      dates = [self.parseDate(inputDate, format)];
-    else if (typeof inputDate === "string") {
-      switch (self.config.mode) {
-        case "single":
-        case "time":
-          dates = [self.parseDate(inputDate, format)];
-          break;
-        case "multiple":
-          dates = inputDate.split(self.config.conjunction).map(function(date) {
-            return self.parseDate(date, format);
-          });
-          break;
-        case "range":
-          dates = inputDate.split(self.l10n.rangeSeparator).map(function(date) {
-            return self.parseDate(date, format);
-          });
-          break;
-        default:
-          break;
-      }
-    } else
-      self.config.errorHandler(new Error("Invalid date supplied: " + JSON.stringify(inputDate)));
-    self.selectedDates = self.config.allowInvalidPreload ? dates : dates.filter(function(d) {
-      return d instanceof Date && isEnabled(d, false);
-    });
-    if (self.config.mode === "range")
-      self.selectedDates.sort(function(a, b) {
-        return a.getTime() - b.getTime();
-      });
-  }
-  function setDate(date, triggerChange2, format) {
-    if (triggerChange2 === void 0) {
-      triggerChange2 = false;
-    }
-    if (format === void 0) {
-      format = self.config.dateFormat;
-    }
-    if (date !== 0 && !date || date instanceof Array && date.length === 0)
-      return self.clear(triggerChange2);
-    setSelectedDate(date, format);
-    self.latestSelectedDateObj = self.selectedDates[self.selectedDates.length - 1];
-    self.redraw();
-    jumpToDate(void 0, triggerChange2);
-    setHoursFromDate();
-    if (self.selectedDates.length === 0) {
-      self.clear(false);
-    }
-    updateValue(triggerChange2);
-    if (triggerChange2)
-      triggerEvent("onChange");
-  }
-  function parseDateRules(arr) {
-    return arr.slice().map(function(rule) {
-      if (typeof rule === "string" || typeof rule === "number" || rule instanceof Date) {
-        return self.parseDate(rule, void 0, true);
-      } else if (rule && typeof rule === "object" && rule.from && rule.to)
-        return {
-          from: self.parseDate(rule.from, void 0),
-          to: self.parseDate(rule.to, void 0)
-        };
-      return rule;
-    }).filter(function(x) {
-      return x;
-    });
-  }
-  function setupDates() {
-    self.selectedDates = [];
-    self.now = self.parseDate(self.config.now) || new Date();
-    var preloadedDate = self.config.defaultDate || ((self.input.nodeName === "INPUT" || self.input.nodeName === "TEXTAREA") && self.input.placeholder && self.input.value === self.input.placeholder ? null : self.input.value);
-    if (preloadedDate)
-      setSelectedDate(preloadedDate, self.config.dateFormat);
-    self._initialDate = self.selectedDates.length > 0 ? self.selectedDates[0] : self.config.minDate && self.config.minDate.getTime() > self.now.getTime() ? self.config.minDate : self.config.maxDate && self.config.maxDate.getTime() < self.now.getTime() ? self.config.maxDate : self.now;
-    self.currentYear = self._initialDate.getFullYear();
-    self.currentMonth = self._initialDate.getMonth();
-    if (self.selectedDates.length > 0)
-      self.latestSelectedDateObj = self.selectedDates[0];
-    if (self.config.minTime !== void 0)
-      self.config.minTime = self.parseDate(self.config.minTime, "H:i");
-    if (self.config.maxTime !== void 0)
-      self.config.maxTime = self.parseDate(self.config.maxTime, "H:i");
-    self.minDateHasTime = !!self.config.minDate && (self.config.minDate.getHours() > 0 || self.config.minDate.getMinutes() > 0 || self.config.minDate.getSeconds() > 0);
-    self.maxDateHasTime = !!self.config.maxDate && (self.config.maxDate.getHours() > 0 || self.config.maxDate.getMinutes() > 0 || self.config.maxDate.getSeconds() > 0);
-  }
-  function setupInputs() {
-    self.input = getInputElem();
-    if (!self.input) {
-      self.config.errorHandler(new Error("Invalid input element specified"));
-      return;
-    }
-    self.input._type = self.input.type;
-    self.input.type = "text";
-    self.input.classList.add("flatpickr-input");
-    self._input = self.input;
-    if (self.config.altInput) {
-      self.altInput = createElement(self.input.nodeName, self.config.altInputClass);
-      self._input = self.altInput;
-      self.altInput.placeholder = self.input.placeholder;
-      self.altInput.disabled = self.input.disabled;
-      self.altInput.required = self.input.required;
-      self.altInput.tabIndex = self.input.tabIndex;
-      self.altInput.type = "text";
-      self.input.setAttribute("type", "hidden");
-      if (!self.config.static && self.input.parentNode)
-        self.input.parentNode.insertBefore(self.altInput, self.input.nextSibling);
-    }
-    if (!self.config.allowInput)
-      self._input.setAttribute("readonly", "readonly");
-    updatePositionElement();
-  }
-  function updatePositionElement() {
-    self._positionElement = self.config.positionElement || self._input;
-  }
-  function setupMobile() {
-    var inputType = self.config.enableTime ? self.config.noCalendar ? "time" : "datetime-local" : "date";
-    self.mobileInput = createElement("input", self.input.className + " flatpickr-mobile");
-    self.mobileInput.tabIndex = 1;
-    self.mobileInput.type = inputType;
-    self.mobileInput.disabled = self.input.disabled;
-    self.mobileInput.required = self.input.required;
-    self.mobileInput.placeholder = self.input.placeholder;
-    self.mobileFormatStr = inputType === "datetime-local" ? "Y-m-d\\TH:i:S" : inputType === "date" ? "Y-m-d" : "H:i:S";
-    if (self.selectedDates.length > 0) {
-      self.mobileInput.defaultValue = self.mobileInput.value = self.formatDate(self.selectedDates[0], self.mobileFormatStr);
-    }
-    if (self.config.minDate)
-      self.mobileInput.min = self.formatDate(self.config.minDate, "Y-m-d");
-    if (self.config.maxDate)
-      self.mobileInput.max = self.formatDate(self.config.maxDate, "Y-m-d");
-    if (self.input.getAttribute("step"))
-      self.mobileInput.step = String(self.input.getAttribute("step"));
-    self.input.type = "hidden";
-    if (self.altInput !== void 0)
-      self.altInput.type = "hidden";
-    try {
-      if (self.input.parentNode)
-        self.input.parentNode.insertBefore(self.mobileInput, self.input.nextSibling);
-    } catch (_a) {
-    }
-    bind(self.mobileInput, "change", function(e) {
-      self.setDate(getEventTarget(e).value, false, self.mobileFormatStr);
-      triggerEvent("onChange");
-      triggerEvent("onClose");
-    });
-  }
-  function toggle(e) {
-    if (self.isOpen === true)
-      return self.close();
-    self.open(e);
-  }
-  function triggerEvent(event, data) {
-    if (self.config === void 0)
-      return;
-    var hooks = self.config[event];
-    if (hooks !== void 0 && hooks.length > 0) {
-      for (var i = 0; hooks[i] && i < hooks.length; i++)
-        hooks[i](self.selectedDates, self.input.value, self, data);
-    }
-    if (event === "onChange") {
-      self.input.dispatchEvent(createEvent("change"));
-      self.input.dispatchEvent(createEvent("input"));
-    }
-  }
-  function createEvent(name) {
-    var e = document.createEvent("Event");
-    e.initEvent(name, true, true);
-    return e;
-  }
-  function isDateSelected(date) {
-    for (var i = 0; i < self.selectedDates.length; i++) {
-      var selectedDate = self.selectedDates[i];
-      if (selectedDate instanceof Date && compareDates(selectedDate, date) === 0)
-        return "" + i;
-    }
-    return false;
-  }
-  function isDateInRange(date) {
-    if (self.config.mode !== "range" || self.selectedDates.length < 2)
-      return false;
-    return compareDates(date, self.selectedDates[0]) >= 0 && compareDates(date, self.selectedDates[1]) <= 0;
-  }
-  function updateNavigationCurrentMonth() {
-    if (self.config.noCalendar || self.isMobile || !self.monthNav)
-      return;
-    self.yearElements.forEach(function(yearElement, i) {
-      var d = new Date(self.currentYear, self.currentMonth, 1);
-      d.setMonth(self.currentMonth + i);
-      if (self.config.showMonths > 1 || self.config.monthSelectorType === "static") {
-        self.monthElements[i].textContent = monthToStr(d.getMonth(), self.config.shorthandCurrentMonth, self.l10n) + " ";
-      } else {
-        self.monthsDropdownContainer.value = d.getMonth().toString();
-      }
-      yearElement.value = d.getFullYear().toString();
-    });
-    self._hidePrevMonthArrow = self.config.minDate !== void 0 && (self.currentYear === self.config.minDate.getFullYear() ? self.currentMonth <= self.config.minDate.getMonth() : self.currentYear < self.config.minDate.getFullYear());
-    self._hideNextMonthArrow = self.config.maxDate !== void 0 && (self.currentYear === self.config.maxDate.getFullYear() ? self.currentMonth + 1 > self.config.maxDate.getMonth() : self.currentYear > self.config.maxDate.getFullYear());
-  }
-  function getDateStr(specificFormat) {
-    var format = specificFormat || (self.config.altInput ? self.config.altFormat : self.config.dateFormat);
-    return self.selectedDates.map(function(dObj) {
-      return self.formatDate(dObj, format);
-    }).filter(function(d, i, arr) {
-      return self.config.mode !== "range" || self.config.enableTime || arr.indexOf(d) === i;
-    }).join(self.config.mode !== "range" ? self.config.conjunction : self.l10n.rangeSeparator);
-  }
-  function updateValue(triggerChange2) {
-    if (triggerChange2 === void 0) {
-      triggerChange2 = true;
-    }
-    if (self.mobileInput !== void 0 && self.mobileFormatStr) {
-      self.mobileInput.value = self.latestSelectedDateObj !== void 0 ? self.formatDate(self.latestSelectedDateObj, self.mobileFormatStr) : "";
-    }
-    self.input.value = getDateStr(self.config.dateFormat);
-    if (self.altInput !== void 0) {
-      self.altInput.value = getDateStr(self.config.altFormat);
-    }
-    if (triggerChange2 !== false)
-      triggerEvent("onValueUpdate");
-  }
-  function onMonthNavClick(e) {
-    var eventTarget = getEventTarget(e);
-    var isPrevMonth = self.prevMonthNav.contains(eventTarget);
-    var isNextMonth = self.nextMonthNav.contains(eventTarget);
-    if (isPrevMonth || isNextMonth) {
-      changeMonth(isPrevMonth ? -1 : 1);
-    } else if (self.yearElements.indexOf(eventTarget) >= 0) {
-      eventTarget.select();
-    } else if (eventTarget.classList.contains("arrowUp")) {
-      self.changeYear(self.currentYear + 1);
-    } else if (eventTarget.classList.contains("arrowDown")) {
-      self.changeYear(self.currentYear - 1);
-    }
-  }
-  function timeWrapper(e) {
-    e.preventDefault();
-    var isKeyDown = e.type === "keydown", eventTarget = getEventTarget(e), input = eventTarget;
-    if (self.amPM !== void 0 && eventTarget === self.amPM) {
-      self.amPM.textContent = self.l10n.amPM[int(self.amPM.textContent === self.l10n.amPM[0])];
-    }
-    var min2 = parseFloat(input.getAttribute("min")), max2 = parseFloat(input.getAttribute("max")), step = parseFloat(input.getAttribute("step")), curValue = parseInt(input.value, 10), delta = e.delta || (isKeyDown ? e.which === 38 ? 1 : -1 : 0);
-    var newValue = curValue + step * delta;
-    if (typeof input.value !== "undefined" && input.value.length === 2) {
-      var isHourElem = input === self.hourElement, isMinuteElem = input === self.minuteElement;
-      if (newValue < min2) {
-        newValue = max2 + newValue + int(!isHourElem) + (int(isHourElem) && int(!self.amPM));
-        if (isMinuteElem)
-          incrementNumInput(void 0, -1, self.hourElement);
-      } else if (newValue > max2) {
-        newValue = input === self.hourElement ? newValue - max2 - int(!self.amPM) : min2;
-        if (isMinuteElem)
-          incrementNumInput(void 0, 1, self.hourElement);
-      }
-      if (self.amPM && isHourElem && (step === 1 ? newValue + curValue === 23 : Math.abs(newValue - curValue) > step)) {
-        self.amPM.textContent = self.l10n.amPM[int(self.amPM.textContent === self.l10n.amPM[0])];
-      }
-      input.value = pad(newValue);
-    }
-  }
-  init();
-  return self;
-}
-function _flatpickr(nodeList, config) {
-  var nodes = Array.prototype.slice.call(nodeList).filter(function(x) {
-    return x instanceof HTMLElement;
-  });
-  var instances = [];
-  for (var i = 0; i < nodes.length; i++) {
-    var node = nodes[i];
-    try {
-      if (node.getAttribute("data-fp-omit") !== null)
-        continue;
-      if (node._flatpickr !== void 0) {
-        node._flatpickr.destroy();
-        node._flatpickr = void 0;
-      }
-      node._flatpickr = FlatpickrInstance(node, config || {});
-      instances.push(node._flatpickr);
-    } catch (e) {
-      console.error(e);
-    }
-  }
-  return instances.length === 1 ? instances[0] : instances;
-}
-if (typeof HTMLElement !== "undefined" && typeof HTMLCollection !== "undefined" && typeof NodeList !== "undefined") {
-  HTMLCollection.prototype.flatpickr = NodeList.prototype.flatpickr = function(config) {
-    return _flatpickr(this, config);
-  };
-  HTMLElement.prototype.flatpickr = function(config) {
-    return _flatpickr([this], config);
-  };
-}
-var flatpickr = function(selector, config) {
-  if (typeof selector === "string") {
-    return _flatpickr(window.document.querySelectorAll(selector), config);
-  } else if (selector instanceof Node) {
-    return _flatpickr([selector], config);
-  } else {
-    return _flatpickr(selector, config);
-  }
-};
-flatpickr.defaultConfig = {};
-flatpickr.l10ns = {
-  en: __assign({}, default_default),
-  default: __assign({}, default_default)
-};
-flatpickr.localize = function(l10n) {
-  flatpickr.l10ns.default = __assign(__assign({}, flatpickr.l10ns.default), l10n);
-};
-flatpickr.setDefaults = function(config) {
-  flatpickr.defaultConfig = __assign(__assign({}, flatpickr.defaultConfig), config);
-};
-flatpickr.parseDate = createDateParser({});
-flatpickr.formatDate = createDateFormatter({});
-flatpickr.compareDates = compareDates;
-if (typeof jQuery !== "undefined" && typeof jQuery.fn !== "undefined") {
-  jQuery.fn.flatpickr = function(config) {
-    return _flatpickr(this, config);
-  };
-}
-Date.prototype.fp_incr = function(days) {
-  return new Date(this.getFullYear(), this.getMonth(), this.getDate() + (typeof days === "string" ? parseInt(days, 10) : days));
-};
-if (typeof window !== "undefined") {
-  window.flatpickr = flatpickr;
-}
-var esm_default = flatpickr;
-
-// src/modals/fields/DateModal.ts
 var DateModal = class extends BaseModal {
   constructor(plugin, file, field, eF, indexedPath, lineNumber = -1, asList = false, asBlockquote = false, previousModal) {
     var _a, _b;
@@ -11998,7 +9862,7 @@ var DateModal = class extends BaseModal {
     while (!next.done) {
       if (next.value.groups) {
         const pattern = next.value.groups.pattern;
-        this.pathTemplateItems[pattern] = (0, import_obsidian47.moment)(value).format(pattern);
+        this.pathTemplateItems[pattern] = (0, import_obsidian48.moment)(value).format(pattern);
       }
       next = tP.next();
     }
@@ -12010,32 +9874,32 @@ var DateModal = class extends BaseModal {
   }
   async save() {
     let newValue;
-    if (this.plugin.app.plugins.enabledPlugins.has("nldates-obsidian")) {
+    if (this.plugin.app.plugins.enabledPlugins.has("nldates-obsidian") && this.field.type === "Date" /* Date */) {
       try {
         const nldates = this.plugin.app.plugins.plugins["nldates-obsidian"];
         const parsedDate = nldates.parseDate(`${this.value}`);
-        newValue = parsedDate.date ? parsedDate.moment : (0, import_obsidian47.moment)(`${this.value}`, this.format);
+        newValue = parsedDate.date ? parsedDate.moment : (0, import_obsidian48.moment)(`${this.value}`, this.format);
       } catch (error) {
-        newValue = (0, import_obsidian47.moment)(`${this.value}`, this.format);
+        newValue = (0, import_obsidian48.moment)(`${this.value}`, this.format);
       }
     } else {
-      newValue = (0, import_obsidian47.moment)(`${this.value}`, this.format);
+      newValue = (0, import_obsidian48.moment)(`${this.value}`, this.format);
     }
     if (newValue.isValid()) {
       const renderedPath = this.buildPath(newValue);
       const linkPath = this.plugin.app.metadataCache.getFirstLinkpathDest(renderedPath || "" + newValue.format(this.format), this.file.path);
       const formattedValue = this.insertAsLink ? `[[${renderedPath || ""}${newValue.format(this.format)}${linkPath ? "|" + linkPath.basename : ""}]]` : newValue.format(this.format);
-      await postValues(this.plugin, [{ id: this.indexedPath || this.field.id, payload: { value: formattedValue } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
+      await postValues(this.plugin, [{ indexedPath: this.indexedPath || this.field.id, payload: { value: formattedValue } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
       this.saved = true;
       if (this.previousModal)
         await this.goToPreviousModal();
       if (this.nextIntervalField && this.pushNextInterval && this.nextShift) {
-        await postValues(this.plugin, [{ id: this.nextIntervalField.id, payload: { value: this.nextShift } }], this.file.path);
+        await postValues(this.plugin, [{ indexedPath: this.nextIntervalField.id, payload: { value: this.nextShift } }], this.file.path);
         this.close();
       }
       this.close();
     } else if (!this.value) {
-      await postValues(this.plugin, [{ id: this.indexedPath || this.field.id, payload: { value: "" } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
+      await postValues(this.plugin, [{ indexedPath: this.indexedPath || this.field.id, payload: { value: "" } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
       this.saved = true;
       if (this.previousModal)
         await this.goToPreviousModal();
@@ -12054,7 +9918,7 @@ var DateModal = class extends BaseModal {
     this.buildSimpleSaveBtn(dateFieldsContainer);
   }
   buildInsertAsLinkButton(container) {
-    const insertAsLinkBtn = new import_obsidian46.ButtonComponent(container);
+    const insertAsLinkBtn = new import_obsidian47.ButtonComponent(container);
     const setLinkBtnIcon = () => {
       insertAsLinkBtn.setIcon(this.insertAsLink ? "link" : "unlink");
       insertAsLinkBtn.setTooltip(
@@ -12068,12 +9932,13 @@ var DateModal = class extends BaseModal {
     });
   }
   buildClearBtn(container) {
-    const clearBtn = new import_obsidian46.ButtonComponent(container);
+    const clearBtn = new import_obsidian47.ButtonComponent(container);
     clearBtn.setIcon("eraser");
     clearBtn.setTooltip(`Clear ${this.field.name}'s date`);
     clearBtn.onClick(() => {
       this.value = "";
-      this.inputEl.setPlaceholder("");
+      this.inputEl.setValue("");
+      this.inputEl.setPlaceholder("Empty");
     });
   }
   toggleButton(button, value) {
@@ -12086,10 +9951,13 @@ var DateModal = class extends BaseModal {
   }
   async buildInputEl(container) {
     [this.currentShift, this.nextIntervalField, this.nextShift] = await this.dateManager.shiftDuration(this.file);
-    this.inputEl = new import_obsidian46.TextComponent(container);
+    const wrapper = container.createDiv({ cls: "date-input-wrapper" });
+    this.inputEl = new import_obsidian47.TextComponent(wrapper);
+    this.inputEl.inputEl.addClass("master-input");
+    this.inputEl.inputEl.addClass(this.field.type.toLowerCase());
     this.inputEl.inputEl.focus();
     this.inputEl.setPlaceholder(
-      this.initialValue ? (0, import_obsidian47.moment)(this.initialValue, this.field.options.dateFormat).format(this.field.options.dateFormat) : ""
+      this.initialValue ? (0, import_obsidian48.moment)(this.initialValue, this.field.options.dateFormat).format(this.field.options.dateFormat) : ""
     );
     this.inputEl.onChange((value) => {
       this.inputEl.inputEl.removeClass("is-invalid");
@@ -12098,30 +9966,23 @@ var DateModal = class extends BaseModal {
       this.value = value;
       this.toggleButton(shiftFromTodayBtn, value);
     });
-    const calendarDisplayBtn = new import_obsidian46.ButtonComponent(container);
-    calendarDisplayBtn.setIcon(FieldIcon["Date" /* Date */]);
-    calendarDisplayBtn.setTooltip("open date picker");
-    const shiftFromTodayBtn = new import_obsidian46.ButtonComponent(container);
+    const calendarInput = wrapper.createEl(
+      "input",
+      {
+        type: inputType[this.field.type],
+        cls: "date-picker"
+      }
+    );
+    calendarInput.value = this.initialValue ? (0, import_obsidian48.moment)(this.initialValue, this.field.options.dateFormat).format("yyyy-MM-DDTHH:mm") : "";
+    calendarInput.oninput = (e) => {
+      var _a;
+      const newValue = (0, import_obsidian48.moment)((_a = e.target) == null ? void 0 : _a.value, "YYYY-MM-DDTHH:mm").format(this.format);
+      this.inputEl.setValue(newValue);
+      this.value = newValue;
+    };
+    const shiftFromTodayBtn = new import_obsidian47.ButtonComponent(container);
     shiftFromTodayBtn.setIcon("skip-forward");
     shiftFromTodayBtn.setTooltip(`Shift ${this.field.name} ${this.currentShift || "1 day"} ahead`);
-    const datePickerContainer = container.createDiv();
-    const datePicker = esm_default(datePickerContainer, {
-      locale: {
-        firstDayOfWeek: this.plugin.settings.firstDayOfWeek
-      },
-      defaultDate: (0, import_obsidian47.moment)(Date.now()).format("YYYY-MM-DD")
-    });
-    datePicker.config.onChange.push((value) => {
-      const newDate = (0, import_obsidian47.moment)(value.toString()).format(this.format);
-      this.inputEl.setValue(newDate);
-      this.value = newDate;
-      this.toggleButton(shiftFromTodayBtn, this.value);
-    });
-    calendarDisplayBtn.onClick((e) => {
-      e.preventDefault();
-      datePicker.setDate(datePicker.parseDate(this.inputEl.getValue()) || new Date());
-      datePicker.open();
-    });
     shiftFromTodayBtn.onClick(async (e) => {
       const newValue = await this.dateManager.getNewDateValue(this.currentShift, this.file, this.indexedPath);
       this.inputEl.setValue(newValue);
@@ -12132,10 +9993,10 @@ var DateModal = class extends BaseModal {
   }
 };
 
-// src/fields/fieldManagers/DateField.ts
-var DateField = class extends FieldManager2 {
-  constructor(plugin, field) {
-    super(plugin, field, "Date" /* Date */);
+// src/fields/abstractFieldManagers/AbstractDateBasedField.ts
+var AbstractDateBasedField = class extends FieldManager2 {
+  constructor(plugin, field, type) {
+    super(plugin, field, type);
     this.defaultDateFormat = "YYYY-MM-DD";
     this.showModalOption = false;
   }
@@ -12147,11 +10008,11 @@ var DateField = class extends FieldManager2 {
   }
   addFieldOption(file, location, indexedPath) {
     const name = this.field.name;
-    const dateIconName = FieldIcon["Date" /* Date */];
+    const dateIconName = FieldIcon[this.field.type];
     const dateModalAction = async () => await this.buildAndOpenModal(file, indexedPath);
     const shiftDateAction = async () => await this.shiftDate(file, indexedPath);
     const clearDateAction = async () => await this.clearDate(file, indexedPath);
-    if (DateField.isSuggest(location)) {
+    if (AbstractDateBasedField.isSuggest(location)) {
       location.options.push({
         id: `update_${name}`,
         actionLabel: `<span>Update <b>${name}</b></span>`,
@@ -12172,7 +10033,7 @@ var DateField = class extends FieldManager2 {
         action: clearDateAction,
         icon: "eraser"
       });
-    } else if (DateField.isFieldOptions(location)) {
+    } else if (AbstractDateBasedField.isFieldOptions(location)) {
       location.addOption("skip-forward", shiftDateAction, `Shift ${name} ahead`);
       location.addOption(dateIconName, dateModalAction, `Set ${name}'s date`);
     }
@@ -12192,26 +10053,26 @@ var DateField = class extends FieldManager2 {
     const dateFormatContainer = container.createDiv({ cls: "field-container" });
     dateFormatContainer.createEl("span", { text: "Date format", cls: "label" });
     const dateExample = dateFormatContainer.createEl("span", { cls: "more-info" });
-    const dateFormatInput = new import_obsidian48.TextComponent(dateFormatContainer);
+    const dateFormatInput = new import_obsidian49.TextComponent(dateFormatContainer);
     dateFormatInput.inputEl.addClass("with-label");
     dateFormatInput.inputEl.addClass("full-width");
     dateFormatInput.setValue(this.field.options.dateFormat);
-    dateExample.setText(`${(0, import_obsidian48.moment)().format(dateFormatInput.getValue())}`);
+    dateExample.setText(`${(0, import_obsidian49.moment)().format(dateFormatInput.getValue())}`);
     dateFormatInput.onChange((value) => {
       this.field.options.dateFormat = value;
-      dateExample.setText(`${(0, import_obsidian48.moment)().format(value)}`);
+      dateExample.setText(`${(0, import_obsidian49.moment)().format(value)}`);
     });
     const defaultInsertAsLinkContainer = container.createDiv({ cls: "field-container" });
     defaultInsertAsLinkContainer.createEl("span", { text: "Insert as link by default", cls: "label" });
     defaultInsertAsLinkContainer.createDiv({ cls: "spacer" });
-    const defaultInsertAsLink = new import_obsidian48.ToggleComponent(defaultInsertAsLinkContainer);
-    defaultInsertAsLink.setValue(DateField.stringToBoolean(this.field.options.defaultInsertAsLink));
+    const defaultInsertAsLink = new import_obsidian49.ToggleComponent(defaultInsertAsLinkContainer);
+    defaultInsertAsLink.setValue(AbstractDateBasedField.stringToBoolean(this.field.options.defaultInsertAsLink));
     defaultInsertAsLink.onChange((value) => {
       this.field.options.defaultInsertAsLink = value;
     });
     const dateLinkPathContainer = container.createDiv({ cls: "field-container" });
     dateLinkPathContainer.createEl("span", { text: "Link path (optional)", cls: "label" });
-    const dateLinkPathInput = new import_obsidian48.TextComponent(dateLinkPathContainer);
+    const dateLinkPathInput = new import_obsidian49.TextComponent(dateLinkPathContainer);
     dateLinkPathInput.inputEl.addClass("with-label");
     dateLinkPathInput.inputEl.addClass("full-width");
     dateLinkPathInput.setValue(this.field.options.linkPath);
@@ -12221,7 +10082,7 @@ var DateField = class extends FieldManager2 {
     const dateShiftIntervalContainer = container.createDiv({ cls: "field-container" });
     dateShiftIntervalContainer.createEl("span", { text: "Define a shift interval", cls: "label" });
     dateShiftIntervalContainer.createDiv({ cls: "spacer" });
-    const dateShiftInterval = new import_obsidian48.TextComponent(dateShiftIntervalContainer);
+    const dateShiftInterval = new import_obsidian49.TextComponent(dateShiftIntervalContainer);
     dateShiftInterval.setPlaceholder("ex: 1 month, 2 days");
     dateShiftInterval.setValue(this.field.options.dateShiftInterval);
     dateShiftInterval.onChange((value) => {
@@ -12237,7 +10098,7 @@ var DateField = class extends FieldManager2 {
       cls: "label"
     });
     nextShiftIntervalFieldContainer.createDiv({ cls: "spacer" });
-    const nextShiftIntervalField = new import_obsidian48.DropdownComponent(nextShiftIntervalFieldContainer);
+    const nextShiftIntervalField = new import_obsidian49.DropdownComponent(nextShiftIntervalFieldContainer);
     nextShiftIntervalField.addOption("none", "---None---");
     let rootFields = [];
     if (this.field.fileClassName) {
@@ -12264,7 +10125,7 @@ var DateField = class extends FieldManager2 {
     const _date = eF == null ? void 0 : eF.value;
     const _dateLink = getLink(_date, file);
     const _dateText = _dateLink ? (_a = _dateLink.path.split("/").last()) == null ? void 0 : _a.replace(/(.*).md/, "$1") : _date;
-    return (0, import_obsidian48.moment)(_dateText, dateFormat);
+    return (0, import_obsidian49.moment)(_dateText, dateFormat);
   }
   async getNewDateValue(currentShift, file, indexedPath) {
     const { dateFormat } = this.field.options;
@@ -12272,7 +10133,7 @@ var DateField = class extends FieldManager2 {
     const [_shiftNumber, shiftPeriod] = (currentShift == null ? void 0 : currentShift.split(" ")) || ["1", "days"];
     const shiftNumber = parseInt(_shiftNumber) || 1;
     const _newDate = momentDate.isValid() ? momentDate.add(shiftNumber, shiftPeriod).format(dateFormat) : void 0;
-    return _newDate || (0, import_obsidian48.moment)().format(dateFormat);
+    return _newDate || (0, import_obsidian49.moment)().format(dateFormat);
   }
   async shiftDate(file, indexedPath) {
     if (!indexedPath)
@@ -12282,29 +10143,29 @@ var DateField = class extends FieldManager2 {
     const [currentShift, nextIntervalField, nextShift] = await fieldManager.shiftDuration(file);
     const newValue = await this.getNewDateValue(currentShift, file, indexedPath);
     if (nextIntervalField && nextShift) {
-      await postValues(this.plugin, [{ id: nextIntervalField.id, payload: { value: nextShift } }], file.path);
+      await postValues(this.plugin, [{ indexedPath: nextIntervalField.id, payload: { value: nextShift } }], file.path);
     }
     const linkFile = this.plugin.app.metadataCache.getFirstLinkpathDest(linkPath || "" + newValue.format(dateFormat), file.path);
-    const formattedValue = DateField.stringToBoolean(defaultInsertAsLink) ? `[[${linkPath || ""}${newValue}${linkFile ? "|" + linkFile.basename : ""}]]` : newValue;
-    await postValues(this.plugin, [{ id: indexedPath, payload: { value: formattedValue } }], file);
+    const formattedValue = AbstractDateBasedField.stringToBoolean(defaultInsertAsLink) ? `[[${linkPath || ""}${newValue}${linkFile ? "|" + linkFile.basename : ""}]]` : newValue.format(dateFormat);
+    await postValues(this.plugin, [{ indexedPath, payload: { value: formattedValue } }], file);
   }
   async clearDate(file, indexedPath) {
     if (!indexedPath)
       return;
-    await postValues(this.plugin, [{ id: indexedPath, payload: { value: "" } }], file);
+    await postValues(this.plugin, [{ indexedPath, payload: { value: "" } }], file);
   }
   createDvField(dv, p, fieldContainer, attrs = {}) {
     var _a;
     attrs.cls = "value-container";
     const fieldValue = dv.el("span", p[this.field.name] || "", attrs);
     const dateBtn = fieldContainer.createEl("button");
-    (0, import_obsidian48.setIcon)(dateBtn, FieldIcon["Date" /* Date */]);
+    (0, import_obsidian49.setIcon)(dateBtn, FieldIcon["Date" /* Date */]);
     const spacer = fieldContainer.createDiv({ cls: "spacer-1" });
     this.shiftBtn = fieldContainer.createEl("button");
-    (0, import_obsidian48.setIcon)(this.shiftBtn, "skip-forward");
+    (0, import_obsidian49.setIcon)(this.shiftBtn, "skip-forward");
     spacer.setAttr("class", "spacer-2");
     const file = this.plugin.app.vault.getAbstractFileByPath(p.file.path);
-    if (file instanceof import_obsidian48.TFile && file.extension == "md") {
+    if (file instanceof import_obsidian49.TFile && file.extension == "md") {
       dateBtn.onclick = async () => await this.buildAndOpenModal(file, this.field.id);
       this.shiftBtn.onclick = () => {
         if (file)
@@ -12352,7 +10213,7 @@ var DateField = class extends FieldManager2 {
         onClicked();
       };
     } else {
-      const date = (0, import_obsidian48.moment)(value, dateFormat);
+      const date = (0, import_obsidian49.moment)(value, dateFormat);
       if (date.isValid()) {
         const dateText = date.format(this.field.options.dateFormat);
         if (this.field.options.defaultInsertAsLink) {
@@ -12377,12 +10238,12 @@ var DateField = class extends FieldManager2 {
       return true;
     } else {
       if (typeof value == "string") {
-        return (0, import_obsidian48.moment)(
+        return (0, import_obsidian49.moment)(
           (_a = value.replace(/^\[\[/g, "").replace(/\]\]$/g, "").split("|").first()) == null ? void 0 : _a.split("/").last(),
           this.field.options.dateFormat
         ).isValid();
       } else {
-        return (0, import_obsidian48.moment)(
+        return (0, import_obsidian49.moment)(
           (_b = value.path.replace(/^\[\[/g, "").replace(/\]\]$/g, "").split("|").first()) == null ? void 0 : _b.split("/").last(),
           this.field.options.dateFormat
         ).isValid();
@@ -12411,7 +10272,389 @@ var DateField = class extends FieldManager2 {
     }
     const [_nextShiftNumber, nextShiftPeriod] = (currentValue == null ? void 0 : currentValue.split(" ")) || ["1", "days"];
     const nextShiftNumber = parseInt(_nextShiftNumber) || 1;
-    if (import_obsidian48.moment.isDuration(import_obsidian48.moment.duration(nextShiftNumber, nextShiftPeriod))) {
+    if (import_obsidian49.moment.isDuration(import_obsidian49.moment.duration(nextShiftNumber, nextShiftPeriod))) {
+      return [currentValue, cycle, nextValue];
+    } else {
+      return [currentValue, cycle, interval];
+    }
+  }
+};
+
+// src/fields/fieldManagers/DateField.ts
+var DateField = class extends AbstractDateBasedField {
+  constructor(plugin, field) {
+    super(plugin, field, "Date" /* Date */);
+    this.showModalOption = false;
+  }
+};
+
+// src/fields/fieldManagers/DateTimeField.ts
+var DateTimeField = class extends AbstractDateBasedField {
+  constructor(plugin, field) {
+    super(plugin, field, "DateTime" /* DateTime */);
+    this.showModalOption = false;
+  }
+};
+
+// src/fields/fieldManagers/TimeField.ts
+var import_obsidian52 = require("obsidian");
+
+// src/modals/fields/TimeModal.ts
+var import_obsidian50 = require("obsidian");
+var import_obsidian51 = require("obsidian");
+var TimeModal = class extends BaseModal {
+  constructor(plugin, file, field, eF, indexedPath, lineNumber = -1, asList = false, asBlockquote = false, previousModal) {
+    var _a, _b;
+    super(plugin, file, previousModal);
+    this.plugin = plugin;
+    this.file = file;
+    this.field = field;
+    this.eF = eF;
+    this.indexedPath = indexedPath;
+    this.lineNumber = lineNumber;
+    this.asList = asList;
+    this.asBlockquote = asBlockquote;
+    this.previousModal = previousModal;
+    this.pushNextInterval = false;
+    const initialValue = ((_a = this.eF) == null ? void 0 : _a.value) || "";
+    this.initialValue = initialValue ? ((_b = initialValue.toString().replace(/^\[\[/g, "").replace(/\]\]$/g, "").split("|").first()) == null ? void 0 : _b.split("/").last()) || "" : "";
+    this.format = this.field.options.timeFormat || this.field.options.defaultTimeFormat;
+    this.timeManager = new FieldManager[this.field.type](this.plugin, this.field);
+    this.value = this.initialValue;
+  }
+  async onOpen() {
+    super.onOpen();
+    this.containerEl.addClass("metadata-menu");
+    cleanActions(this.contentEl, ".field-container");
+    cleanActions(this.contentEl, ".field-error");
+    const fieldContainer = this.contentEl.createDiv({ cls: "field-container" });
+    await this.buildFields(fieldContainer);
+    this.errorField = this.contentEl.createEl("div", { cls: "field-error" });
+    this.errorField.hide();
+  }
+  async save() {
+    const newValue = (0, import_obsidian51.moment)(`${this.value}`, this.format);
+    if (newValue.isValid()) {
+      const formattedValue = newValue.format(this.format);
+      await postValues(this.plugin, [{ indexedPath: this.indexedPath || this.field.id, payload: { value: formattedValue } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
+      this.saved = true;
+      if (this.previousModal)
+        await this.goToPreviousModal();
+      if (this.nextIntervalField && this.pushNextInterval && this.nextShift) {
+        await postValues(this.plugin, [{ indexedPath: this.nextIntervalField.id, payload: { value: this.nextShift } }], this.file.path);
+        this.close();
+      }
+      this.close();
+    } else if (!this.value) {
+      await postValues(this.plugin, [{ indexedPath: this.indexedPath || this.field.id, payload: { value: "" } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
+      this.saved = true;
+      if (this.previousModal)
+        await this.goToPreviousModal();
+      this.close();
+    } else {
+      this.errorField.show();
+      this.errorField.setText(`value must be a valid time`);
+      this.inputEl.inputEl.addClass("is-invalid");
+      return;
+    }
+  }
+  async buildFields(timeFieldsContainer) {
+    await this.buildInputEl(timeFieldsContainer);
+    this.buildClearBtn(timeFieldsContainer);
+    this.buildSimpleSaveBtn(timeFieldsContainer);
+  }
+  buildClearBtn(container) {
+    const clearBtn = new import_obsidian50.ButtonComponent(container);
+    clearBtn.setIcon("eraser");
+    clearBtn.setTooltip(`Clear ${this.field.name}'s time`);
+    clearBtn.onClick(() => {
+      this.value = "";
+      this.inputEl.setValue("");
+      this.inputEl.setPlaceholder("Empty");
+    });
+  }
+  toggleButton(button, value) {
+    button.setDisabled(!!value);
+    if (value) {
+      button.buttonEl.addClass("disabled");
+    } else {
+      button.buttonEl.removeClass("disabled");
+    }
+  }
+  async buildInputEl(container) {
+    [this.currentShift, this.nextIntervalField, this.nextShift] = await this.timeManager.shiftDuration(this.file);
+    const wrapper = container.createDiv({ cls: "date-input-wrapper" });
+    this.inputEl = new import_obsidian50.TextComponent(wrapper);
+    this.inputEl.inputEl.addClass("master-input");
+    this.inputEl.inputEl.addClass("time");
+    this.inputEl.inputEl.focus();
+    this.inputEl.setPlaceholder(
+      this.initialValue ? (0, import_obsidian51.moment)(this.initialValue, this.field.options.timeFormat).format(this.field.options.timeFormat) : ""
+    );
+    this.inputEl.onChange((value) => {
+      this.inputEl.inputEl.removeClass("is-invalid");
+      this.errorField.hide();
+      this.errorField.setText("");
+      this.value = value;
+      this.toggleButton(shiftFromTodayBtn, value);
+    });
+    const calendarInput = wrapper.createEl(
+      "input",
+      {
+        type: "time",
+        cls: "time-picker"
+      }
+    );
+    calendarInput.value = this.initialValue ? (0, import_obsidian51.moment)(this.initialValue, this.field.options.timeFormat).format(this.field.options.timeFormat) : "";
+    calendarInput.oninput = (e) => {
+      var _a;
+      const newValue = (0, import_obsidian51.moment)((_a = e.target) == null ? void 0 : _a.value, "HH:mm").format(this.format);
+      this.inputEl.setValue(newValue);
+      this.value = newValue;
+    };
+    const shiftFromTodayBtn = new import_obsidian50.ButtonComponent(container);
+    shiftFromTodayBtn.setIcon("skip-forward");
+    shiftFromTodayBtn.setTooltip(`Shift ${this.field.name} ${this.currentShift || "1 hour"} ahead`);
+    shiftFromTodayBtn.onClick(async (e) => {
+      const newValue = await this.timeManager.getNewTimeValue(this.currentShift, this.file, this.indexedPath);
+      this.inputEl.setValue(newValue);
+      this.value = newValue;
+      this.pushNextInterval = true;
+      this.toggleButton(shiftFromTodayBtn, this.inputEl.getValue());
+    });
+  }
+};
+
+// src/fields/fieldManagers/TimeField.ts
+var TimeField = class extends FieldManager2 {
+  constructor(plugin, field) {
+    super(plugin, field, "Time" /* Time */);
+    this.defaultTimeFormat = "HH:mm";
+    this.showModalOption = false;
+  }
+  async buildAndOpenModal(file, indexedPath) {
+    const eF = await Note.getExistingFieldForIndexedPath(this.plugin, file, indexedPath);
+    const modal = new TimeModal(this.plugin, file, this.field, eF, indexedPath);
+    modal.titleEl.setText(`Change time for <${this.field.name}>`);
+    modal.open();
+  }
+  addFieldOption(file, location, indexedPath) {
+    const name = this.field.name;
+    const timeIconName = FieldIcon[this.field.type];
+    const timeModalAction = async () => await this.buildAndOpenModal(file, indexedPath);
+    const shiftTimeAction = async () => await this.shiftTime(file, indexedPath);
+    const clearTimeAction = async () => await this.clearTime(file, indexedPath);
+    if (TimeField.isSuggest(location)) {
+      location.options.push({
+        id: `update_${name}`,
+        actionLabel: `<span>Update <b>${name}</b></span>`,
+        action: timeModalAction,
+        icon: timeIconName
+      });
+      if (this.field.options.timeShiftInterval || this.field.options.nextShiftIntervalField) {
+        location.options.push({
+          id: `update_${name}`,
+          actionLabel: `<span>Shift <b>${name}</b> ahead</span>`,
+          action: shiftTimeAction,
+          icon: "skip-forward"
+        });
+      }
+      location.options.push({
+        id: `clear_${name}`,
+        actionLabel: `<span>Clear <b>${name}</b></span>`,
+        action: clearTimeAction,
+        icon: "eraser"
+      });
+    } else if (TimeField.isFieldOptions(location)) {
+      location.addOption("skip-forward", shiftTimeAction, `Shift ${name} ahead`);
+      location.addOption(timeIconName, timeModalAction, `Set ${name}'s time`);
+    }
+    ;
+  }
+  createAndOpenFieldModal(file, selectedFieldName, eF, indexedPath, lineNumber, asList, asBlockquote, previousModal) {
+    const fieldModal = new TimeModal(this.plugin, file, this.field, eF, indexedPath, lineNumber, asList, asBlockquote, previousModal);
+    fieldModal.titleEl.setText(`Enter time for ${selectedFieldName}`);
+    fieldModal.open();
+  }
+  createSettingContainer(container, plugin, location) {
+    var _a, _b;
+    if (!this.field.options.timeFormat)
+      this.field.options.timeFormat = this.defaultTimeFormat;
+    const timeFormatContainer = container.createDiv({ cls: "field-container" });
+    timeFormatContainer.createEl("span", { text: "Time format", cls: "label" });
+    const timeExample = timeFormatContainer.createEl("span", { cls: "more-info" });
+    const timeFormatInput = new import_obsidian52.TextComponent(timeFormatContainer);
+    timeFormatInput.inputEl.addClass("with-label");
+    timeFormatInput.inputEl.addClass("full-width");
+    timeFormatInput.setValue(this.field.options.timeFormat);
+    timeExample.setText(`${(0, import_obsidian52.moment)().format(timeFormatInput.getValue())}`);
+    timeFormatInput.onChange((value) => {
+      this.field.options.timeFormat = value;
+      timeExample.setText(`${(0, import_obsidian52.moment)().format(value)}`);
+    });
+    const timeShiftIntervalContainer = container.createDiv({ cls: "field-container" });
+    timeShiftIntervalContainer.createEl("span", { text: "Define a shift interval", cls: "label" });
+    timeShiftIntervalContainer.createDiv({ cls: "spacer" });
+    const timeShiftInterval = new import_obsidian52.TextComponent(timeShiftIntervalContainer);
+    timeShiftInterval.setPlaceholder("ex: 1 hour, 32 minutes");
+    timeShiftInterval.setValue(this.field.options.timeShiftInterval);
+    timeShiftInterval.onChange((value) => {
+      if (!value) {
+        delete this.field.options.timeShiftInterval;
+      } else {
+        this.field.options.timeShiftInterval = value.toString();
+      }
+    });
+    const nextShiftIntervalFieldContainer = container.createDiv({ cls: "field-container" });
+    nextShiftIntervalFieldContainer.createEl("span", {
+      text: "Field containing shift intervals",
+      cls: "label"
+    });
+    nextShiftIntervalFieldContainer.createDiv({ cls: "spacer" });
+    const nextShiftIntervalField = new import_obsidian52.DropdownComponent(nextShiftIntervalFieldContainer);
+    nextShiftIntervalField.addOption("none", "---None---");
+    let rootFields = [];
+    if (this.field.fileClassName) {
+      rootFields = ((_a = this.plugin.fieldIndex.fileClassesFields.get(this.field.fileClassName || "")) == null ? void 0 : _a.filter((_f) => _f.isRoot() && _f.name !== this.field.name && _f.type === "Cycle" /* Cycle */)) || [];
+    } else {
+      rootFields = this.plugin.presetFields.filter((_f) => _f.name !== this.field.name && _f.type === "Cycle" /* Cycle */);
+    }
+    rootFields.forEach((_f) => nextShiftIntervalField.addOption(_f.id, _f.name));
+    const currentField = ((_b = rootFields.find((_f) => _f.name === this.field.options.nextShiftIntervalField)) == null ? void 0 : _b.id) || "none";
+    nextShiftIntervalField.setValue(currentField);
+    nextShiftIntervalField.onChange((value) => {
+      var _a2;
+      if (value === "none") {
+        delete this.field.options.nextShiftIntervalField;
+      } else {
+        this.field.options.nextShiftIntervalField = (_a2 = rootFields.find((_f) => _f.id === value)) == null ? void 0 : _a2.name.toString();
+      }
+    });
+  }
+  async getMomentTime(file, indexedPath) {
+    const { timeFormat } = this.field.options;
+    const eF = await Note.getExistingFieldForIndexedPath(this.plugin, file, indexedPath);
+    const _time = eF == null ? void 0 : eF.value;
+    return (0, import_obsidian52.moment)(_time, timeFormat);
+  }
+  async getNewTimeValue(currentShift, file, indexedPath) {
+    const { timeFormat } = this.field.options;
+    const momentTime = await this.getMomentTime(file, indexedPath);
+    const [_shiftNumber, shiftPeriod] = (currentShift == null ? void 0 : currentShift.split(" ")) || ["1", "days"];
+    const shiftNumber = parseInt(_shiftNumber) || 1;
+    const _newTime = momentTime.isValid() ? momentTime.add(shiftNumber, shiftPeriod).format(timeFormat) : void 0;
+    return _newTime || (0, import_obsidian52.moment)().format(timeFormat);
+  }
+  async shiftTime(file, indexedPath) {
+    if (!indexedPath)
+      return;
+    const { timeFormat } = this.field.options;
+    const fieldManager = new FieldManager[this.field.type](this.plugin, this.field);
+    const [currentShift, nextIntervalField, nextShift] = await fieldManager.shiftDuration(file);
+    const newValue = await this.getNewTimeValue(currentShift, file, indexedPath);
+    if (nextIntervalField && nextShift) {
+      await postValues(this.plugin, [{ indexedPath: nextIntervalField.id, payload: { value: nextShift } }], file.path);
+    }
+    const formattedValue = newValue.format(timeFormat);
+    await postValues(this.plugin, [{ indexedPath, payload: { value: formattedValue } }], file);
+  }
+  async clearTime(file, indexedPath) {
+    if (!indexedPath)
+      return;
+    await postValues(this.plugin, [{ indexedPath, payload: { value: "" } }], file);
+  }
+  createDvField(dv, p, fieldContainer, attrs = {}) {
+    var _a;
+    attrs.cls = "value-container";
+    const fieldValue = dv.el("span", p[this.field.name] || "", attrs);
+    const timeBtn = fieldContainer.createEl("button");
+    (0, import_obsidian52.setIcon)(timeBtn, FieldIcon["Time" /* Time */]);
+    const spacer = fieldContainer.createDiv({ cls: "spacer-1" });
+    this.shiftBtn = fieldContainer.createEl("button");
+    (0, import_obsidian52.setIcon)(this.shiftBtn, "skip-forward");
+    spacer.setAttr("class", "spacer-2");
+    const file = this.plugin.app.vault.getAbstractFileByPath(p.file.path);
+    if (file instanceof import_obsidian52.TFile && file.extension == "md") {
+      timeBtn.onclick = async () => await this.buildAndOpenModal(file, this.field.id);
+      this.shiftBtn.onclick = () => {
+        if (file)
+          this.shiftTime(file, this.field.id);
+      };
+    }
+    if (!((_a = attrs == null ? void 0 : attrs.options) == null ? void 0 : _a.alwaysOn)) {
+      timeBtn.hide();
+      if (this.shiftBtn)
+        this.shiftBtn.hide();
+      spacer.show();
+      fieldContainer.onmouseover = () => {
+        timeBtn.show();
+        if (this.shiftBtn)
+          this.shiftBtn.show();
+        spacer.hide();
+      };
+      fieldContainer.onmouseout = () => {
+        timeBtn.hide();
+        if (this.shiftBtn)
+          this.shiftBtn.hide();
+        spacer.show();
+      };
+    }
+    fieldContainer.appendChild(fieldValue);
+    fieldContainer.appendChild(timeBtn);
+    if (this.shiftBtn)
+      fieldContainer.appendChild(this.shiftBtn);
+    fieldContainer.appendChild(spacer);
+  }
+  getOptionsStr() {
+    return this.field.options.timeFormat;
+  }
+  validateOptions() {
+    return true;
+  }
+  displayValue(container, file, value, onClicked) {
+    const timeFormat = this.field.options.timeFormat;
+    const time = (0, import_obsidian52.moment)(value, timeFormat);
+    if (time.isValid()) {
+      const timeText = time.format(this.field.options.timeFormat);
+      container.createDiv({ text: timeText });
+    } else {
+      container.createDiv({ text: value });
+    }
+    container.createDiv({});
+  }
+  validateValue(value) {
+    if (!value) {
+      return true;
+    } else {
+      return (0, import_obsidian52.moment)(
+        value,
+        this.field.options.timeFormat
+      ).isValid();
+    }
+  }
+  async shiftDuration(file) {
+    var _a, _b;
+    const interval = this.field.options.timeShiftInterval;
+    const cycleIntervalField = this.field.options.nextShiftIntervalField;
+    const cycle = (_a = this.plugin.fieldIndex.filesFields.get(file.path)) == null ? void 0 : _a.find((field) => field.name === cycleIntervalField);
+    let currentValue;
+    let nextValue;
+    if (cycle) {
+      const cycleManager = new FieldManager[cycle.type](this.plugin, cycle);
+      const options2 = cycleManager.getOptionsList();
+      currentValue = (_b = await Note.getExistingFieldForIndexedPath(this.plugin, file, cycle.id)) == null ? void 0 : _b.value;
+      if (currentValue) {
+        nextValue = cycleManager.nextOption(currentValue);
+      } else {
+        currentValue = options2[0];
+        nextValue = options2[1];
+      }
+    } else if (interval) {
+      currentValue = interval;
+    }
+    const [_nextShiftNumber, nextShiftPeriod] = (currentValue == null ? void 0 : currentValue.split(" ")) || ["1", "minutes"];
+    const nextShiftNumber = parseInt(_nextShiftNumber) || 1;
+    if (import_obsidian52.moment.isDuration(import_obsidian52.moment.duration(nextShiftNumber, nextShiftPeriod))) {
       return [currentValue, cycle, nextValue];
     } else {
       return [currentValue, cycle, interval];
@@ -12420,8 +10663,8 @@ var DateField = class extends FieldManager2 {
 };
 
 // src/modals/fields/MultiFileModal.ts
-var import_obsidian49 = require("obsidian");
-var MultiFileModal = class extends import_obsidian49.FuzzySuggestModal {
+var import_obsidian53 = require("obsidian");
+var MultiFileModal = class extends import_obsidian53.FuzzySuggestModal {
   constructor(plugin, file, field, eF, indexedPath, lineNumber = -1, asList = false, asBlockquote = false, previousModal) {
     var _a;
     super(plugin.app);
@@ -12442,7 +10685,7 @@ var MultiFileModal = class extends import_obsidian49.FuzzySuggestModal {
           const link = getLink(item, this.file);
           if (link) {
             const file2 = this.plugin.app.vault.getAbstractFileByPath(link.path);
-            if (file2 instanceof import_obsidian49.TFile && !this.selectedFiles.map((_f) => _f.path).includes(file2.path))
+            if (file2 instanceof import_obsidian53.TFile && !this.selectedFiles.map((_f) => _f.path).includes(file2.path))
               this.selectedFiles.push(file2);
           }
         });
@@ -12452,7 +10695,7 @@ var MultiFileModal = class extends import_obsidian49.FuzzySuggestModal {
           const link = getLink(_link, this.file);
           if (link) {
             const file2 = this.plugin.app.vault.getAbstractFileByPath(link.path);
-            if (file2 instanceof import_obsidian49.TFile && !this.selectedFiles.map((_f) => _f.path).includes(link.path))
+            if (file2 instanceof import_obsidian53.TFile && !this.selectedFiles.map((_f) => _f.path).includes(link.path))
               this.selectedFiles.push(file2);
           }
         });
@@ -12473,18 +10716,18 @@ var MultiFileModal = class extends import_obsidian49.FuzzySuggestModal {
     buttonContainer.createDiv({ cls: "spacer" });
     const infoContainer = buttonContainer.createDiv({ cls: "info" });
     infoContainer.setText("Alt+Enter to save");
-    const confirmButton = new import_obsidian49.ButtonComponent(buttonContainer);
+    const confirmButton = new import_obsidian53.ButtonComponent(buttonContainer);
     confirmButton.setIcon("checkmark");
     confirmButton.onClick(async () => {
       await this.replaceValues();
       this.close();
     });
-    const cancelButton = new import_obsidian49.ButtonComponent(buttonContainer);
+    const cancelButton = new import_obsidian53.ButtonComponent(buttonContainer);
     cancelButton.setIcon("cross");
     cancelButton.onClick(() => {
       this.close();
     });
-    const clearButton = new import_obsidian49.ButtonComponent(buttonContainer);
+    const clearButton = new import_obsidian53.ButtonComponent(buttonContainer);
     clearButton.setIcon("trash");
     clearButton.onClick(async () => {
       await this.clearValues();
@@ -12525,10 +10768,10 @@ var MultiFileModal = class extends import_obsidian49.FuzzySuggestModal {
       }
       return FieldManager2.buildMarkDownLink(this.plugin, this.file, file.basename, void 0, alias);
     });
-    await postValues(this.plugin, [{ id: this.indexedPath || this.field.id, payload: { value: result.join(", ") } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
+    await postValues(this.plugin, [{ indexedPath: this.indexedPath || this.field.id, payload: { value: result.join(", ") } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
   }
   async clearValues() {
-    await postValues(this.plugin, [{ id: this.indexedPath || this.field.id, payload: { value: "" } }], this.file);
+    await postValues(this.plugin, [{ indexedPath: this.indexedPath || this.field.id, payload: { value: "" } }], this.file);
   }
   renderSuggestion(value, el) {
     var _a;
@@ -12549,7 +10792,7 @@ var MultiFileModal = class extends import_obsidian49.FuzzySuggestModal {
     if (this.selectedFiles.some((file) => file.path === value.item.path)) {
       el.addClass("value-checked");
       const iconContainer = el.createDiv({ cls: "icon-container" });
-      (0, import_obsidian49.setIcon)(iconContainer, "check-circle");
+      (0, import_obsidian53.setIcon)(iconContainer, "check-circle");
     }
   }
   renderSelected() {
@@ -12561,7 +10804,7 @@ var MultiFileModal = class extends import_obsidian49.FuzzySuggestModal {
         s.addClass("value-checked");
         if (s.querySelectorAll(".icon-container").length == 0) {
           const iconContainer = s.createDiv({ cls: "icon-container" });
-          (0, import_obsidian49.setIcon)(iconContainer, "check-circle");
+          (0, import_obsidian53.setIcon)(iconContainer, "check-circle");
         }
       } else {
         s.removeClass("value-checked");
@@ -12650,11 +10893,427 @@ var MultiFileField = class extends AbstractFileBasedField {
   }
 };
 
+// src/modals/fields/MediaFileModal.ts
+var import_obsidian55 = require("obsidian");
+
+// src/modals/baseFieldModals/BaseMediaModal.ts
+var import_obsidian54 = require("obsidian");
+var commonMediaTypeIcon = (display) => `<svg xmlns="http://www.w3.org/2000/svg" ${display === "card" ? 'width="164" height="164"' : 'width="40" height="40"'} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-question">
+    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+    <polyline points="14 2 14 8 20 8"/>
+    <circle cx="10" cy="13" r="2"/><path d="m20 17-1.09-1.09a2 2 0 0 0-2.82 0L10 22"/>
+</svg>`;
+var BaseMediaFileModal = class extends import_obsidian54.FuzzySuggestModal {
+  constructor(plugin, file, field, eF, indexedPath, lineNumber = -1, asList = false, asBlockquote = false, previousModal) {
+    var _a;
+    super(plugin.app);
+    this.plugin = plugin;
+    this.file = file;
+    this.field = field;
+    this.eF = eF;
+    this.indexedPath = indexedPath;
+    this.lineNumber = lineNumber;
+    this.asList = asList;
+    this.asBlockquote = asBlockquote;
+    this.previousModal = previousModal;
+    this.selectedFiles = [];
+    this.containerEl.addClass("metadata-menu");
+    (_a = this.containerEl.querySelector(".prompt")) == null ? void 0 : _a.addClass(
+      this.field.options.display === "card" ? "media-as-cards" : "media-as-list"
+    );
+  }
+  onClose() {
+    var _a;
+    (_a = this.previousModal) == null ? void 0 : _a.open();
+  }
+  getItems() {
+    const sortingMethod = new Function("a", "b", `return ${this.field.options.customSorting}`) || function(a, b) {
+      return a.basename < b.basename ? -1 : 1;
+    };
+    try {
+      const fileManager = new FieldManager[this.field.type](this.plugin, this.field);
+      return fileManager.getFiles().sort(sortingMethod);
+    } catch (error) {
+      this.close();
+      throw error;
+    }
+  }
+  getItemText(item) {
+    return item.basename;
+  }
+  async replaceValues() {
+    const result = this.selectedFiles.map((file) => {
+      const alias = extensionMediaTypes[file.extension] === "Image" /* Image */ ? this.field.options.thumbnailSize : void 0;
+      return MediaField.buildLink(this.plugin, this.file, file.path, alias);
+    });
+    await postValues(this.plugin, [{ indexedPath: this.indexedPath || this.field.id, payload: { value: result.join(", ") } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
+  }
+  async clearValues() {
+    await postValues(this.plugin, [{ indexedPath: this.indexedPath || this.field.id, payload: { value: "" } }], this.file);
+  }
+  renderSuggestion(value, el) {
+    el.addClass("value-container");
+    const isImage = extensionMediaTypes[value.item.extension] === "Image" /* Image */;
+    const suggestionContainer = el.createDiv({ cls: "media-item" });
+    const thumbnailContainer = suggestionContainer.createDiv({ cls: "thumbnail-container" });
+    if (isImage) {
+      const image = thumbnailContainer.createEl("img", { cls: "thumbnail" });
+      const src = this.plugin.app.vault.adapter.getResourcePath(value.item.path);
+      if (this.field.options.display === "list") {
+        thumbnailContainer.style.width = "40px";
+      }
+      image.src = src;
+    } else {
+      thumbnailContainer.innerHTML = commonMediaTypeIcon(this.field.options.display);
+    }
+    const mediaInfoContainer = suggestionContainer.createDiv({ cls: "media-info-container" });
+    mediaInfoContainer.createDiv({ text: value.item.extension, cls: "chip media-type-container" });
+    if (this.selectedFiles.some((f) => f.path === value.item.path)) {
+      el.addClass("value-checked");
+      const iconContainer = mediaInfoContainer.createDiv({ cls: "icon-container" });
+      (0, import_obsidian54.setIcon)(iconContainer, "check-circle");
+    }
+    this.inputEl.focus();
+    const fileName = `${value.item.basename.slice(0, 20).padEnd(value.item.basename.length > 20 ? 23 : 0, ".")}.${value.item.extension}`;
+    suggestionContainer.createDiv({ cls: "file-name", text: fileName });
+  }
+  async onChooseItem(item) {
+  }
+};
+
+// src/modals/fields/MediaFileModal.ts
+var MediaFileModal = class extends BaseMediaFileModal {
+  constructor(plugin, file, field, eF, indexedPath, lineNumber = -1, asList = false, asBlockquote = false, previousModal) {
+    var _a, _b;
+    super(plugin, file, field, eF, indexedPath, lineNumber, asList, asBlockquote, previousModal);
+    this.plugin = plugin;
+    this.file = file;
+    this.field = field;
+    this.eF = eF;
+    this.indexedPath = indexedPath;
+    this.lineNumber = lineNumber;
+    this.asList = asList;
+    this.asBlockquote = asBlockquote;
+    this.previousModal = previousModal;
+    const initialValueObject = ((_a = this.eF) == null ? void 0 : _a.value) || "";
+    const link = getLink(initialValueObject, this.file);
+    if (link) {
+      const file2 = this.plugin.app.vault.getAbstractFileByPath(link.path);
+      if (file2 instanceof import_obsidian55.TFile)
+        this.selectedFiles = [file2];
+    }
+    this.containerEl.addClass("metadata-menu");
+    (_b = this.containerEl.querySelector(".prompt")) == null ? void 0 : _b.addClass(
+      this.field.options.display === "card" ? "media-as-cards" : "media-as-list"
+    );
+  }
+  async onChooseItem(item) {
+    var _a;
+    const embed = this.field.options.embed;
+    const alias = extensionMediaTypes[item.extension] === "Image" /* Image */ ? this.field.options.thumbnailSize : void 0;
+    const baseValue = MediaField.buildLink(this.plugin, this.file, item.path, embed ? alias : void 0);
+    const value = this.field.options.embed ? baseValue : baseValue.replace(/^\!/, "");
+    await postValues(this.plugin, [{ indexedPath: this.indexedPath || this.field.id, payload: { value } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
+    (_a = this.previousModal) == null ? void 0 : _a.open();
+  }
+};
+
+// src/fields/abstractFieldManagers/AbstractMediaField.ts
+var import_obsidian57 = require("obsidian");
+
+// src/suggester/FolderSuggester.ts
+var import_obsidian56 = require("obsidian");
+var FolderSuggest = class extends TextInputSuggest {
+  constructor(plugin, inputEl) {
+    super(inputEl);
+    this.plugin = plugin;
+    this.inputEl = inputEl;
+  }
+  getSuggestions(inputStr) {
+    const abstractFiles = this.plugin.app.vault.getAllLoadedFiles();
+    const folders = [];
+    const lowerCaseInputStr = inputStr.toLowerCase();
+    abstractFiles.forEach((folder) => {
+      if (folder instanceof import_obsidian56.TFolder && folder.path.toLowerCase().contains(lowerCaseInputStr)) {
+        folders.push(folder);
+      }
+    });
+    return folders;
+  }
+  renderSuggestion(file, el) {
+    el.setText(file.path);
+  }
+  selectSuggestion(file) {
+    this.inputEl.value = file.path;
+    this.inputEl.trigger("input");
+    this.close();
+  }
+};
+
+// src/fields/abstractFieldManagers/AbstractMediaField.ts
+var filesDisplay = {
+  "list": "list",
+  "card": "card"
+};
+var AbstractMediaField = class extends AbstractFileBasedField {
+  constructor(plugin, field, fieldType) {
+    super(plugin, field, fieldType);
+    this.foldersInputComponents = [];
+    this.getFiles = () => {
+      const folders = this.field.options.folders;
+      const files = this.plugin.app.vault.getFiles().filter((f) => !(folders == null ? void 0 : folders.length) || folders.some((folder) => f.path.startsWith(folder))).filter((f) => !["md", "canvas"].includes(f.extension));
+      return files;
+    };
+    this.field.options.folders = this.field.options.folders || [];
+  }
+  static buildLink(plugin, sourceFile, destPath, thumbnailSize) {
+    const destFile = plugin.app.vault.getAbstractFileByPath(destPath);
+    if (destFile instanceof import_obsidian57.TFile) {
+      const link = plugin.app.fileManager.generateMarkdownLink(destFile, sourceFile.path, void 0, thumbnailSize);
+      return link;
+    }
+    return "";
+  }
+  displayValue(container, file, value, onClicked) {
+    const link = getLink(value, file);
+    if (link == null ? void 0 : link.path) {
+      const linkText = link.path.split("/").last() || "";
+      const linkEl = container.createEl("a", { text: linkText.replace(/(.*).md/, "$1") });
+      linkEl.onclick = () => {
+        this.plugin.app.workspace.openLinkText(link.path, file.path, true);
+        onClicked();
+      };
+    } else {
+      container.createDiv({ text: value });
+    }
+    container.createDiv();
+  }
+  createFoldersPathContainer(container) {
+  }
+  createAddButton(valuesListHeader, valuesListBody) {
+    valuesListHeader.createDiv({ cls: "label", text: "Add a folder containing media files" });
+    valuesListHeader.createDiv({ cls: "spacer" });
+    const addValue = valuesListHeader.createEl("button");
+    addValue.type = "button";
+    addValue.textContent = "Add a value";
+    addValue.onClickEvent(async (evt) => {
+      evt.preventDefault();
+      const newKeyNumber = (this.field.options.folders || []).length + 1;
+      this.field.options.folders[newKeyNumber] = "";
+      this.foldersInputComponents.push(this.createFolderContainer(valuesListBody, newKeyNumber));
+    });
+  }
+  createFolderContainer(parentNode, key) {
+    const values = this.field.options.folders || {};
+    const presetFolder = values[key];
+    const valueContainer = parentNode.createDiv({ cls: "field-container" });
+    const input = new import_obsidian57.TextComponent(valueContainer);
+    input.inputEl.addClass("full-width");
+    input.setValue(presetFolder);
+    input.onChange((value) => {
+      this.field.options.folders[key] = value;
+      FieldSettingsModal.removeValidationError(input);
+    });
+    new FolderSuggest(
+      this.plugin,
+      input.inputEl
+    );
+    const valueRemoveButton = new import_obsidian57.ButtonComponent(valueContainer);
+    valueRemoveButton.setIcon("trash").onClick((evt) => {
+      evt.preventDefault();
+      FieldSettingsModal.removeValidationError(input);
+      this.field.options.folders = this.field.options.folders.filter((f) => f !== input.getValue()).filter((f) => !!f);
+      parentNode.removeChild(valueContainer);
+      this.foldersInputComponents.remove(input);
+    });
+    return input;
+  }
+  createFoldersListContainer(parentContainer) {
+    var _a;
+    const valuesListHeader = parentContainer.createDiv({ cls: "field-container" });
+    const presetFoldersFields = parentContainer.createDiv();
+    const foldersList = presetFoldersFields.createDiv();
+    const foldersListContainer = foldersList.createDiv();
+    this.createAddButton(valuesListHeader, foldersListContainer);
+    (_a = this.field.options.folders) == null ? void 0 : _a.forEach((folder, index) => {
+      this.foldersInputComponents.push(this.createFolderContainer(foldersListContainer, index));
+    });
+    return presetFoldersFields;
+  }
+  createEmbedTogglerContainer(container) {
+    const togglerContainer = container.createDiv({ cls: "field-container" });
+    togglerContainer.createDiv({ cls: "label", text: "Inline thumbnail embedded" });
+    togglerContainer.createDiv({ cls: "spacer" });
+    new import_obsidian57.ToggleComponent(togglerContainer).setValue(this.field.options.embed).onChange((value) => this.field.options.embed = value);
+  }
+  createFilesDisplaySelectorContainer(container) {
+    const filesDisplaySelectorContainer = container.createDiv({ cls: "field-container" });
+    filesDisplaySelectorContainer.createDiv({ cls: "label", text: "File suggest modal display" });
+    filesDisplaySelectorContainer.createDiv({ cls: "spacer" });
+    new import_obsidian57.DropdownComponent(filesDisplaySelectorContainer).addOptions(filesDisplay).setValue(this.field.options.display || "list").onChange((value) => this.field.options.display = value);
+  }
+  createThumbnailSizeInputContainer(container) {
+    const thumbnailSizeInputContainer = container.createDiv({ cls: "field-container" });
+    thumbnailSizeInputContainer.createDiv({ cls: "label", text: "Inline embedded thumbnail height (px): " });
+    thumbnailSizeInputContainer.createDiv({ cls: "spacer" });
+    new import_obsidian57.TextComponent(thumbnailSizeInputContainer).setValue(this.field.options.thumbnailSize).onChange((value) => {
+      if (!value)
+        this.field.options.thumbnailSize = "";
+      else if (isNaN(parseInt(value)))
+        this.field.options.thumbnailSize = "20";
+      else
+        this.field.options.thumbnailSize = value;
+    });
+  }
+  createSettingContainer(container, plugin, location) {
+    this.createFoldersListContainer(container);
+    this.createEmbedTogglerContainer(container);
+    this.createFilesDisplaySelectorContainer(container);
+    this.createThumbnailSizeInputContainer(container);
+    super.createCustomSortingContainer(container);
+  }
+};
+
+// src/fields/fieldManagers/MediaField.ts
+var MediaField = class extends AbstractMediaField {
+  constructor(plugin, field) {
+    super(plugin, field, "Media" /* Media */);
+    this.foldersInputComponents = [];
+    this.field.options.folders = this.field.options.folders || [];
+  }
+  modalFactory(plugin, file, field, eF, indexedPath, lineNumber = -1, asList = false, asBlockquote = false, previousModal) {
+    return new MediaFileModal(plugin, file, field, eF, indexedPath, lineNumber, asList, asBlockquote, previousModal);
+  }
+};
+
+// src/modals/fields/MultiMediaFileModal.ts
+var import_obsidian58 = require("obsidian");
+var MultiMediaFileModal = class extends BaseMediaFileModal {
+  constructor(plugin, file, field, eF, indexedPath, lineNumber = -1, asList = false, asBlockquote = false, previousModal) {
+    var _a;
+    super(plugin, file, field, eF, indexedPath, lineNumber, asList, asBlockquote, previousModal);
+    this.plugin = plugin;
+    this.file = file;
+    this.field = field;
+    this.eF = eF;
+    this.indexedPath = indexedPath;
+    this.lineNumber = lineNumber;
+    this.asList = asList;
+    this.asBlockquote = asBlockquote;
+    this.previousModal = previousModal;
+    const initialOptions = ((_a = this.eF) == null ? void 0 : _a.value) || [];
+    if (initialOptions) {
+      if (Array.isArray(initialOptions)) {
+        initialOptions.map((item) => {
+          const link = getLink(item, this.file);
+          if (link) {
+            const file2 = this.plugin.app.vault.getAbstractFileByPath(link.path);
+            if (file2 instanceof import_obsidian58.TFile && !this.selectedFiles.map((_f) => _f.path).includes(file2.path))
+              this.selectedFiles.push(file2);
+          }
+        });
+      } else {
+        const links = extractLinks(initialOptions);
+        links.forEach((_link) => {
+          const link = getLink(_link, this.file);
+          if (link) {
+            const file2 = this.plugin.app.vault.getAbstractFileByPath(link.path);
+            if (file2 instanceof import_obsidian58.TFile && !this.selectedFiles.map((_f) => _f.path).includes(link.path))
+              this.selectedFiles.push(file2);
+          }
+        });
+      }
+    } else {
+      this.selectedFiles = [];
+    }
+    this.containerEl.onkeydown = async (e) => {
+      if (e.key == "Enter" && e.altKey) {
+        e.preventDefault();
+        await this.replaceValues();
+        this.close();
+      }
+    };
+    cleanActions(this.containerEl, ".footer-actions");
+    const buttonContainer = this.containerEl.createDiv({ cls: "footer-actions" });
+    buttonContainer.createDiv({ cls: "spacer" });
+    const infoContainer = buttonContainer.createDiv({ cls: "info" });
+    infoContainer.setText("Alt+Enter to save");
+    const confirmButton = new import_obsidian58.ButtonComponent(buttonContainer);
+    confirmButton.setIcon("checkmark");
+    confirmButton.onClick(async () => {
+      await this.replaceValues();
+      this.close();
+    });
+    const cancelButton = new import_obsidian58.ButtonComponent(buttonContainer);
+    cancelButton.setIcon("cross");
+    cancelButton.onClick(() => {
+      this.close();
+    });
+    const clearButton = new import_obsidian58.ButtonComponent(buttonContainer);
+    clearButton.setIcon("trash");
+    clearButton.onClick(async () => {
+      await this.clearValues();
+      this.close();
+    });
+    clearButton.buttonEl.addClass("danger");
+    this.modalEl.appendChild(buttonContainer);
+  }
+  async replaceValues() {
+    const embed = this.field.options.embed;
+    const result = this.selectedFiles.map((file) => {
+      const alias = extensionMediaTypes[file.extension] === "Image" /* Image */ ? this.field.options.thumbnailSize : void 0;
+      const value = AbstractMediaField.buildLink(this.plugin, this.file, file.path, embed ? alias : void 0);
+      return embed ? value : value.replace(/^\!/, "");
+    });
+    await postValues(this.plugin, [{ indexedPath: this.indexedPath || this.field.id, payload: { value: result.join(", ") } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
+  }
+  async clearValues() {
+    await postValues(this.plugin, [{ indexedPath: this.indexedPath || this.field.id, payload: { value: "" } }], this.file);
+  }
+  renderSelected() {
+    const chooser = this.chooser;
+    const suggestions = chooser.suggestions;
+    const values = chooser.values;
+    suggestions.forEach((s, i) => {
+      if (this.selectedFiles.some((file) => file.path === values[i].item.path)) {
+        s.addClass("value-checked");
+        if (s.querySelectorAll(".icon-container").length == 0) {
+          const iconContainer = s.createDiv({ cls: "icon-container" });
+          (0, import_obsidian58.setIcon)(iconContainer, "check-circle");
+        }
+      } else {
+        s.removeClass("value-checked");
+        s.querySelectorAll(".icon-container").forEach((icon) => icon.remove());
+      }
+    });
+  }
+  selectSuggestion(value, evt) {
+    if (this.selectedFiles.includes(value.item)) {
+      this.selectedFiles.remove(value.item);
+    } else {
+      this.selectedFiles.push(value.item);
+    }
+    this.renderSelected();
+  }
+};
+
+// src/fields/fieldManagers/MultiMediaField.ts
+var MultiMediaField = class extends AbstractMediaField {
+  constructor(plugin, field) {
+    super(plugin, field, "MultiMedia" /* MultiMedia */);
+    this.foldersInputComponents = [];
+    this.field.options.folders = this.field.options.folders || [];
+  }
+  modalFactory(plugin, file, field, eF, indexedPath, lineNumber = -1, asList = false, asBlockquote = false, previousModal) {
+    return new MultiMediaFileModal(plugin, file, field, eF, indexedPath, lineNumber, asList, asBlockquote, previousModal);
+  }
+};
+
 // src/fields/fieldManagers/LookupField.ts
-var import_obsidian51 = require("obsidian");
+var import_obsidian60 = require("obsidian");
 
 // src/commands/updateLookups.ts
-var import_obsidian50 = require("obsidian");
+var import_obsidian59 = require("obsidian");
 function arraysAsStringAreEqual(a, b) {
   const aAsArray = typeof a === "string" ? a.split(",").map((v) => v.trim()) : Array.isArray(a) ? a : [];
   const bAsArray = typeof b === "string" ? b.split(",").map((v) => v.trim()) : Array.isArray(b) ? b : [];
@@ -12738,7 +11397,7 @@ async function updateLookups(plugin, forceUpdateOne, forceUpdateAll = false) {
     const matchRegex = /(?<filePath>.*)__related__(?<fileClassName>.*)___(?<fieldName>.*)/;
     const { filePath, fieldName } = ((_a = lookupFileId.match(matchRegex)) == null ? void 0 : _a.groups) || {};
     const file = plugin.app.vault.getAbstractFileByPath(filePath);
-    if (!file || !(file instanceof import_obsidian50.TFile))
+    if (!file || !(file instanceof import_obsidian59.TFile))
       return;
     payloads[filePath] = payloads[filePath] || [];
     let newValue = "";
@@ -12766,7 +11425,7 @@ async function updateLookups(plugin, forceUpdateOne, forceUpdateAll = false) {
         f.fileLookupFieldLastOutputType.set(lookupFileId, outputType);
       }
       if (shouldCheckForUpdate && (valueHasChanged || formatHasChanged)) {
-        payloads[filePath].push({ id: field.id, payload: { value: newValue } });
+        payloads[filePath].push({ indexedPath: field.id, payload: { value: newValue } });
         updatedFields.push(`${filePath}__${fieldName}`);
       }
       if (!valueHasChanged && !formatHasChanged) {
@@ -12850,7 +11509,7 @@ var LookupField = class extends FieldManager2 {
     const autoUpdateContainer = autoUpdateTopContainer.createDiv({ cls: "field-container" });
     autoUpdateContainer.createEl("span", { text: "Auto update this field ", cls: "label" });
     autoUpdateContainer.createDiv({ cls: "spacer" });
-    const autoUpdate = new import_obsidian51.ToggleComponent(autoUpdateContainer);
+    const autoUpdate = new import_obsidian60.ToggleComponent(autoUpdateContainer);
     autoUpdateTopContainer.createEl("span", { text: "This could lead to latencies depending on the queries", cls: "sub-text warning" });
     if (this.field.options.autoUpdate === void 0)
       this.field.options.autoUpdate = false;
@@ -12862,7 +11521,7 @@ var LookupField = class extends FieldManager2 {
     dvQueryStringTopContainer.createEl("span", { text: "Pages to look for in your vault (DataviewJS Query)", cls: "label" });
     dvQueryStringTopContainer.createEl("span", { text: "DataviewJS query of the form `dv.pages(...)`", cls: "sub-text" });
     const dvQueryStringContainer = dvQueryStringTopContainer.createDiv({ cls: "field-container" });
-    const dvQueryString = new import_obsidian51.TextAreaComponent(dvQueryStringContainer);
+    const dvQueryString = new import_obsidian60.TextAreaComponent(dvQueryStringContainer);
     dvQueryString.inputEl.addClass("full-width");
     dvQueryString.inputEl.cols = 50;
     dvQueryString.inputEl.rows = 4;
@@ -12875,7 +11534,7 @@ var LookupField = class extends FieldManager2 {
     const targetFieldTopContainer = container.createDiv({ cls: "vstacked" });
     const targetFieldContainer = targetFieldTopContainer.createDiv({ cls: "field-container" });
     targetFieldContainer.createEl("span", { text: "Name of the related field", cls: "label" });
-    const targetFieldName = new import_obsidian51.TextComponent(targetFieldContainer);
+    const targetFieldName = new import_obsidian60.TextComponent(targetFieldContainer);
     targetFieldName.inputEl.addClass("full-width");
     targetFieldName.inputEl.addClass("with-label");
     targetFieldTopContainer.createEl("span", { text: "field in the target pages that contains a link to the page where this lookup field is", cls: "sub-text" });
@@ -12888,7 +11547,7 @@ var LookupField = class extends FieldManager2 {
     this.field.options.outputType = this.field.options.outputType || "LinksList" /* LinksList */;
     outputTypeContainer.createEl("span", { text: "Type of output", cls: "label" });
     outputTypeContainer.createDiv({ cls: "spacer" });
-    const outputTypeList = new import_obsidian51.DropdownComponent(outputTypeContainer);
+    const outputTypeList = new import_obsidian60.DropdownComponent(outputTypeContainer);
     Object.keys(Type).forEach((outputType) => {
       outputTypeList.addOption(outputType, Description[outputType]);
     });
@@ -12904,7 +11563,7 @@ var LookupField = class extends FieldManager2 {
     this.field.options.builtinSummarizingFunction = this.field.options.builtinSummarizingFunction || Default.BuiltinSummarizing;
     builtinSummarizeFunctionContainer.createEl("span", { text: OptionLabel.BuiltinSummarizing, cls: "label" });
     builtinSummarizeFunctionContainer.createDiv({ cls: "spacer" });
-    const builtinSummarizeFunctionList = new import_obsidian51.DropdownComponent(builtinSummarizeFunctionContainer);
+    const builtinSummarizeFunctionList = new import_obsidian60.DropdownComponent(builtinSummarizeFunctionContainer);
     Object.keys(BuiltinSummarizing).forEach((builtinFunction2) => {
       builtinSummarizeFunctionList.addOption(builtinFunction2, BuiltinSummarizing[builtinFunction2]);
     });
@@ -12920,7 +11579,7 @@ var LookupField = class extends FieldManager2 {
     this.field.options.summarizedFieldName = this.field.options.summarizedFieldName;
     const summarizedFieldNameContainer = summarizedFieldNameTopContainer.createDiv({ cls: "field-container" });
     summarizedFieldNameContainer.createEl("span", { text: "Summarized field name", cls: "label" });
-    const summarizedFieldName = new import_obsidian51.TextComponent(summarizedFieldNameContainer);
+    const summarizedFieldName = new import_obsidian60.TextComponent(summarizedFieldNameContainer);
     summarizedFieldName.inputEl.addClass("full-width");
     summarizedFieldName.inputEl.addClass("with-label");
     summarizedFieldNameTopContainer.createEl("span", { text: "Name of the field containing summarized value used for the summarizing function", cls: "sub-text" });
@@ -12933,7 +11592,7 @@ var LookupField = class extends FieldManager2 {
     outputRenderingFunctionTopContainer.createEl("span", { text: OptionLabel.CustomList, cls: "label" });
     outputRenderingFunctionTopContainer.createEl("code", { text: OptionSubLabel.CustomList });
     const outputRenderingFunctionContainer = outputRenderingFunctionTopContainer.createDiv({ cls: "field-container" });
-    const outputRenderingFunction = new import_obsidian51.TextAreaComponent(outputRenderingFunctionContainer);
+    const outputRenderingFunction = new import_obsidian60.TextAreaComponent(outputRenderingFunctionContainer);
     outputRenderingFunction.inputEl.addClass("full-width");
     outputRenderingFunction.setPlaceholder(Helper.CustomList);
     outputRenderingFunction.setValue(this.field.options.customListFunction);
@@ -12947,7 +11606,7 @@ var LookupField = class extends FieldManager2 {
     outputSummarizingFunctionTopContainer.createEl("span", { text: OptionLabel.CustomSummarizing, cls: "label" });
     outputSummarizingFunctionTopContainer.createEl("code", { text: OptionSubLabel.CustomSummarizing });
     const outputSummarizingFunctionContainer = outputSummarizingFunctionTopContainer.createDiv({ cls: "field-container" });
-    const outputSummarizingFunction = new import_obsidian51.TextAreaComponent(outputSummarizingFunctionContainer);
+    const outputSummarizingFunction = new import_obsidian60.TextAreaComponent(outputSummarizingFunctionContainer);
     outputSummarizingFunction.inputEl.addClass("full-width");
     outputSummarizingFunction.setPlaceholder(Helper.CustomSummarizing);
     outputSummarizingFunction.setValue(this.field.options.customSummarizingFunction);
@@ -12987,10 +11646,10 @@ var LookupField = class extends FieldManager2 {
 };
 
 // src/fields/fieldManagers/FormulaField.ts
-var import_obsidian53 = require("obsidian");
+var import_obsidian62 = require("obsidian");
 
 // src/commands/updateFormulas.ts
-var import_obsidian52 = require("obsidian");
+var import_obsidian61 = require("obsidian");
 function cleanRemovedFormulasFromIndex(plugin) {
   var _a, _b;
   const f = plugin.fieldIndex;
@@ -13024,7 +11683,7 @@ async function updateFormulas(plugin, forceUpdateOne, forceUpdateAll = false) {
     const { filePath, fileClassName, fieldName } = ((_a2 = id.match(matchRegex)) == null ? void 0 : _a2.groups) || {};
     const shouldUpdate = forceUpdateAll || (forceUpdateOne == null ? void 0 : forceUpdateOne.file.path) === filePath && (forceUpdateOne == null ? void 0 : forceUpdateOne.fieldName) === fieldName || field.options.autoUpdate === true;
     const _file = plugin.app.vault.getAbstractFileByPath(filePath);
-    if (!_file || !(_file instanceof import_obsidian52.TFile))
+    if (!_file || !(_file instanceof import_obsidian61.TFile))
       return;
     const currentValue = `${f.fileFormulaFieldLastValue.get(id) || ""}`;
     try {
@@ -13038,7 +11697,7 @@ async function updateFormulas(plugin, forceUpdateOne, forceUpdateAll = false) {
         if (!shouldUpdate) {
           f.fileFormulaFieldsStatus.set(`${filePath}__${field.name}`, "changed" /* changed */);
         } else {
-          f.pushPayloadToUpdate(filePath, [{ id: field.id, payload: { value: newValue } }]);
+          f.pushPayloadToUpdate(filePath, [{ indexedPath: field.id, payload: { value: newValue } }]);
           f.fileFormulaFieldLastValue.set(id, newValue);
           f.fileFormulaFieldsStatus.set(`${filePath}__${field.name}`, "upToDate" /* upToDate */);
         }
@@ -13108,7 +11767,7 @@ var FormulaField = class extends FieldManager2 {
     const autoUpdateContainer = autoUpdateTopContainer.createDiv({ cls: "field-container" });
     autoUpdateContainer.createEl("span", { text: "Auto update this field ", cls: "label" });
     autoUpdateContainer.createDiv({ cls: "spacer" });
-    const autoUpdate = new import_obsidian53.ToggleComponent(autoUpdateContainer);
+    const autoUpdate = new import_obsidian62.ToggleComponent(autoUpdateContainer);
     autoUpdateTopContainer.createEl("span", { text: "This could lead to latencies depending on the queries", cls: "sub-text warning" });
     if (this.field.options.autoUpdate === void 0)
       this.field.options.autoUpdate = false;
@@ -13120,7 +11779,7 @@ var FormulaField = class extends FieldManager2 {
     formulaTopContainer.createEl("span", { text: "javascript formula", cls: "label" });
     formulaTopContainer.createEl("span", { text: "current and dv variables are available`", cls: "sub-text" });
     const formulaContainer = formulaTopContainer.createDiv({ cls: "field-container" });
-    const formula = new import_obsidian53.TextAreaComponent(formulaContainer);
+    const formula = new import_obsidian62.TextAreaComponent(formulaContainer);
     formula.inputEl.addClass("full-width");
     formula.inputEl.cols = 50;
     formula.inputEl.rows = 4;
@@ -13142,8 +11801,8 @@ var FormulaField = class extends FieldManager2 {
   }
 };
 
-// src/fields/fieldManagers/AbstractCanvasBasedField.ts
-var import_obsidian54 = require("obsidian");
+// src/fields/abstractFieldManagers/AbstractCanvasBasedField.ts
+var import_obsidian63 = require("obsidian");
 var AbstractListBasedField2 = class extends FieldManager2 {
   constructor(plugin, field, type) {
     super(plugin, field, type);
@@ -13161,10 +11820,10 @@ var AbstractListBasedField2 = class extends FieldManager2 {
       const toggleStandardColorButton = (container2, color) => {
         if (colorList.includes(color)) {
           container2.addClass("active");
-          (0, import_obsidian54.setIcon)(container2, "cross");
+          (0, import_obsidian63.setIcon)(container2, "cross");
         } else {
           container2.removeClass("active");
-          (0, import_obsidian54.setIcon)(container2, "plus");
+          (0, import_obsidian63.setIcon)(container2, "plus");
         }
         ;
       };
@@ -13199,7 +11858,7 @@ var AbstractListBasedField2 = class extends FieldManager2 {
           colorContainer.onmouseout = () => {
             colorContainer.setAttr("style", `background-color: ${color}; color: ${color}`);
           };
-          (0, import_obsidian54.setIcon)(colorContainer, "cross");
+          (0, import_obsidian63.setIcon)(colorContainer, "cross");
           colorContainer.onclick = () => {
             colorList.remove(color);
             container.removeChild(colorContainer);
@@ -13208,7 +11867,7 @@ var AbstractListBasedField2 = class extends FieldManager2 {
       };
       toggleAltColors();
       const altColorPickerContainer = container.createDiv({ cls: `node-color picker` });
-      const altColorPicker = new import_obsidian54.ColorComponent(altColorPickerContainer);
+      const altColorPicker = new import_obsidian63.ColorComponent(altColorPickerContainer);
       altColorPicker.onChange((value) => {
         colorList.push(value);
         this.buildColorsContainer(container, colorList, label);
@@ -13221,8 +11880,8 @@ var AbstractListBasedField2 = class extends FieldManager2 {
         edgeList = edgeList || this.sides.map((side2) => side2[0]);
         const edgeSideContainer = container.createDiv({ cls: "edge-side" });
         const sideIconContainer = edgeSideContainer.createDiv({ cls: "side-icon" });
-        (0, import_obsidian54.setIcon)(sideIconContainer, iconName);
-        const sideTogglerContainer = new import_obsidian54.ToggleComponent(edgeSideContainer);
+        (0, import_obsidian63.setIcon)(sideIconContainer, iconName);
+        const sideTogglerContainer = new import_obsidian63.ToggleComponent(edgeSideContainer);
         sideTogglerContainer.setValue(edgeList.includes(side));
         sideTogglerContainer.onChange((value) => value ? edgeList.push(side) : edgeList.remove(side));
       });
@@ -13232,7 +11891,7 @@ var AbstractListBasedField2 = class extends FieldManager2 {
       container.createDiv({ cls: "label", text: title });
       labels.forEach((label) => {
         const labelContainer = container.createDiv({ cls: "item chip", text: label });
-        new import_obsidian54.ButtonComponent(labelContainer).setIcon("x-circle").setClass("item-remove").onClick(() => {
+        new import_obsidian63.ButtonComponent(labelContainer).setIcon("x-circle").setClass("item-remove").onClick(() => {
           labels.remove(label);
           container.removeChild(labelContainer);
         });
@@ -13241,8 +11900,8 @@ var AbstractListBasedField2 = class extends FieldManager2 {
     this.buildNewLabelContainer = (currentLabelsContainer, currentLabelsTitle, newLabelContainer, labels, title) => {
       newLabelContainer.createDiv({ cls: "label", text: title });
       newLabelContainer.createDiv({ cls: "spacer" });
-      const labelInput = new import_obsidian54.TextComponent(newLabelContainer);
-      const labelValidate = new import_obsidian54.ButtonComponent(newLabelContainer);
+      const labelInput = new import_obsidian63.TextComponent(newLabelContainer);
+      const labelValidate = new import_obsidian63.ButtonComponent(newLabelContainer);
       labelInput.onChange((value) => value ? labelValidate.setCta() : labelValidate.removeCta());
       labelValidate.setIcon("plus-circle");
       labelValidate.onClick(() => {
@@ -13254,7 +11913,7 @@ var AbstractListBasedField2 = class extends FieldManager2 {
     };
     this.createCanvasPathContainer = (container) => {
       container.createDiv({ text: `Path of the canvas`, cls: "label" });
-      const canvasPathInput = new import_obsidian54.TextComponent(container);
+      const canvasPathInput = new import_obsidian63.TextComponent(container);
       canvasPathInput.inputEl.addClass("full-width");
       canvasPathInput.inputEl.addClass("with-label");
       new FileSuggest(
@@ -13275,7 +11934,7 @@ var AbstractListBasedField2 = class extends FieldManager2 {
     this.createDirectionContainer = (container, title) => {
       container.createDiv({ text: title, cls: "label" });
       container.createDiv({ cls: "spacer" });
-      const directionSelection = new import_obsidian54.DropdownComponent(container);
+      const directionSelection = new import_obsidian63.DropdownComponent(container);
       [
         ["incoming", "Incoming"],
         ["outgoing", "Outgoing"],
@@ -13288,7 +11947,7 @@ var AbstractListBasedField2 = class extends FieldManager2 {
       container.createEl("span", { text: title });
       container.createEl("span", { text: "Dataview query returning a list of files (<dv> object is available)", cls: "sub-text" });
       const filesFromDVQueryContainer = container.createDiv({ cls: "field-container" });
-      const filesFromDVQuery = new import_obsidian54.TextAreaComponent(filesFromDVQueryContainer);
+      const filesFromDVQuery = new import_obsidian63.TextAreaComponent(filesFromDVQueryContainer);
       filesFromDVQuery.inputEl.addClass("full-width");
       filesFromDVQuery.inputEl.cols = 65;
       filesFromDVQuery.inputEl.rows = 3;
@@ -13331,7 +11990,7 @@ var CanvasField = class extends AbstractListBasedField2 {
   async createAndOpenFieldModal(file, selectedFieldName, eF, indexedPath, lineNumber, asList, asBlockquote) {
     await postValues(
       this.plugin,
-      [{ id: indexedPath || this.field.id, payload: { value: "" } }],
+      [{ indexedPath: indexedPath || this.field.id, payload: { value: "" } }],
       file,
       lineNumber,
       asList,
@@ -13398,7 +12057,7 @@ var CanvasGroupField = class extends AbstractListBasedField2 {
   addFieldOption(file, location, indexedPath) {
   }
   async createAndOpenFieldModal(file, selectedFieldName, eF, indexedPath, lineNumber, asList, asBlockquote) {
-    await postValues(this.plugin, [{ id: indexedPath || this.field.id, payload: { value: "" } }], file, lineNumber, asList, asBlockquote);
+    await postValues(this.plugin, [{ indexedPath: indexedPath || this.field.id, payload: { value: "" } }], file, lineNumber, asList, asBlockquote);
   }
   createDvField(dv, p, fieldContainer, attrs) {
     const fieldValue = dv.el("span", p[this.field.name], attrs);
@@ -13443,7 +12102,7 @@ var CanvasGroupLinkField = class extends AbstractListBasedField2 {
   addFieldOption(file, location, indexedPath) {
   }
   async createAndOpenFieldModal(file, selectedFieldName, eF, indexedPath, lineNumber, asList, asBlockquote) {
-    await postValues(this.plugin, [{ id: indexedPath || this.field.id, payload: { value: "" } }], file, lineNumber, asList, asBlockquote);
+    await postValues(this.plugin, [{ indexedPath: indexedPath || this.field.id, payload: { value: "" } }], file, lineNumber, asList, asBlockquote);
   }
   createDvField(dv, p, fieldContainer, attrs) {
     const fieldValue = dv.el("span", p[this.field.name], attrs);
@@ -13510,8 +12169,8 @@ var CanvasGroupLinkField = class extends AbstractListBasedField2 {
 // src/fields/fieldManagers/YAMLField.ts
 var import_language2 = require("@codemirror/language");
 
-// src/fields/fieldManagers/AbstractRawObjectField.ts
-var import_obsidian55 = require("obsidian");
+// src/fields/abstractFieldManagers/AbstractRawObjectField.ts
+var import_obsidian64 = require("obsidian");
 
 // node_modules/codemirror/dist/index.js
 var import_view = require("@codemirror/view");
@@ -13610,7 +12269,7 @@ var RawObjectModal = class extends BaseModal {
   }
   async save() {
     const newContent = this.editor.state.doc.toString().trim();
-    await postValues(this.plugin, [{ id: this.indexedPath || this.field.id, payload: { value: newContent } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
+    await postValues(this.plugin, [{ indexedPath: this.indexedPath || this.field.id, payload: { value: newContent } }], this.file, this.lineNumber, this.asList, this.asBlockquote);
     this.saved = true;
     if (this.previousModal)
       await this.goToPreviousModal();
@@ -13618,7 +12277,7 @@ var RawObjectModal = class extends BaseModal {
   }
 };
 
-// src/fields/fieldManagers/AbstractRawObjectField.ts
+// src/fields/abstractFieldManagers/AbstractRawObjectField.ts
 var RawObjectField = class extends FieldManager2 {
   constructor(plugin, field, type) {
     super(plugin, field, type);
@@ -13665,7 +12324,7 @@ var RawObjectField = class extends FieldManager2 {
     const spacer = fieldContainer.createDiv({ cls: "spacer-1" });
     if ((_a = attrs.options) == null ? void 0 : _a.alwaysOn)
       spacer.hide();
-    (0, import_obsidian55.setIcon)(editBtn, FieldIcon["Input" /* Input */]);
+    (0, import_obsidian64.setIcon)(editBtn, FieldIcon["Input" /* Input */]);
     if (!((_b = attrs == null ? void 0 : attrs.options) == null ? void 0 : _b.alwaysOn)) {
       editBtn.hide();
       spacer.show();
@@ -13682,7 +12341,7 @@ var RawObjectField = class extends FieldManager2 {
     }
     editBtn.onclick = async () => {
       const file = this.plugin.app.vault.getAbstractFileByPath(p.file.path);
-      if (file instanceof import_obsidian55.TFile && file.extension === "md") {
+      if (file instanceof import_obsidian64.TFile && file.extension === "md") {
         await this.buildAndOpenModal(file);
       }
       fieldValue.hide();
@@ -15904,7 +14563,7 @@ var intOct = {
   resolve: (str, _onError, opt) => intResolve(str, 2, 8, opt),
   stringify: (node) => intStringify(node, 8, "0o")
 };
-var int2 = {
+var int = {
   identify: intIdentify,
   default: true,
   tag: "tag:yaml.org,2002:int",
@@ -15930,7 +14589,7 @@ var schema = [
   nullTag,
   boolTag,
   intOct,
-  int2,
+  int,
   intHex,
   floatNaN,
   floatExp,
@@ -16297,7 +14956,7 @@ var intOct2 = {
   resolve: (str, _onError, opt) => intResolve2(str, 1, 8, opt),
   stringify: (node) => intStringify2(node, 8, "0")
 };
-var int3 = {
+var int2 = {
   identify: intIdentify3,
   default: true,
   tag: "tag:yaml.org,2002:int",
@@ -16483,7 +15142,7 @@ var schema3 = [
   falseTag,
   intBin,
   intOct2,
-  int3,
+  int2,
   intHex2,
   floatNaN2,
   floatExp2,
@@ -16512,7 +15171,7 @@ var tagsByName = {
   floatExp,
   floatNaN,
   floatTime,
-  int: int2,
+  int,
   intHex,
   intOct,
   intTime,
@@ -20077,10 +18736,10 @@ var JSONField = class extends RawObjectField {
 };
 
 // src/fields/fieldManagers/ObjectListField.ts
-var import_obsidian57 = require("obsidian");
+var import_obsidian66 = require("obsidian");
 
 // src/modals/fields/ObjectListModal.ts
-var import_obsidian56 = require("obsidian");
+var import_obsidian65 = require("obsidian");
 var ObjectListModal = class extends BaseSuggestModal {
   constructor(plugin, file, field, eF, indexedPath, lineNumber = -1, asList = false, asBlockquote = false, previousModal) {
     super(plugin, file, eF, indexedPath, previousModal);
@@ -20098,7 +18757,7 @@ var ObjectListModal = class extends BaseSuggestModal {
   buildAddButton(container) {
     const infoContainer = container.createDiv({ cls: "info" });
     infoContainer.setText("Alt+Enter to Add");
-    const addButton = new import_obsidian56.ButtonComponent(container);
+    const addButton = new import_obsidian65.ButtonComponent(container);
     addButton.setIcon("plus");
     addButton.onClick(async () => {
       this.onAdd();
@@ -20113,7 +18772,7 @@ var ObjectListModal = class extends BaseSuggestModal {
       this.close();
       this.open();
     } else if (this.indexedPath) {
-      await postValues(this.plugin, [{ id: this.indexedPath, payload: { value: "" } }], this.file);
+      await postValues(this.plugin, [{ indexedPath: this.indexedPath, payload: { value: "" } }], this.file);
       this.close();
       this.open();
     }
@@ -20147,7 +18806,7 @@ var ObjectListModal = class extends BaseSuggestModal {
     }
     container.createDiv({ cls: "spacer" });
     const removeContainer = container.createDiv({ cls: "icon-container" });
-    (0, import_obsidian56.setIcon)(removeContainer, "trash");
+    (0, import_obsidian65.setIcon)(removeContainer, "trash");
     removeContainer.onclick = () => {
       this.toRemove = item;
     };
@@ -20243,10 +18902,10 @@ var ObjectListField = class extends FieldManager2 {
     const fieldValue = dv.el("span", "{...}", { ...attrs, cls: "value-container" });
     fieldContainer.appendChild(fieldValue);
     const editBtn = fieldContainer.createEl("button");
-    (0, import_obsidian57.setIcon)(editBtn, FieldIcon[this.field.type]);
+    (0, import_obsidian66.setIcon)(editBtn, FieldIcon[this.field.type]);
     editBtn.onclick = async () => {
       const file = this.plugin.app.vault.getAbstractFileByPath(p["file"]["path"]);
-      const _eF = file instanceof import_obsidian57.TFile && file.extension == "md" && await Note.getExistingFieldForIndexedPath(this.plugin, file, this.field.id);
+      const _eF = file instanceof import_obsidian66.TFile && file.extension == "md" && await Note.getExistingFieldForIndexedPath(this.plugin, file, this.field.id);
       if (_eF)
         this.createAndOpenFieldModal(file, this.field.name, _eF, _eF.indexedPath);
     };
@@ -20258,7 +18917,7 @@ var ObjectListField = class extends FieldManager2 {
     const value = eF == null ? void 0 : eF.value;
     const indexForNew = !value || value.length === 0 ? 0 : value.length;
     if (indexedPath)
-      await postValues(this.plugin, [{ id: `${indexedPath}[${indexForNew}]`, payload: { value: "" } }], file, -1);
+      await postValues(this.plugin, [{ indexedPath: `${indexedPath}[${indexForNew}]`, payload: { value: "" } }], file, -1);
   }
   async createAndOpenFieldModal(file, selectedFieldName, eF, indexedPath, lineNumber, asList, asBlockquote, previousModal) {
     const fieldModal = new ObjectListModal(this.plugin, file, this.field, eF, indexedPath, lineNumber, asList, asBlockquote, previousModal);
@@ -20268,7 +18927,7 @@ var ObjectListField = class extends FieldManager2 {
     const fields = this.plugin.fieldIndex.filesFields.get(file.path);
     if (Array.isArray(value)) {
       const items = (fields == null ? void 0 : fields.filter(
-        (_f) => (this.field.isRoot() && _f.path === this.field.id || !this.field.isRoot() && Field_default.upperPath(_f.path) === this.field.path) && _f.path !== ""
+        (_f) => (this.field.isRoot() && _f.path === this.field.id || !this.field.isRoot() && this.field.path + "____" + this.field.id === _f.path) && _f.path !== ""
       ).map((_f) => _f.name)) || [];
       container.setText(`${value.length} item${value.length !== 1 ? "(s)" : ""}: [${items.join(" | ")}]`);
     }
@@ -20285,6 +18944,10 @@ var Managers = {
   Multi: MultiField,
   File: FileField,
   Date: DateField,
+  DateTime: DateTimeField,
+  Time: TimeField,
+  Media: MediaField,
+  MultiMedia: MultiMediaField,
   MultiFile: MultiFileField,
   Lookup: LookupField,
   Formula: FormulaField,
@@ -20308,7 +18971,11 @@ var FieldTypeLabelMapping = {
   "Number": "Number" /* Number */,
   "File": "File" /* File */,
   "MultiFile": "MultiFile" /* MultiFile */,
+  "Media": "Media" /* Media */,
+  "MultiMedia": "MultiMedia" /* MultiMedia */,
   "Date": "Date" /* Date */,
+  "DateTime": "DateTime" /* DateTime */,
+  "Time": "Time" /* Time */,
   "Lookup": "Lookup" /* Lookup */,
   "Formula": "Formula" /* Formula */,
   "Canvas": "Canvas" /* Canvas */,
@@ -20328,7 +18995,11 @@ var FieldTypeTagClass = {
   "Number": "number",
   "File": "file",
   "MultiFile": "file",
+  "Media": "file",
+  "MultiMedia": "file",
   "Date": "date",
+  "DateTime": "datetime",
+  "Time": "time",
   "Lookup": "lookup",
   "Formula": "formula",
   "Canvas": "canvas-links",
@@ -20340,24 +19011,28 @@ var FieldTypeTagClass = {
   "ObjectList": "object-list"
 };
 var FieldTypeTooltip = {
-  "Input": "Accept any value",
-  "Select": "Accept a single value from a list",
-  "Multi": "Accept multiple values from a list",
-  "Cycle": "Cycle through values from a list",
-  "Boolean": "Accept true or false",
-  "Number": "Accept a number",
-  "File": "Accept a link",
-  "MultiFile": "Accept multiple links",
-  "Date": "Accept a date",
-  "Lookup": "Accept a lookup query",
-  "Formula": "Accept a formula",
+  "Input": "Accepts any value",
+  "Select": "Accepts a single value from a list",
+  "Multi": "Accepts multiple values from a list",
+  "Cycle": "Cycles through values from a list",
+  "Boolean": "Accepts true or false",
+  "Number": "Accepts a number",
+  "File": "Accepts a link",
+  "MultiFile": "Accepts multiple links",
+  "Media": "Accepts a link to a media file",
+  "MultiMedia": "Accepts multiple links to media files",
+  "Date": "Accepts a date",
+  "DateTime": "Accepts a date with time",
+  "Time": "Accepts a time",
+  "Lookup": "Accepts a lookup query",
+  "Formula": "Accepts a formula",
   "Canvas": "Updates with links in canvas",
   "CanvasGroup": "Updates with groups in canvas",
   "CanvasGroupLink": "Updates with links to groups in canvas",
-  "YAML": "Accept a YAML object",
-  "JSON": "Accept a JSON object",
-  "Object": "Accept objects (values are fields)",
-  "ObjectList": "Accept a list of object fields"
+  "YAML": "Accepts a YAML object",
+  "JSON": "Accepts a JSON object",
+  "Object": "Accepts objects (values are fields)",
+  "ObjectList": "Accepts a list of object fields"
 };
 var FieldManager = {
   "Input": Managers_default.Input,
@@ -20368,7 +19043,11 @@ var FieldManager = {
   "Number": Managers_default.Number,
   "File": Managers_default.File,
   "MultiFile": Managers_default.MultiFile,
+  "Media": Managers_default.Media,
+  "MultiMedia": Managers_default.MultiMedia,
   "Date": Managers_default.Date,
+  "DateTime": Managers_default.DateTime,
+  "Time": Managers_default.Time,
   "Lookup": Managers_default.Lookup,
   "Formula": Managers_default.Formula,
   "Canvas": Managers_default.Canvas,
@@ -20388,7 +19067,11 @@ var FieldIcon = {
   "Number": "plus-minus-glyph",
   "File": "link",
   "MultiFile": "link",
+  "Media": "paperclip",
+  "MultiMedia": "paperclip",
   "Date": "calendar-with-checkmark",
+  "DateTime": "calendar-clock",
+  "Time": "clock-4",
   "Lookup": "file-search",
   "Formula": "function-square",
   "Canvas": "layout-dashboard",
@@ -20408,7 +19091,11 @@ var FieldBackgroundColorClass = {
   "Number": "number",
   "File": "file",
   "MultiFile": "file",
+  "Media": "file",
+  "MultiMedia": "file",
   "Date": "date",
+  "DateTime": "date",
+  "Time": "time",
   "Lookup": "lookup",
   "Formula": "lookup",
   "Canvas": "file",
@@ -20448,6 +19135,18 @@ var frontmatterOnlyTypes = [
   "Object" /* Object */,
   "ObjectList" /* ObjectList */
 ];
+var extensionMediaTypes = {
+  "avif": "Image" /* Image */,
+  "bmp": "Image" /* Image */,
+  "gif": "Image" /* Image */,
+  "jpg": "Image" /* Image */,
+  "jpeg": "Image" /* Image */,
+  "png": "Image" /* Image */,
+  "svg": "Image" /* Image */,
+  "tif": "Image" /* Image */,
+  "tiff": "Image" /* Image */,
+  "webp": "Image" /* Image */
+};
 
 // src/fields/Field.ts
 var Field = class {
@@ -20753,7 +19452,7 @@ var FieldOptions = class {
   }
   addOption(icon, onclick, tooltip, className, file, indexedPath, plugin) {
     const fieldOptionContainer = this.container.createDiv({ cls: "field-item field-option" });
-    const fieldOption = new import_obsidian58.ButtonComponent(fieldOptionContainer);
+    const fieldOption = new import_obsidian67.ButtonComponent(fieldOptionContainer);
     if (indexedPath && file && plugin) {
       this.setIconAndTooltipAsync(fieldOption, file, indexedPath, plugin);
     } else {
@@ -20766,7 +19465,7 @@ var FieldOptions = class {
     fieldOption.onClick(() => onclick());
   }
 };
-var FieldsModal = class extends import_obsidian58.Modal {
+var FieldsModal = class extends import_obsidian67.Modal {
   constructor(plugin, file, noteFields, indexedPath) {
     super(plugin.app);
     this.plugin = plugin;
@@ -20838,7 +19537,7 @@ var FieldsModal = class extends import_obsidian58.Modal {
     const upperObject = (_a = this.note.existingFields.find((eF) => eF.field.id === upperId)) == null ? void 0 : _a.field;
     const upperObjectName = upperObject ? upperObject.name : fileName;
     const backBtnWrapper = this.contentEl.createDiv({ cls: "back-button-wrapper" });
-    const backBtn = new import_obsidian58.ButtonComponent(backBtnWrapper);
+    const backBtn = new import_obsidian67.ButtonComponent(backBtnWrapper);
     backBtn.setIcon("chevron-left");
     backBtn.setTooltip(`Go to ${upperObjectName} fields`);
     backBtnWrapper.createSpan({ text: `${upperObjectName}${upperIndex ? " [" + upperIndex + "]" : ""}` });
@@ -20858,7 +19557,7 @@ var FieldsModal = class extends import_obsidian58.Modal {
       fieldNameContainer.addClass(`fileClassField__${fileClass.name.replace("/", "___").replaceAll(" ", "_")}`);
     }
     const fieldSettingContainer = fieldSettingsWrapper.createDiv({ cls: "field-item field-setting" });
-    const fieldSettingBtn = new import_obsidian58.ButtonComponent(fieldSettingContainer);
+    const fieldSettingBtn = new import_obsidian67.ButtonComponent(fieldSettingContainer);
     fieldSettingBtn.setIcon("gear");
     fieldSettingBtn.setTooltip(`${field.fileClassName ? field.fileClassName + " > " : "Preset Field > "} ${field.name} settings`);
     fieldSettingBtn.onClick(() => {
@@ -20896,12 +19595,12 @@ var FieldsModal = class extends import_obsidian58.Modal {
     } else {
       const newIndexedPath = `${this.indexedPath ? this.indexedPath + "____" : ""}${field.id}`;
       const fieldBtnContainer = fieldOptionsWrapper.createDiv({ cls: "field-item field-option" });
-      const fieldBtn = new import_obsidian58.ButtonComponent(fieldBtnContainer);
+      const fieldBtn = new import_obsidian67.ButtonComponent(fieldBtnContainer);
       fieldBtn.setIcon("list-plus");
       fieldBtn.setTooltip("Add field at section");
       fieldBtn.onClick(async () => {
         if (objectTypes2.includes(field.type) && this.note) {
-          await postValues(this.plugin, [{ id: `${newIndexedPath}`, payload: { value: "" } }], this.file);
+          await postValues(this.plugin, [{ indexedPath: `${newIndexedPath}`, payload: { value: "" } }], this.file);
           this.indexedPath = `${newIndexedPath}`;
         } else {
           if (field.path === "") {
@@ -20949,7 +19648,7 @@ var FieldsModal = class extends import_obsidian58.Modal {
       fieldNameContainer.addClass(`fileClassField__${fileClass.name.replace("/", "___").replaceAll(" ", "_")}`);
     }
     const fieldSettingContainer = fieldSettingsWrapper.createDiv({ cls: "field-item field-setting" });
-    const fieldSettingBtn = new import_obsidian58.ButtonComponent(fieldSettingContainer);
+    const fieldSettingBtn = new import_obsidian67.ButtonComponent(fieldSettingContainer);
     fieldSettingBtn.setIcon("gear");
     fieldSettingBtn.setTooltip(`${field.fileClassName ? field.fileClassName + " > " : "Preset Field > "} ${field.name} settings`);
     fieldSettingBtn.onClick(() => {
@@ -20986,13 +19685,13 @@ var FieldsModal = class extends import_obsidian58.Modal {
           const fileClassNameContainer = fileClassOptionsContainer.createDiv({ cls: "name", text: _fileClass.name });
           fileClassNameContainer.setAttr("id", `fileClass__${_fileClass.name.replace("/", "___").replace(" ", "_")}`);
           if (await _fileClass.missingFieldsForFileClass(this.file)) {
-            const fileClassInsertMissingFieldsInFrontmatterBtn = new import_obsidian58.ButtonComponent(fileClassOptionsContainer);
+            const fileClassInsertMissingFieldsInFrontmatterBtn = new import_obsidian67.ButtonComponent(fileClassOptionsContainer);
             fileClassInsertMissingFieldsInFrontmatterBtn.setIcon("align-vertical-space-around");
             fileClassInsertMissingFieldsInFrontmatterBtn.setTooltip(`Insert missing fields for ${_fileClass.name}`);
             fileClassInsertMissingFieldsInFrontmatterBtn.onClick(() => {
               insertMissingFields(this.plugin, this.file.path, -1, false, false, _fileClass.name);
             });
-            const fileClassInsertMissingFieldsBtn = new import_obsidian58.ButtonComponent(fileClassOptionsContainer);
+            const fileClassInsertMissingFieldsBtn = new import_obsidian67.ButtonComponent(fileClassOptionsContainer);
             fileClassInsertMissingFieldsBtn.setIcon("log-in");
             fileClassInsertMissingFieldsBtn.setTooltip(`Insert missing fields for ${_fileClass.name}`);
             fileClassInsertMissingFieldsBtn.onClick(() => {
@@ -21010,7 +19709,7 @@ var FieldsModal = class extends import_obsidian58.Modal {
               ).open();
             });
           }
-          const fileClassAddAttributeBtn = new import_obsidian58.ButtonComponent(fileClassOptionsContainer);
+          const fileClassAddAttributeBtn = new import_obsidian67.ButtonComponent(fileClassOptionsContainer);
           fileClassAddAttributeBtn.setIcon("plus-circle");
           fileClassAddAttributeBtn.setTooltip(`Add field definition in ${_fileClass.name}`);
           fileClassAddAttributeBtn.onClick(() => {
@@ -21052,7 +19751,7 @@ var FieldsModal = class extends import_obsidian58.Modal {
   buildInsertMissingFieldsBtn() {
     const insertMissingFieldsContainer = this.contentEl.createDiv({ cls: "insert-all-fields" });
     insertMissingFieldsContainer.createDiv({ text: "Insert missing fields" });
-    const insertMissingFieldsInFrontmatterBtn = new import_obsidian58.ButtonComponent(insertMissingFieldsContainer);
+    const insertMissingFieldsInFrontmatterBtn = new import_obsidian67.ButtonComponent(insertMissingFieldsContainer);
     insertMissingFieldsInFrontmatterBtn.setIcon("align-vertical-space-around");
     insertMissingFieldsInFrontmatterBtn.setTooltip("In Frontmatter");
     insertMissingFieldsInFrontmatterBtn.onClick(() => {
@@ -21065,7 +19764,7 @@ var FieldsModal = class extends import_obsidian58.Modal {
         insertMissingFields(this.plugin, this.file.path, -1, false, false, fileClass == null ? void 0 : fileClass.name, this.indexedPath);
       }
     });
-    const insertMissingFieldsBtn = new import_obsidian58.ButtonComponent(insertMissingFieldsContainer);
+    const insertMissingFieldsBtn = new import_obsidian67.ButtonComponent(insertMissingFieldsContainer);
     insertMissingFieldsBtn.setIcon("log-in");
     insertMissingFieldsBtn.setTooltip("At line...");
     insertMissingFieldsBtn.onClick(() => {
@@ -21100,7 +19799,7 @@ var FieldsModal = class extends import_obsidian58.Modal {
   buildInsertNewItem(field, indexedPath) {
     const insertNewItemContainer = this.contentEl.createDiv({ cls: "insert-all-fields" });
     insertNewItemContainer.createDiv({ text: "Add a new item" });
-    const insertNewItemBtn = new import_obsidian58.ButtonComponent(insertNewItemContainer);
+    const insertNewItemBtn = new import_obsidian67.ButtonComponent(insertNewItemContainer);
     insertNewItemBtn.setIcon("list-plus");
     insertNewItemBtn.onClick(async () => {
       const fieldManager = new FieldManager[field.type](this.plugin, field);
@@ -21133,7 +19832,7 @@ var FieldsModal = class extends import_obsidian58.Modal {
     }
   }
 };
-var NoteFieldsComponent = class extends import_obsidian58.Component {
+var NoteFieldsComponent = class extends import_obsidian67.Component {
   constructor(plugin, cacheVersion, onChange, file, indexedPath) {
     super();
     this.plugin = plugin;
@@ -21171,7 +19870,7 @@ function addFileClassAttributeOptions(plugin) {
     name: "All fileClass attributes options",
     icon: "gear",
     checkCallback: (checking) => {
-      const view = plugin.app.workspace.getActiveViewOfType(import_obsidian59.MarkdownView);
+      const view = plugin.app.workspace.getActiveViewOfType(import_obsidian68.MarkdownView);
       const inFileClass = !!(classFilesPath && !!(view == null ? void 0 : view.file) && view.file.path.startsWith(classFilesPath));
       if (checking) {
         return inFileClass;
@@ -21191,7 +19890,7 @@ function addInsertFileClassAttribute(plugin) {
     name: "Insert a new fileClass attribute",
     icon: "list-plus",
     checkCallback: (checking) => {
-      const view = plugin.app.workspace.getActiveViewOfType(import_obsidian59.MarkdownView);
+      const view = plugin.app.workspace.getActiveViewOfType(import_obsidian68.MarkdownView);
       const inFileClass = !!(classFilesPath && !!(view == null ? void 0 : view.file) && view.file.path.startsWith(classFilesPath));
       if (checking) {
         return inFileClass;
@@ -21204,7 +19903,7 @@ function addInsertFileClassAttribute(plugin) {
             fileClassAttributeModal.open();
           }
         } catch (error) {
-          new import_obsidian59.Notice("plugin is not a valid fileClass");
+          new import_obsidian68.Notice("plugin is not a valid fileClass");
         }
       }
     }
@@ -21217,7 +19916,7 @@ function addInsertFieldAtPositionCommand(plugin) {
     name: "Choose a field to insert at cursor",
     icon: "list-plus",
     checkCallback: (checking) => {
-      const view = plugin.app.workspace.getActiveViewOfType(import_obsidian59.MarkdownView);
+      const view = plugin.app.workspace.getActiveViewOfType(import_obsidian68.MarkdownView);
       const inFile = !!((view == null ? void 0 : view.file) && (!classFilesPath || !view.file.path.startsWith(classFilesPath)));
       if (checking) {
         return inFile;
@@ -21236,7 +19935,7 @@ function addFieldOptionsCommand(plugin) {
     name: "Fields options",
     icon: "gear",
     checkCallback: (checking) => {
-      const view = plugin.app.workspace.getActiveViewOfType(import_obsidian59.MarkdownView);
+      const view = plugin.app.workspace.getActiveViewOfType(import_obsidian68.MarkdownView);
       const inFile = !!((view == null ? void 0 : view.file) && (!classFilesPath || !view.file.path.startsWith(classFilesPath)));
       if (checking) {
         return inFile;
@@ -21256,7 +19955,7 @@ function addManageFieldAtCursorCommand(plugin) {
     name: "Manage field at cursor",
     icon: "text-cursor-input",
     checkCallback: (checking) => {
-      const view = plugin.app.workspace.getActiveViewOfType(import_obsidian59.MarkdownView);
+      const view = plugin.app.workspace.getActiveViewOfType(import_obsidian68.MarkdownView);
       const editor = view == null ? void 0 : view.editor;
       const inFile = !!((view == null ? void 0 : view.file) && (!classFilesPath || !view.file.path.startsWith(classFilesPath)));
       if (checking) {
@@ -21274,7 +19973,7 @@ function addManageFieldAtCursorCommand(plugin) {
                 if (node)
                   optionsList.createAndOpenFieldModal(node);
                 else
-                  new import_obsidian59.Notice("No field with definition at this position", 2e3);
+                  new import_obsidian68.Notice("No field with definition at this position", 2e3);
               }
               break;
             case "preview": {
@@ -21287,13 +19986,13 @@ function addManageFieldAtCursorCommand(plugin) {
                   if (node)
                     optionsList.createAndOpenFieldModal(node);
                   else
-                    new import_obsidian59.Notice("No field with definition at this position", 2e3);
+                    new import_obsidian68.Notice("No field with definition at this position", 2e3);
                 } else if (key === plugin.settings.fileClassAlias) {
                   const node = note.getNodeForIndexedPath(`fileclass-field-${plugin.settings.fileClassAlias}`);
                   if (node)
                     optionsList.createAndOpenFieldModal(node);
                   else
-                    new import_obsidian59.Notice("No field with definition at this position", 2e3);
+                    new import_obsidian68.Notice("No field with definition at this position", 2e3);
                 }
               }
               break;
@@ -21311,7 +20010,7 @@ function insertMissingFieldsCommand(plugin) {
     name: "Bulk insert missing fields",
     icon: "battery-full",
     checkCallback: (checking) => {
-      const view = plugin.app.workspace.getActiveViewOfType(import_obsidian59.MarkdownView);
+      const view = plugin.app.workspace.getActiveViewOfType(import_obsidian68.MarkdownView);
       const inFile = !!((view == null ? void 0 : view.file) && (!classFilesPath || !view.file.path.startsWith(classFilesPath)));
       if (checking) {
         return inFile;
@@ -21346,14 +20045,14 @@ function addOpenFieldsModalCommand(plugin) {
     name: "Open this note's fields modal",
     icon: "clipboard-list",
     checkCallback: (checking) => {
-      const view = plugin.app.workspace.getActiveViewOfType(import_obsidian59.MarkdownView);
+      const view = plugin.app.workspace.getActiveViewOfType(import_obsidian68.MarkdownView);
       const inFile = !!((view == null ? void 0 : view.file) && (!classFilesPath || !view.file.path.startsWith(classFilesPath)));
       if (checking) {
         return inFile;
       }
       if (inFile) {
         const file = view.file;
-        if (inFile && file instanceof import_obsidian59.TFile && file.extension === "md") {
+        if (inFile && file instanceof import_obsidian68.TFile && file.extension === "md") {
           const noteFieldsComponent = new NoteFieldsComponent(plugin, "1", () => {
           }, file);
           plugin.addChild(noteFieldsComponent);
@@ -21368,7 +20067,7 @@ function addInsertFieldCommand(plugin, command, field, fileClassName) {
     name: command.label,
     icon: command.icon,
     checkCallback: (checking) => {
-      const view = plugin.app.workspace.getActiveViewOfType(import_obsidian59.MarkdownView);
+      const view = plugin.app.workspace.getActiveViewOfType(import_obsidian68.MarkdownView);
       const fR = command.id.match(/insert__(?<fieldId>.*)/);
       const fileClasses = (view == null ? void 0 : view.file) ? plugin.fieldIndex.filesFileClasses.get(view == null ? void 0 : view.file.path) : void 0;
       const belongsToView = field !== void 0 && !!(view == null ? void 0 : view.file) && (!!fileClasses && fileClasses.some((fileClass) => fileClass.name === fileClassName) || !fileClasses && !fileClassName);
@@ -21467,14 +20166,14 @@ function addUpdateFileLookupsCommand(plugin) {
     icon: "file-search",
     checkCallback: (checking) => {
       var _a;
-      const view = plugin.app.workspace.getActiveViewOfType(import_obsidian59.MarkdownView);
+      const view = plugin.app.workspace.getActiveViewOfType(import_obsidian68.MarkdownView);
       const inFile = !!((view == null ? void 0 : view.file) && (!classFilesPath || !view.file.path.startsWith(classFilesPath)));
       if (checking) {
         return inFile;
       }
       if (inFile) {
         const file = view.file;
-        if (inFile && file instanceof import_obsidian59.TFile && file.extension === "md") {
+        if (inFile && file instanceof import_obsidian68.TFile && file.extension === "md") {
           const lookupFields = (_a = plugin.fieldIndex.filesFields.get(file.path)) == null ? void 0 : _a.filter((field) => field.type === "Lookup" /* Lookup */);
           lookupFields == null ? void 0 : lookupFields.forEach(async (field) => {
             await updateLookups(plugin, { file, fieldName: field.name });
@@ -21493,14 +20192,14 @@ function addUpdateFileFormulasCommand(plugin) {
     icon: "function-square",
     checkCallback: (checking) => {
       var _a;
-      const view = plugin.app.workspace.getActiveViewOfType(import_obsidian59.MarkdownView);
+      const view = plugin.app.workspace.getActiveViewOfType(import_obsidian68.MarkdownView);
       const inFile = !!((view == null ? void 0 : view.file) && (!classFilesPath || !view.file.path.startsWith(classFilesPath)));
       if (checking) {
         return inFile;
       }
       if (inFile) {
         const file = view.file;
-        if (inFile && file instanceof import_obsidian59.TFile && file.extension === "md") {
+        if (inFile && file instanceof import_obsidian68.TFile && file.extension === "md") {
           const formulaFields = (_a = plugin.fieldIndex.filesFields.get(file.path)) == null ? void 0 : _a.filter((field) => field.type === "Formula" /* Formula */);
           formulaFields == null ? void 0 : formulaFields.forEach(async (field) => {
             await updateFormulas(plugin, { file, fieldName: field.name });
@@ -21528,8 +20227,8 @@ function addCommands(plugin) {
 }
 
 // src/components/ContextMenu.ts
-var import_obsidian60 = require("obsidian");
-var ContextMenu = class extends import_obsidian60.Component {
+var import_obsidian69 = require("obsidian");
+var ContextMenu = class extends import_obsidian69.Component {
   constructor(plugin) {
     super();
     this.plugin = plugin;
@@ -21557,8 +20256,8 @@ var ContextMenu = class extends import_obsidian60.Component {
   }
   buildOptions(file, menu) {
     const classFilesPath = this.plugin.settings.classFilesPath;
-    if (file instanceof import_obsidian60.TFile && file.extension === "md") {
-      if (!import_obsidian60.Platform.isMobile && (0, import_obsidian60.requireApiVersion)("0.16.0")) {
+    if (file instanceof import_obsidian69.TFile && file.extension === "md") {
+      if (!import_obsidian69.Platform.isMobile && (0, import_obsidian69.requireApiVersion)("0.16.0")) {
         if (classFilesPath && file.path.startsWith(classFilesPath)) {
           const fileClassName = FileClass.getFileClassNameFromPath(this.plugin.settings, file.path);
           menu.setSectionSubmenu(
@@ -21601,10 +20300,10 @@ var ContextMenu = class extends import_obsidian60.Component {
 };
 
 // src/components/ExtraButton.ts
-var import_obsidian63 = require("obsidian");
+var import_obsidian72 = require("obsidian");
 
 // src/options/linkAttributes.ts
-var import_obsidian61 = require("obsidian");
+var import_obsidian70 = require("obsidian");
 function clearExtraAttributes(link) {
   Object.values(link.attributes).forEach((attr) => {
     if (attr.name.includes("fileclass-name")) {
@@ -21696,7 +20395,7 @@ function setLinkMetadataFormButton(plugin, link, destPath, viewTypeName, fileCla
       const metadataMenuBtn = plugin.app.workspace.containerEl.createEl("a", { cls: "metadata-menu fileclass-icon" });
       setStatus(metadataMenuBtn);
       if (metadataMenuBtn) {
-        (0, import_obsidian61.setIcon)(metadataMenuBtn, icon);
+        (0, import_obsidian70.setIcon)(metadataMenuBtn, icon);
         (_a = link.parentElement) == null ? void 0 : _a.insertBefore(metadataMenuBtn, link.nextSibling);
         metadataMenuBtn.onclick = (event) => {
           const fileClassViewManager = new FileClassViewManager(plugin, fileClass);
@@ -21718,13 +20417,13 @@ function setLinkMetadataFormButton(plugin, link, destPath, viewTypeName, fileCla
         const metadataMenuBtn = plugin.app.workspace.containerEl.createEl("a", { cls: "metadata-menu fileclass-icon" });
         setStatus(metadataMenuBtn);
         if (metadataMenuBtn) {
-          (0, import_obsidian61.setIcon)(metadataMenuBtn, icon || plugin.settings.fileClassIcon);
+          (0, import_obsidian70.setIcon)(metadataMenuBtn, icon || plugin.settings.fileClassIcon);
           (_b = link.parentElement) == null ? void 0 : _b.insertBefore(metadataMenuBtn, link.nextSibling);
           if (viewTypeName === "a.internal-link" && metadataMenuBtn.closest(".fv-table"))
             metadataMenuBtn.addClass("dataview-fileclass-icon");
           metadataMenuBtn.onclick = (event) => {
             const file = plugin.app.vault.getAbstractFileByPath(`${destPath}.md`);
-            if (file instanceof import_obsidian61.TFile && file.extension === "md") {
+            if (file instanceof import_obsidian70.TFile && file.extension === "md") {
               const noteFieldsComponent = new NoteFieldsComponent(plugin, "1", () => {
               }, file);
               plugin.addChild(noteFieldsComponent);
@@ -21779,7 +20478,7 @@ function updateDivExtraAttributes(app2, plugin, link, viewTypeName, sourceName, 
     default:
       {
         const linkName = _linkName || link.textContent;
-        const dest = linkName && app2.metadataCache.getFirstLinkpathDest((0, import_obsidian61.getLinkpath)(linkName), sourceName);
+        const dest = linkName && app2.metadataCache.getFirstLinkpathDest((0, import_obsidian70.getLinkpath)(linkName), sourceName);
         if (dest) {
           const fileClassName = (_e = plugin.fieldIndex.filesFileClassesNames.get(dest.path)) == null ? void 0 : _e.last();
           setLinkMetadataFormButton(plugin, link, dest.path.replace(/(.*).md/, "$1"), viewTypeName, fileClassName);
@@ -21857,7 +20556,7 @@ function updateVisibleLinks(app2, plugin) {
   const settings = plugin.settings;
   app2.workspace.iterateRootLeaves((leaf) => {
     var _a;
-    if (leaf.view instanceof import_obsidian61.MarkdownView && leaf.view.file) {
+    if (leaf.view instanceof import_obsidian70.MarkdownView && leaf.view.file) {
       const file = leaf.view.file;
       const cachedFile = app2.metadataCache.getFileCache(file);
       const fileName = file.path.replace(/(.*).md/, "$1");
@@ -21890,7 +20589,7 @@ function updateVisibleLinks(app2, plugin) {
 var import_state4 = require("@codemirror/state");
 
 // src/options/livePreview.ts
-var import_obsidian62 = require("obsidian");
+var import_obsidian71 = require("obsidian");
 var import_view3 = require("@codemirror/view");
 var import_state3 = require("@codemirror/state");
 var import_language4 = require("@codemirror/language");
@@ -21915,7 +20614,7 @@ function buildCMViewPlugin(plugin) {
           const icon = (fileClass == null ? void 0 : fileClass.getIcon()) || "file-spreadsheet";
           fileClass = plugin.fieldIndex.fileClassesPath.get(this.destName + ".md");
           if (fileClass) {
-            (0, import_obsidian62.setIcon)(metadataMenuBtn, icon || settings.fileClassIcon);
+            (0, import_obsidian71.setIcon)(metadataMenuBtn, icon || settings.fileClassIcon);
             metadataMenuBtn.onclick = (event) => {
               const fileClassViewManager = new FileClassViewManager(plugin, fileClass);
               plugin.addChild(fileClassViewManager);
@@ -21925,10 +20624,10 @@ function buildCMViewPlugin(plugin) {
           }
         } else if (fileClass) {
           const icon = fileClass.getIcon();
-          (0, import_obsidian62.setIcon)(metadataMenuBtn, icon || settings.fileClassIcon);
+          (0, import_obsidian71.setIcon)(metadataMenuBtn, icon || settings.fileClassIcon);
           metadataMenuBtn.onclick = (event) => {
             const file = plugin.app.vault.getAbstractFileByPath(`${this.destName}.md`);
-            if (file instanceof import_obsidian62.TFile && file.extension === "md") {
+            if (file instanceof import_obsidian71.TFile && file.extension === "md") {
               const noteFieldsComponent = new NoteFieldsComponent(plugin, "1", () => {
               }, file);
               plugin.addChild(noteFieldsComponent);
@@ -21961,7 +20660,7 @@ function buildCMViewPlugin(plugin) {
         if (!settings.enableEditor) {
           return builder.finish();
         }
-        const mdView = view.state.field(import_obsidian62.editorInfoField);
+        const mdView = view.state.field(import_obsidian71.editorInfoField);
         let lastAttributes = {};
         let iconDecoAfter = null;
         let iconDecoAfterWhere = null;
@@ -22064,7 +20763,7 @@ function buildCMViewPlugin(plugin) {
 }
 
 // src/components/ExtraButton.ts
-var ExtraButton = class extends import_obsidian63.Component {
+var ExtraButton = class extends import_obsidian72.Component {
   constructor(plugin) {
     super();
     this.plugin = plugin;
@@ -22091,12 +20790,12 @@ var ExtraButton = class extends import_obsidian63.Component {
       this.initModalObservers(document);
       updateVisibleLinks(this.plugin.app, this.plugin);
     });
-    this.registerEvent(this.plugin.app.metadataCache.on("changed", (0, import_obsidian63.debounce)(this.updateLinks, 100, true)));
-    this.registerEvent(this.plugin.app.workspace.on("metadata-menu:indexed", (0, import_obsidian63.debounce)(this.updateLinks, 100, true)));
-    this.registerEvent(this.plugin.app.workspace.on("layout-change", (0, import_obsidian63.debounce)(this.updateLinks, 10, true)));
+    this.registerEvent(this.plugin.app.metadataCache.on("changed", (0, import_obsidian72.debounce)(this.updateLinks, 100, true)));
+    this.registerEvent(this.plugin.app.workspace.on("metadata-menu:indexed", (0, import_obsidian72.debounce)(this.updateLinks, 100, true)));
+    this.registerEvent(this.plugin.app.workspace.on("layout-change", (0, import_obsidian72.debounce)(this.updateLinks, 10, true)));
     this.registerEvent(this.plugin.app.workspace.on("window-open", (window2, win) => this.initModalObservers(window2.getContainer().doc)));
     this.registerEvent(this.plugin.app.workspace.on("layout-change", () => this.initViewObservers()));
-    this.registerEvent(this.plugin.app.internalPlugins.getPluginById("bookmarks").instance.on("changed", (0, import_obsidian63.debounce)(this.updateLinks, 100, true)));
+    this.registerEvent(this.plugin.app.internalPlugins.getPluginById("bookmarks").instance.on("changed", (0, import_obsidian72.debounce)(this.updateLinks, 100, true)));
   }
   initViewObservers() {
     var _a, _b, _c, _d, _e, _f;
@@ -22239,10 +20938,10 @@ var ExtraButton = class extends import_obsidian63.Component {
 };
 
 // src/index/FieldIndex.ts
-var import_obsidian67 = require("obsidian");
+var import_obsidian76 = require("obsidian");
 
 // src/fileClass/FileClassQuery.ts
-var import_obsidian64 = require("obsidian");
+var import_obsidian73 = require("obsidian");
 var FileClassQuery = class {
   constructor(name = "", id = "", query = "", fileClassName = "") {
     this.name = name;
@@ -22255,7 +20954,7 @@ var FileClassQuery = class {
     try {
       return new Function("dv", `return ${this.query}`)(api);
     } catch (error) {
-      new import_obsidian64.Notice(` for <${this.name}>. Check your settings`);
+      new import_obsidian73.Notice(` for <${this.name}>. Check your settings`);
       return [];
     }
   }
@@ -22322,7 +21021,7 @@ function resolveLookups(plugin) {
 }
 
 // src/commands/updateCanvas.ts
-var import_obsidian65 = require("obsidian");
+var import_obsidian74 = require("obsidian");
 async function updateCanvas(plugin, forceUpdateOne) {
   var _a;
   const start2 = Date.now();
@@ -22425,7 +21124,7 @@ async function updateCanvas(plugin, forceUpdateOne) {
         edges = canvasContent.edges;
       } catch (error) {
         DEBUG && console.log(error);
-        new import_obsidian65.Notice(`Couldn't read ${canvas.path}`);
+        new import_obsidian74.Notice(`Couldn't read ${canvas.path}`);
       }
     }
     const canvasGroups = nodes.filter((node) => node.type === "group");
@@ -22477,26 +21176,26 @@ async function updateCanvas(plugin, forceUpdateOne) {
     });
     currentFiles.forEach(async ({ cumulatedLinksFields, cumulatedGroupsFields, cumulatedGroupsLinksFields }, filePath) => {
       const file = plugin.app.vault.getAbstractFileByPath(filePath);
-      if (file && file instanceof import_obsidian65.TFile) {
+      if (file && file instanceof import_obsidian74.TFile) {
         const fields = plugin.fieldIndex.filesFields.get(file.path) || [];
         const payload = [];
         cumulatedLinksFields.forEach((linkNodes, name) => {
           const field = fields.find((_f) => _f.name === name);
           const values = linkNodes.map((node) => FieldManager2.buildMarkDownLink(plugin, file, node.file, node.subpath));
           if (field)
-            payload.push({ id: field.id, payload: { value: values ? [...new Set(values)].join(",") : "" } });
+            payload.push({ indexedPath: field.id, payload: { value: values ? [...new Set(values)].join(",") : "" } });
         });
         cumulatedGroupsFields.forEach((groupNodes, name) => {
           const field = fields.find((_f) => _f.name === name);
           const values = groupNodes.map((group) => group.label);
           if (field)
-            payload.push({ id: field.id, payload: { value: values ? [...new Set(values.filter((v) => !!v))].join(",") : "" } });
+            payload.push({ indexedPath: field.id, payload: { value: values ? [...new Set(values.filter((v) => !!v))].join(",") : "" } });
         });
         cumulatedGroupsLinksFields.forEach((linkNodes, name) => {
           const field = fields.find((_f) => _f.name === name);
           const values = linkNodes.map((node) => FieldManager2.buildMarkDownLink(plugin, file, node.file, node.subpath));
           if (field)
-            payload.push({ id: field.id, payload: { value: values ? [...new Set(values)].join(",") : "" } });
+            payload.push({ indexedPath: field.id, payload: { value: values ? [...new Set(values)].join(",") : "" } });
         });
         if (payload.length)
           await postValues(plugin, payload, file);
@@ -22505,25 +21204,25 @@ async function updateCanvas(plugin, forceUpdateOne) {
     previousFilesPaths.filter((f2) => !currentFilesPaths.includes(f2)).forEach(async (filePath) => {
       var _a2, _b, _c;
       const targetFile = app.vault.getAbstractFileByPath(filePath);
-      if (targetFile && targetFile instanceof import_obsidian65.TFile) {
+      if (targetFile && targetFile instanceof import_obsidian74.TFile) {
         const payload = [];
         const canvasFields = (_a2 = f.filesFields.get(filePath)) == null ? void 0 : _a2.filter(
           (field) => field.type === "Canvas" /* Canvas */ && field.options.canvasPath === canvas.path
         );
         canvasFields == null ? void 0 : canvasFields.forEach((field) => {
-          payload.push({ id: field.id, payload: { value: "" } });
+          payload.push({ indexedPath: field.id, payload: { value: "" } });
         });
         const canvasGroupFields = (_b = f.filesFields.get(filePath)) == null ? void 0 : _b.filter(
           (field) => field.type === "CanvasGroup" /* CanvasGroup */ && field.options.canvasPath === canvas.path
         );
         canvasGroupFields == null ? void 0 : canvasGroupFields.forEach((field) => {
-          payload.push({ id: field.id, payload: { value: "" } });
+          payload.push({ indexedPath: field.id, payload: { value: "" } });
         });
         const canvasGroupLinksFields = (_c = f.filesFields.get(filePath)) == null ? void 0 : _c.filter(
           (field) => field.type === "CanvasGroupLink" /* CanvasGroupLink */ && field.options.canvasPath === canvas.path
         );
         canvasGroupLinksFields == null ? void 0 : canvasGroupLinksFields.forEach((field) => {
-          payload.push({ id: field.id, payload: { value: "" } });
+          payload.push({ indexedPath: field.id, payload: { value: "" } });
         });
         if (payload.length)
           await postValues(plugin, payload, targetFile);
@@ -22541,7 +21240,7 @@ async function updateCanvasAfterFileClass(plugin, files = []) {
       const canvasFields = fileClassName && ((_b = index.fileClassesFields.get(fileClassName)) == null ? void 0 : _b.filter((field) => field.type === "Canvas" /* Canvas */)) || [];
       await Promise.all(canvasFields.map(async (field) => {
         const canvasFile = this.plugin.app.vault.getAbstractFileByPath(field.options.canvasPath);
-        if (canvasFile instanceof import_obsidian65.TFile && canvasFile.extension === "canvas") {
+        if (canvasFile instanceof import_obsidian74.TFile && canvasFile.extension === "canvas") {
           await updateCanvas(this.plugin, { canvas: canvasFile });
         }
       }));
@@ -22624,8 +21323,8 @@ var V1FileClassMigration = class {
 };
 
 // src/index/FieldIndexBuilder.ts
-var import_obsidian66 = require("obsidian");
-var FieldIndexBuilder = class extends import_obsidian66.Component {
+var import_obsidian75 = require("obsidian");
+var FieldIndexBuilder = class extends import_obsidian75.Component {
   constructor(plugin) {
     super();
     this.plugin = plugin;
@@ -22703,7 +21402,7 @@ var FieldIndex = class extends FieldIndexBuilder {
     );
     this.registerEvent(
       this.plugin.app.vault.on("modify", async (file) => {
-        if (file instanceof import_obsidian67.TFile) {
+        if (file instanceof import_obsidian76.TFile) {
           if (file.extension === "md") {
             this.changedFiles.push(file);
             this.lastTimeBeforeResolving = Date.now();
@@ -22809,8 +21508,8 @@ var FieldIndex = class extends FieldIndexBuilder {
     const currentFieldsPayloadToUpdate = this.dVRelatedFieldsToUpdate.get(filePath) || { status: "toProcess", fieldsPayload: [] };
     for (const fieldPayload of fieldsPayloadToUpdate) {
       currentFieldsPayloadToUpdate.status = "toProcess";
-      const { id, payload } = fieldPayload;
-      const currentField = currentFieldsPayloadToUpdate == null ? void 0 : currentFieldsPayloadToUpdate.fieldsPayload.find((item) => item.id === id);
+      const { indexedPath, payload } = fieldPayload;
+      const currentField = currentFieldsPayloadToUpdate == null ? void 0 : currentFieldsPayloadToUpdate.fieldsPayload.find((item) => item.indexedPath === indexedPath);
       if (currentField)
         currentField.payload = payload;
       else
@@ -22828,7 +21527,7 @@ var FieldIndex = class extends FieldIndexBuilder {
             await postValues(this.plugin, fieldsPayload, filePath);
             fieldsPayload.forEach((fieldPayload) => {
               var _a2;
-              const field = (_a2 = this.filesFields.get(filePath)) == null ? void 0 : _a2.find((_f) => _f.isRoot() && _f.id === fieldPayload.id);
+              const field = (_a2 = this.filesFields.get(filePath)) == null ? void 0 : _a2.find((_f) => _f.isRoot() && _f.id === fieldPayload.indexedPath);
               if (field && field.type === "Lookup" /* Lookup */)
                 this.fileLookupFieldsStatus.set(`${filePath}__${field.name}`, "upToDate" /* upToDate */);
               if (field && field.type === "Formula" /* Formula */)
@@ -22869,7 +21568,7 @@ var FieldIndex = class extends FieldIndexBuilder {
           edges = canvasContent.edges;
         } catch (error) {
           DEBUG && console.log(error);
-          new import_obsidian67.Notice(`Couldn't read ${canvas.path}`);
+          new import_obsidian76.Notice(`Couldn't read ${canvas.path}`);
         }
       }
       nodes == null ? void 0 : nodes.forEach(async (node) => {
@@ -23252,7 +21951,7 @@ var FieldIndex = class extends FieldIndexBuilder {
 };
 
 // src/components/IndexStatus.ts
-var import_obsidian68 = require("obsidian");
+var import_obsidian77 = require("obsidian");
 var Statuses = /* @__PURE__ */ ((Statuses2) => {
   Statuses2["indexing"] = "indexing";
   Statuses2["indexed"] = "indexed";
@@ -23283,7 +21982,7 @@ var statusTooltip = {
   "indexed": "Metadata Menu: field index complete",
   "update": "Click to update lookups and formulas"
 };
-var IndexStatus = class extends import_obsidian68.Component {
+var IndexStatus = class extends import_obsidian77.Component {
   constructor(plugin) {
     super();
     this.plugin = plugin;
@@ -23301,7 +22000,7 @@ var IndexStatus = class extends import_obsidian68.Component {
   onload() {
     const indexStatus = this.plugin.addStatusBarItem();
     const container = indexStatus.createEl("div", { cls: "status-bar-item-segment" });
-    this.statusBtn = new import_obsidian68.ButtonComponent(container);
+    this.statusBtn = new import_obsidian77.ButtonComponent(container);
     this.statusBtn.setClass("status-item-btn");
     this.statusIcon = this.statusBtn.buttonEl.createEl("span", { cls: "status-bar-item-icon sync-status-icon" });
     this.setState("indexed");
@@ -23341,9 +22040,9 @@ var IndexStatus = class extends import_obsidian68.Component {
     return [];
   }
   checkForUpdate(view) {
-    if (view && view instanceof import_obsidian68.FileView && view.file) {
+    if (view && view instanceof import_obsidian77.FileView && view.file) {
       const file = this.plugin.app.vault.getAbstractFileByPath(view.file.path);
-      if (file instanceof import_obsidian68.TFile && file.extension === "md") {
+      if (file instanceof import_obsidian77.TFile && file.extension === "md") {
         this.file = file;
         if (this.plugin.fieldIndex.dvQFieldChanged(file.path)) {
           this.setState("update");
@@ -23362,7 +22061,7 @@ var IndexStatus = class extends import_obsidian68.Component {
 };
 
 // src/commands/fieldModifier.ts
-var import_obsidian69 = require("obsidian");
+var import_obsidian78 = require("obsidian");
 function buildAndOpenModal(plugin, file, fieldName, attrs) {
   var _a;
   if ((_a = attrs == null ? void 0 : attrs.options) == null ? void 0 : _a.inFrontmatter) {
@@ -23408,11 +22107,11 @@ function fieldModifier(plugin, dv, p, fieldName, attrs) {
       fieldContainer.appendChild(emptyField);
     } else {
       const addFieldBtn = dv.el("button", attrs);
-      (0, import_obsidian69.setIcon)(addFieldBtn, "log-in");
+      (0, import_obsidian78.setIcon)(addFieldBtn, "log-in");
       addFieldBtn.onclick = async () => {
         var _a2;
         const file = plugin.app.vault.getAbstractFileByPath(p.file.path);
-        if (file instanceof import_obsidian69.TFile && file.extension == "md") {
+        if (file instanceof import_obsidian78.TFile && file.extension == "md") {
           const field = (_a2 = plugin.fieldIndex.filesFields.get(file.path)) == null ? void 0 : _a2.filter((f) => f.isRoot()).find((field2) => field2.name === fieldName);
           if (field) {
             buildAndOpenModal(plugin, file, fieldName, attrs);
@@ -23436,11 +22135,11 @@ function fieldModifier(plugin, dv, p, fieldName, attrs) {
       };
       fieldContainer.appendChild(addFieldBtn);
       const addInFrontmatterFieldBtn = dv.el("button", attrs);
-      (0, import_obsidian69.setIcon)(addInFrontmatterFieldBtn, "align-vertical-space-around");
+      (0, import_obsidian78.setIcon)(addInFrontmatterFieldBtn, "align-vertical-space-around");
       addInFrontmatterFieldBtn.onclick = async () => {
         var _a2;
         const file = plugin.app.vault.getAbstractFileByPath(p.file.path);
-        if (file instanceof import_obsidian69.TFile && file.extension == "md") {
+        if (file instanceof import_obsidian78.TFile && file.extension == "md") {
           const field = (_a2 = plugin.fieldIndex.filesFields.get(file.path)) == null ? void 0 : _a2.filter((f) => f.isRoot()).find((field2) => field2.name === fieldName);
           if (field)
             FieldManager2.openFieldModal(plugin, file, field.name, -1, false, false);
@@ -23452,7 +22151,7 @@ function fieldModifier(plugin, dv, p, fieldName, attrs) {
     }
   } else {
     const file = plugin.app.vault.getAbstractFileByPath(p.file.path);
-    if (file instanceof import_obsidian69.TFile && file.extension == "md") {
+    if (file instanceof import_obsidian78.TFile && file.extension == "md") {
       const field = (_b = plugin.fieldIndex.filesFields.get(file.path)) == null ? void 0 : _b.filter((f) => f.isRoot()).find((field2) => field2.name === fieldName);
       if (field) {
         createDvField(plugin, dv, p, fieldContainer, fieldName, attrs);
@@ -23466,7 +22165,7 @@ function fieldModifier(plugin, dv, p, fieldName, attrs) {
 }
 
 // src/commands/fileFields.ts
-var import_obsidian70 = require("obsidian");
+var import_obsidian79 = require("obsidian");
 var FieldInfo = class {
   constructor(plugin, file, eF) {
     this.plugin = plugin;
@@ -23477,26 +22176,26 @@ var FieldInfo = class {
     const field = this.eF.field;
     const fieldManager = new FieldManager[field.type](this.plugin, field);
     return {
-      ignoredInMenu: this.plugin.settings.globallyIgnoredFields.includes(this.eF.field.name),
-      isValid: fieldManager.validateValue(this.eF.value),
+      indexedPath: this.eF.indexedPath,
+      name: this.eF.field.name,
+      value: this.eF.value,
       fileClassName: this.eF.field.fileClassName,
       type: this.eF.field.type,
-      options: this.eF.field.options,
-      sourceType: this.eF.field.fileClassName ? "fileClass" : "settings",
-      indexedPath: this.eF.indexedPath,
+      isValid: fieldManager.validateValue(this.eF.value),
       id: this.eF.field.id,
-      name: this.eF.field.name,
-      value: this.eF.value
+      ignoredInMenu: this.plugin.settings.globallyIgnoredFields.includes(this.eF.field.name),
+      options: this.eF.field.options,
+      sourceType: this.eF.field.fileClassName ? "fileClass" : "settings"
     };
   }
 };
 async function fileFields(plugin, fileOrfilePath) {
   let file;
-  if (fileOrfilePath instanceof import_obsidian70.TFile) {
+  if (fileOrfilePath instanceof import_obsidian79.TFile) {
     file = fileOrfilePath;
   } else {
     const _file = plugin.app.vault.getAbstractFileByPath(fileOrfilePath);
-    if (_file instanceof import_obsidian70.TFile && _file.extension == "md") {
+    if (_file instanceof import_obsidian79.TFile && _file.extension == "md") {
       file = _file;
     } else {
       throw Error("path doesn't correspond to a proper file");
@@ -23512,14 +22211,14 @@ async function fileFields(plugin, fileOrfilePath) {
 }
 
 // src/commands/getValues.ts
-var import_obsidian71 = require("obsidian");
+var import_obsidian80 = require("obsidian");
 async function getValues(plugin, fileOrfilePath, attribute) {
   let file;
-  if (fileOrfilePath instanceof import_obsidian71.TFile) {
+  if (fileOrfilePath instanceof import_obsidian80.TFile) {
     file = fileOrfilePath;
   } else {
     const _file = plugin.app.vault.getAbstractFileByPath(fileOrfilePath);
-    if (_file instanceof import_obsidian71.TFile && _file.extension == "md") {
+    if (_file instanceof import_obsidian80.TFile && _file.extension == "md") {
       file = _file;
     } else {
       throw Error("path doesn't correspond to a proper file");
@@ -23530,11 +22229,11 @@ async function getValues(plugin, fileOrfilePath, attribute) {
 }
 async function getValuesForIndexedPath(plugin, fileOrfilePath, indexedPath) {
   let file;
-  if (fileOrfilePath instanceof import_obsidian71.TFile) {
+  if (fileOrfilePath instanceof import_obsidian80.TFile) {
     file = fileOrfilePath;
   } else {
     const _file = plugin.app.vault.getAbstractFileByPath(fileOrfilePath);
-    if (_file instanceof import_obsidian71.TFile && _file.extension == "md") {
+    if (_file instanceof import_obsidian80.TFile && _file.extension == "md") {
       file = _file;
     } else {
       throw Error("path doesn't correspond to a proper file");
@@ -23542,6 +22241,142 @@ async function getValuesForIndexedPath(plugin, fileOrfilePath, indexedPath) {
   }
   const eF = await Note.getExistingFieldForIndexedPath(plugin, file, indexedPath);
   return eF == null ? void 0 : eF.value;
+}
+
+// src/commands/postNamedFieldsValues.ts
+var import_obsidian81 = require("obsidian");
+var LocationWrapper = {
+  "fullLine": { start: "", end: "" },
+  "brackets": { start: "[", end: "]" },
+  "parenthesis": { start: "(", end: ")" }
+};
+async function postNamedFieldsValues(plugin, payload, fileOrFilePath, lineNumber, after = true, asList = false, asComment = false) {
+  var _a;
+  if (payload.some((_payload) => !_payload.name)) {
+    console.error("One payload's field is missing a name");
+    return;
+  }
+  const file = getFileFromFileOrPath(plugin, fileOrFilePath);
+  const eFs = await Note.getExistingFields(plugin, file);
+  const cache = plugin.app.metadataCache.getFileCache(file);
+  const frontmatter = cache == null ? void 0 : cache.frontmatter;
+  const { start: start2, end: end2 } = getFrontmatterPosition(plugin, file);
+  const dvAPi = (_a = plugin.app.plugins.plugins.dataview) == null ? void 0 : _a.api;
+  const inFrontmatter = !!(lineNumber === -1 || lineNumber && start2 && end2 && lineNumber >= start2.line && lineNumber <= end2.line);
+  const toCreateInline = {};
+  const toUpdateInline = {};
+  const toYaml = {};
+  payload.forEach(async (item) => {
+    const create = !legacyGenuineKeys(dvAPi.page(file.path)).includes(item.name);
+    if (create) {
+      if (!lineNumber || inFrontmatter) {
+        toYaml[item.name] = item.payload;
+      } else {
+        toCreateInline[item.name] = item.payload;
+      }
+    } else {
+      if (frontmatter && Object.keys(frontmatter).includes(item.name)) {
+        toYaml[item.name] = item.payload;
+      } else {
+        toUpdateInline[item.name] = item.payload;
+      }
+    }
+  });
+  if (Object.keys(toYaml).length) {
+    await plugin.app.fileManager.processFrontMatter(file, (fm) => {
+      Object.keys(toYaml).forEach((key) => {
+        fm[key] = toYaml[key].value;
+      });
+    });
+  }
+  if (Object.keys(toCreateInline).length || Object.keys(toUpdateInline).length) {
+    postFieldsInline(plugin, file, toUpdateInline, toCreateInline, lineNumber, after, asList, asComment);
+  }
+}
+var matchInlineFields = (regex, line, attribute, input, location = "fullLine", style) => {
+  const sR = line.matchAll(regex);
+  let next = sR.next();
+  const newFields = [];
+  while (!next.done) {
+    const match = next.value;
+    if (match.groups && Object.keys(match.groups).every((j) => fieldComponents.includes(j))) {
+      const { inList, inQuote, preSpacer, startStyle, endStyle, beforeSeparatorSpacer, afterSeparatorSpacer, values } = match.groups;
+      const inputArray = input ? input.replace(/(\,\s+)/g, ",").split(",") : [""];
+      const newValue = inputArray.length == 1 ? inputArray[0] : `${inputArray.join(", ")}`;
+      const start2 = LocationWrapper[location].start;
+      const end2 = LocationWrapper[location].end;
+      const targetStartStyle = style ? buildStartStyle(style) : startStyle;
+      const targetEndStyle = style ? buildEndStyle(style) : endStyle;
+      newFields.push({
+        oldField: match[0],
+        newField: `${inQuote || ""}${start2}${inList || ""}${preSpacer || ""}${targetStartStyle}${attribute}${targetEndStyle}${beforeSeparatorSpacer}::${afterSeparatorSpacer || " "}${newValue}${end2}`
+      });
+    }
+    next = sR.next();
+  }
+  return newFields;
+};
+async function postFieldsInline(plugin, file, fieldsToUpdate, fieldsToCreate, lineNumber, after = true, asList = false, asComment = false) {
+  var _a;
+  const skippedLines = [];
+  let newContent = [];
+  const currentContent = await plugin.app.vault.read(file);
+  currentContent.split("\n").forEach((line, _lineNumber) => {
+    if (_lineNumber == lineNumber) {
+      if (after)
+        newContent.push(line);
+      Object.entries(fieldsToCreate).forEach(([fieldName, payload]) => {
+        const startStyle = payload.style ? buildStartStyle(payload.style) : "";
+        const endStyle = payload.style ? buildEndStyle(payload.style) : "";
+        const newLine = `${asComment ? ">" : ""}${asList ? "- " : ""}${startStyle}${fieldName}${endStyle}:: ${payload.value}`;
+        newContent.push(newLine);
+      });
+      if (!after)
+        newContent.push(line);
+    } else {
+      newContent.push(line);
+    }
+  });
+  const updateContentWithField = (content, fieldName, payload) => {
+    return content.map((line, i) => {
+      const encodedInput = encodeLink(payload.value);
+      let encodedLine = encodeLink(line);
+      const fullLineRegex2 = new RegExp(`^${inlineFieldRegex(fieldName)}(?<values>[^\\]]*)`, "u");
+      const fR = encodedLine.match(fullLineRegex2);
+      if ((fR == null ? void 0 : fR.groups) && Object.keys(fR.groups).every((j) => fieldComponents.includes(j))) {
+        const { inList, inQuote, preSpacer, startStyle, endStyle, beforeSeparatorSpacer, afterSeparatorSpacer, values } = fR.groups;
+        const targetStartStyle = payload.style ? buildStartStyle(payload.style) : startStyle;
+        const targetEndStyle = payload.style ? buildEndStyle(payload.style) : endStyle;
+        const inputArray = payload.value ? payload.value.replace(/(\,\s+)/g, ",").split(",").sort() : [];
+        let newValue;
+        let hiddenValue = "";
+        let emptyLineAfterList = "";
+        newValue = inputArray.length == 1 ? inputArray[0] : `${inputArray.join(", ")}`;
+        return `${inQuote || ""}${inList || ""}${preSpacer || ""}${targetStartStyle}${fieldName}${targetEndStyle}${beforeSeparatorSpacer}::${afterSeparatorSpacer || " "}${hiddenValue + newValue + emptyLineAfterList}`;
+      } else {
+        const newFields = [];
+        const inSentenceRegexBrackets2 = new RegExp(`\\[${inlineFieldRegex(fieldName)}(?<values>[^\\]]+)?\\]`, "gu");
+        const inSentenceRegexPar2 = new RegExp(`\\(${inlineFieldRegex(fieldName)}(?<values>[^\\)]+)?\\)`, "gu");
+        newFields.push(...matchInlineFields(inSentenceRegexBrackets2, encodedLine, fieldName, encodedInput, "brackets" /* brackets */, payload.style));
+        newFields.push(...matchInlineFields(inSentenceRegexPar2, encodedLine, fieldName, encodedInput, "parenthesis" /* parenthesis */, payload.style));
+        newFields.forEach((field) => {
+          const fieldRegex = new RegExp(field.oldField.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "u");
+          encodedLine = encodedLine.replace(fieldRegex, field.newField);
+        });
+        return decodeLink(encodedLine);
+      }
+    });
+  };
+  Object.entries(fieldsToUpdate).forEach(([fieldName, payload]) => {
+    newContent = updateContentWithField(newContent, fieldName, payload);
+  });
+  const updatedFile = newContent.filter((line, i) => !skippedLines.includes(i)).join("\n");
+  await plugin.app.vault.modify(file, updatedFile);
+  const editor = (_a = plugin.app.workspace.getActiveViewOfType(import_obsidian81.MarkdownView)) == null ? void 0 : _a.editor;
+  if (editor) {
+    const lineNumber2 = editor.getCursor().line;
+    editor.setCursor({ line: editor.getCursor().line, ch: editor.getLine(lineNumber2).length });
+  }
 }
 
 // src/MetadataMenuApi.ts
@@ -23556,7 +22391,8 @@ var MetadataMenuApi = class {
       fieldModifier: this.fieldModifier(),
       fileFields: this.fileFields(),
       insertMissingFields: this.insertMissingFields(),
-      postValues: this.postValues()
+      postValues: this.postValues(),
+      postNamedFieldsValues: this.postNamedFieldsValues()
     };
   }
   getValues() {
@@ -23577,46 +22413,20 @@ var MetadataMenuApi = class {
   postValues() {
     return async (fileOrFilePath, payload, lineNumber, asList, asBlockquote) => postValues(this.plugin, payload, fileOrFilePath, lineNumber, asList, asBlockquote);
   }
+  postNamedFieldsValues() {
+    return async (fileOrFilePath, payload, lineNumber, asList, asBlockquote) => postNamedFieldsValues(this.plugin, payload, fileOrFilePath, lineNumber, asList, asBlockquote);
+  }
 };
 
 // src/settings/MetadataMenuSettingTab.ts
-var import_obsidian75 = require("obsidian");
-
-// src/suggester/FolderSuggester.ts
-var import_obsidian72 = require("obsidian");
-var FolderSuggest = class extends TextInputSuggest {
-  constructor(plugin, inputEl) {
-    super(inputEl);
-    this.plugin = plugin;
-    this.inputEl = inputEl;
-  }
-  getSuggestions(inputStr) {
-    const abstractFiles = this.plugin.app.vault.getAllLoadedFiles();
-    const folders = [];
-    const lowerCaseInputStr = inputStr.toLowerCase();
-    abstractFiles.forEach((folder) => {
-      if (folder instanceof import_obsidian72.TFolder && folder.path.toLowerCase().contains(lowerCaseInputStr)) {
-        folders.push(folder);
-      }
-    });
-    return folders;
-  }
-  renderSuggestion(file, el) {
-    el.setText(file.path);
-  }
-  selectSuggestion(file) {
-    this.inputEl.value = file.path;
-    this.inputEl.trigger("input");
-    this.close();
-  }
-};
+var import_obsidian84 = require("obsidian");
 
 // src/settings/FileClassQuerySettingModal.ts
-var import_obsidian74 = require("obsidian");
+var import_obsidian83 = require("obsidian");
 
 // src/settings/FileClassQuerySetting.ts
-var import_obsidian73 = require("obsidian");
-var FileClassQuerySetting = class extends import_obsidian73.Setting {
+var import_obsidian82 = require("obsidian");
+var FileClassQuerySetting = class extends import_obsidian82.Setting {
   constructor(containerEl, property, plugin) {
     super(containerEl);
     this.containerEl = containerEl;
@@ -23677,7 +22487,7 @@ var FileClassQuerySetting = class extends import_obsidian73.Setting {
 };
 
 // src/settings/FileClassQuerySettingModal.ts
-var FileClassQuerySettingsModal = class extends import_obsidian74.Modal {
+var FileClassQuerySettingsModal = class extends import_obsidian83.Modal {
   constructor(plugin, parentSettingContainer, parentSetting, fileClassQuery) {
     super(plugin.app);
     this.plugin = plugin;
@@ -23725,7 +22535,7 @@ var FileClassQuerySettingsModal = class extends import_obsidian74.Modal {
   }
   createnameInputContainer(container) {
     container.createDiv({ cls: "label", text: `FileClass Query Name:` });
-    const input = new import_obsidian74.TextComponent(container);
+    const input = new import_obsidian83.TextComponent(container);
     input.inputEl.addClass("with-label");
     input.inputEl.addClass("full-width");
     const name = this.fileClassQuery.name;
@@ -23740,7 +22550,7 @@ var FileClassQuerySettingsModal = class extends import_obsidian74.Modal {
   createFileClassSelectorContainer(container) {
     container.createDiv({ cls: "label", text: `Fileclass:` });
     container.createDiv({ cls: "spacer" });
-    const select = new import_obsidian74.DropdownComponent(container);
+    const select = new import_obsidian83.DropdownComponent(container);
     const classFilesPath = this.plugin.settings.classFilesPath;
     const fileClasses = this.plugin.app.vault.getFiles().filter((f) => classFilesPath && f.path.startsWith(classFilesPath)).reverse();
     select.addOption("--Select a fileClass--", "--Select a fileClass--");
@@ -23763,7 +22573,7 @@ var FileClassQuerySettingsModal = class extends import_obsidian74.Modal {
   createQueryInputContainer(container) {
     container.createDiv({ text: "dataviewJS query:" });
     const queryStringInputContainer = container.createDiv({ cls: "field-container" });
-    const queryStringInput = new import_obsidian74.TextAreaComponent(queryStringInputContainer);
+    const queryStringInput = new import_obsidian83.TextAreaComponent(queryStringInputContainer);
     queryStringInput.inputEl.addClass("full-width");
     queryStringInput.inputEl.rows = 4;
     queryStringInput.setValue(this.fileClassQuery.query);
@@ -23783,7 +22593,7 @@ var FileClassQuerySettingsModal = class extends import_obsidian74.Modal {
     this.createCancelButton(footer);
   }
   createSaveButton(container) {
-    const b = new import_obsidian74.ButtonComponent(container);
+    const b = new import_obsidian83.ButtonComponent(container);
     b.setTooltip("Save");
     b.setIcon("checkmark");
     b.onClick(async () => {
@@ -23807,7 +22617,7 @@ var FileClassQuerySettingsModal = class extends import_obsidian74.Modal {
     });
   }
   createCancelButton(container) {
-    const b = new import_obsidian74.ButtonComponent(container);
+    const b = new import_obsidian83.ButtonComponent(container);
     b.setIcon("cross").setTooltip("Cancel").onClick(() => {
       this.saved = false;
       if (this.initialFileClassQuery.name != "") {
@@ -23820,7 +22630,7 @@ var FileClassQuerySettingsModal = class extends import_obsidian74.Modal {
 };
 
 // src/settings/MetadataMenuSettingTab.ts
-var SettingTextWithButtonComponent = class extends import_obsidian75.Setting {
+var SettingTextWithButtonComponent = class extends import_obsidian84.Setting {
   constructor(plugin, containerEl, name, description, placeholder, currentValues, normalizeValue) {
     super(containerEl);
     this.plugin = plugin;
@@ -23831,7 +22641,7 @@ var SettingTextWithButtonComponent = class extends import_obsidian75.Setting {
     this.currentValues = currentValues;
     this.normalizeValue = normalizeValue;
     this.newValues = [];
-    const saveButton = new import_obsidian75.ButtonComponent(this.containerEl);
+    const saveButton = new import_obsidian84.ButtonComponent(this.containerEl);
     saveButton.buttonEl.addClass("save");
     saveButton.setIcon("save");
     saveButton.onClick(async () => {
@@ -23864,7 +22674,7 @@ var SettingTextWithButtonComponent = class extends import_obsidian75.Setting {
     this.infoEl.appendChild(saveButton.buttonEl);
   }
 };
-var ButtonDisplaySetting = class extends import_obsidian75.Setting {
+var ButtonDisplaySetting = class extends import_obsidian84.Setting {
   constructor(plugin, containerEl, name, description, value, needsReload) {
     super(containerEl);
     this.plugin = plugin;
@@ -23885,7 +22695,7 @@ var ButtonDisplaySetting = class extends import_obsidian75.Setting {
     }).settingEl.addClass("no-border");
   }
 };
-var MetadataMenuSettingTab = class extends import_obsidian75.PluginSettingTab {
+var MetadataMenuSettingTab = class extends import_obsidian84.PluginSettingTab {
   constructor(plugin) {
     super(plugin.app, plugin);
     this.plugin = plugin;
@@ -23906,7 +22716,7 @@ var MetadataMenuSettingTab = class extends import_obsidian75.PluginSettingTab {
     const settingsContainer = this.containerEl.createEl("div");
     if (withButton) {
       const settingsContainerShowButtonContainer = settingHeaderContainer.createEl("div", { cls: "setting-item-control" });
-      const settingsContainerShowButton = new import_obsidian75.ButtonComponent(settingsContainerShowButtonContainer);
+      const settingsContainerShowButton = new import_obsidian84.ButtonComponent(settingsContainerShowButtonContainer);
       settingsContainerShowButton.buttonEl.addClass("setting-item-control");
       settingsContainer.hide();
       settingsContainerShowButton.setCta();
@@ -23935,7 +22745,7 @@ var MetadataMenuSettingTab = class extends import_obsidian75.PluginSettingTab {
       true
     );
     const scopeReloadInfo = globalSettings.createDiv({ cls: "settings-info-warning" });
-    new import_obsidian75.Setting(globalSettings).setName("Scope").setDesc("Index fields in frontmatter only or in the whole note (if you use dataview inline fields). Indexing full notes could cause some latencies in vaults with large files").addDropdown((cb) => {
+    new import_obsidian84.Setting(globalSettings).setName("Scope").setDesc("Index fields in frontmatter only or in the whole note (if you use dataview inline fields). Indexing full notes could cause some latencies in vaults with large files").addDropdown((cb) => {
       cb.addOption("frontmatterOnly", "Frontmatter only");
       cb.addOption("fullNote", "Full note");
       cb.setValue(this.plugin.settings.frontmatterOnly ? "frontmatterOnly" : "fullNote");
@@ -23945,7 +22755,7 @@ var MetadataMenuSettingTab = class extends import_obsidian75.PluginSettingTab {
         scopeReloadInfo.textContent = "Please reload metadata menu to apply this change";
       });
     }).settingEl.addClass("no-border");
-    new import_obsidian75.Setting(globalSettings).setName("Display field options in context menu").setDesc("Choose to show or hide fields options in the context menu of a link or a file").addToggle((toggle) => {
+    new import_obsidian84.Setting(globalSettings).setName("Display field options in context menu").setDesc("Choose to show or hide fields options in the context menu of a link or a file").addToggle((toggle) => {
       toggle.setValue(this.plugin.settings.displayFieldsInContextMenu);
       toggle.onChange(async (value) => {
         this.plugin.settings.displayFieldsInContextMenu = value;
@@ -23988,7 +22798,7 @@ var MetadataMenuSettingTab = class extends import_obsidian75.PluginSettingTab {
       "globallyIgnoredFields",
       (item) => item
     );
-    const enableAutoComplete = new import_obsidian75.Setting(globalSettings).setName("Autocomplete").setDesc("Activate autocomplete fields").addToggle((cb) => {
+    const enableAutoComplete = new import_obsidian84.Setting(globalSettings).setName("Autocomplete").setDesc("Activate autocomplete fields").addToggle((cb) => {
       cb.setValue(this.plugin.settings.isAutosuggestEnabled);
       cb.onChange((value) => {
         this.plugin.settings.isAutosuggestEnabled = value;
@@ -23997,7 +22807,7 @@ var MetadataMenuSettingTab = class extends import_obsidian75.PluginSettingTab {
     });
     enableAutoComplete.settingEl.addClass("no-border");
     enableAutoComplete.controlEl.addClass("full-width");
-    const enableAutoCalculation = new import_obsidian75.Setting(globalSettings).setName("Auto calculation").setDesc("Activate lookups and formulas fields global auto-calculation").addToggle((cb) => {
+    const enableAutoCalculation = new import_obsidian84.Setting(globalSettings).setName("Auto calculation").setDesc("Activate lookups and formulas fields global auto-calculation").addToggle((cb) => {
       cb.setValue(this.plugin.settings.isAutoCalculationEnabled);
       cb.onChange((value) => {
         this.plugin.settings.isAutoCalculationEnabled = value;
@@ -24006,7 +22816,7 @@ var MetadataMenuSettingTab = class extends import_obsidian75.PluginSettingTab {
     });
     enableAutoCalculation.settingEl.addClass("no-border");
     enableAutoCalculation.controlEl.addClass("full-width");
-    const showIndexingStatus = new import_obsidian75.Setting(globalSettings).setName("Fields Indexing Status").setDesc("Show fields indexing status icon in status toolbar").addToggle((cb) => {
+    const showIndexingStatus = new import_obsidian84.Setting(globalSettings).setName("Fields Indexing Status").setDesc("Show fields indexing status icon in status toolbar").addToggle((cb) => {
       cb.setValue(this.plugin.settings.showIndexingStatusInStatusBar);
       cb.onChange((value) => {
         this.plugin.settings.showIndexingStatusInStatusBar = value;
@@ -24020,7 +22830,7 @@ var MetadataMenuSettingTab = class extends import_obsidian75.PluginSettingTab {
     });
     showIndexingStatus.settingEl.addClass("no-border");
     showIndexingStatus.controlEl.addClass("full-width");
-    const frontmatterListDisplay = new import_obsidian75.Setting(globalSettings).setName("Frontmatter list display").setDesc("Choose wether lists should be displayed as arrays or indented lists in frontmatter").addDropdown((cb) => {
+    const frontmatterListDisplay = new import_obsidian84.Setting(globalSettings).setName("Frontmatter list display").setDesc("Choose wether lists should be displayed as arrays or indented lists in frontmatter").addDropdown((cb) => {
       [["Array", "asArray"], ["Indented List", "asList"]].forEach(([display, value]) => {
         cb.addOption(value, display);
       });
@@ -24032,9 +22842,9 @@ var MetadataMenuSettingTab = class extends import_obsidian75.PluginSettingTab {
     });
     frontmatterListDisplay.settingEl.addClass("no-border");
     frontmatterListDisplay.controlEl.addClass("full-width");
-    new import_obsidian75.Setting(globalSettings).setName("First day of week").setDesc("For date fields, which day the date picker's week should start with").addDropdown((cb) => {
+    new import_obsidian84.Setting(globalSettings).setName("First day of week").setDesc("For date fields, which day the date picker's week should start with").addDropdown((cb) => {
       for (let i = 0; i < 2; i++) {
-        cb.addOption(i.toString(), (0, import_obsidian75.moment)().day(i).format("dddd"));
+        cb.addOption(i.toString(), (0, import_obsidian84.moment)().day(i).format("dddd"));
       }
       cb.setValue(this.plugin.settings.firstDayOfWeek.toString() || "1");
       cb.onChange(async (value) => {
@@ -24048,7 +22858,7 @@ var MetadataMenuSettingTab = class extends import_obsidian75.PluginSettingTab {
       "Manage globally predefined type and options for a field throughout your whole vault",
       true
     );
-    new import_obsidian75.Setting(presetFieldsSettings).setName("Add New Field Setting").setDesc("Add a new Frontmatter property for which you want preset options.").addButton((button) => {
+    new import_obsidian84.Setting(presetFieldsSettings).setName("Add New Field Setting").setDesc("Add a new Frontmatter property for which you want preset options.").addButton((button) => {
       return button.setTooltip("Add New Property Manager").setButtonText("Add new").setCta().onClick(async () => {
         let modal = new FieldSettingsModal(this.plugin, presetFieldsSettings);
         modal.open();
@@ -24070,7 +22880,7 @@ var MetadataMenuSettingTab = class extends import_obsidian75.PluginSettingTab {
       "Manage fileClass folder and alias. When a note has a fileClass defined, fileClass field properties will override global preset fields settings for the same field name",
       true
     );
-    const fileClassesFolderSaveButton = new import_obsidian75.ButtonComponent(classFilesSettings);
+    const fileClassesFolderSaveButton = new import_obsidian84.ButtonComponent(classFilesSettings);
     fileClassesFolderSaveButton.buttonEl.addClass("save");
     fileClassesFolderSaveButton.setIcon("save");
     fileClassesFolderSaveButton.onClick(async () => {
@@ -24078,7 +22888,7 @@ var MetadataMenuSettingTab = class extends import_obsidian75.PluginSettingTab {
       await this.plugin.saveSettings();
       fileClassesFolderSaveButton.removeCta();
     });
-    const path = new import_obsidian75.Setting(classFilesSettings).setName("Class Files path").setDesc("Path to the files containing the authorized fields for a type of note").addSearch((cfs) => {
+    const path = new import_obsidian84.Setting(classFilesSettings).setName("Class Files path").setDesc("Path to the files containing the authorized fields for a type of note").addSearch((cfs) => {
       new FolderSuggest(this.plugin, cfs.inputEl);
       cfs.setPlaceholder("Folder").setValue(this.plugin.settings.classFilesPath || "").onChange((new_folder) => {
         const newPath = new_folder.endsWith("/") || !new_folder ? new_folder : new_folder + "/";
@@ -24090,7 +22900,7 @@ var MetadataMenuSettingTab = class extends import_obsidian75.PluginSettingTab {
     path.settingEl.addClass("narrow-title");
     path.controlEl.addClass("full-width");
     path.settingEl.appendChild(fileClassesFolderSaveButton.buttonEl);
-    const aliasSaveButton = new import_obsidian75.ButtonComponent(classFilesSettings);
+    const aliasSaveButton = new import_obsidian84.ButtonComponent(classFilesSettings);
     aliasSaveButton.buttonEl.addClass("save");
     aliasSaveButton.setIcon("save");
     aliasSaveButton.onClick(async () => {
@@ -24098,7 +22908,7 @@ var MetadataMenuSettingTab = class extends import_obsidian75.PluginSettingTab {
       await this.plugin.saveSettings();
       aliasSaveButton.removeCta();
     });
-    const alias = new import_obsidian75.Setting(classFilesSettings).setName("FileClass field alias").setDesc("Choose another name for fileClass field in frontmatter (example: Category, type, ...").addText((text) => {
+    const alias = new import_obsidian84.Setting(classFilesSettings).setName("FileClass field alias").setDesc("Choose another name for fileClass field in frontmatter (example: Category, type, ...").addText((text) => {
       text.setValue(this.plugin.settings.fileClassAlias).onChange(async (value) => {
         this.newFileClassAlias = value || "fileClass";
         aliasSaveButton.setCta();
@@ -24108,7 +22918,7 @@ var MetadataMenuSettingTab = class extends import_obsidian75.PluginSettingTab {
     alias.settingEl.addClass("narrow-title");
     alias.controlEl.addClass("full-width");
     alias.settingEl.appendChild(aliasSaveButton.buttonEl);
-    const global = new import_obsidian75.Setting(classFilesSettings).setName("Global fileClass").setDesc("Choose one fileClass to be applicable to all files (even it is not present as a fileClass attribute in their frontmatter). This will override the preset Fields defined above").addSearch((cfs) => {
+    const global = new import_obsidian84.Setting(classFilesSettings).setName("Global fileClass").setDesc("Choose one fileClass to be applicable to all files (even it is not present as a fileClass attribute in their frontmatter). This will override the preset Fields defined above").addSearch((cfs) => {
       new FileSuggest(
         cfs.inputEl,
         this.plugin,
@@ -24126,7 +22936,7 @@ var MetadataMenuSettingTab = class extends import_obsidian75.PluginSettingTab {
     global.settingEl.addClass("no-border");
     global.settingEl.addClass("narrow-title");
     global.controlEl.addClass("full-width");
-    const defaultIconSave = new import_obsidian75.ButtonComponent(classFilesSettings);
+    const defaultIconSave = new import_obsidian84.ButtonComponent(classFilesSettings);
     defaultIconSave.buttonEl.addClass("save");
     defaultIconSave.setIcon("save");
     defaultIconSave.onClick(async () => {
@@ -24135,20 +22945,20 @@ var MetadataMenuSettingTab = class extends import_obsidian75.PluginSettingTab {
       defaultIconSave.removeCta();
     });
     const iconManagerContainer = classFilesSettings.createDiv({ cls: "icon" });
-    const defaultIconSetting = new import_obsidian75.Setting(classFilesSettings).setName("Default Icon").setDesc("Choose a default icon for fileclasses from lucide.dev library").addText((cb) => {
+    const defaultIconSetting = new import_obsidian84.Setting(classFilesSettings).setName("Default Icon").setDesc("Choose a default icon for fileclasses from lucide.dev library").addText((cb) => {
       cb.setValue(this.plugin.settings.fileClassIcon || DEFAULT_SETTINGS.fileClassIcon).onChange((value) => {
         this.newIcon = value;
-        (0, import_obsidian75.setIcon)(iconManagerContainer, value);
+        (0, import_obsidian84.setIcon)(iconManagerContainer, value);
         defaultIconSave.setCta();
       });
     });
-    (0, import_obsidian75.setIcon)(iconManagerContainer, this.plugin.settings.fileClassIcon || DEFAULT_SETTINGS.fileClassIcon);
+    (0, import_obsidian84.setIcon)(iconManagerContainer, this.plugin.settings.fileClassIcon || DEFAULT_SETTINGS.fileClassIcon);
     defaultIconSetting.settingEl.appendChild(iconManagerContainer);
     defaultIconSetting.settingEl.appendChild(defaultIconSave.buttonEl);
     defaultIconSetting.settingEl.addClass("no-border");
     defaultIconSetting.settingEl.addClass("narrow-title");
     defaultIconSetting.controlEl.addClass("full-width");
-    const rowPerPageSaveButton = new import_obsidian75.ButtonComponent(classFilesSettings);
+    const rowPerPageSaveButton = new import_obsidian84.ButtonComponent(classFilesSettings);
     rowPerPageSaveButton.buttonEl.addClass("save");
     rowPerPageSaveButton.setIcon("save");
     rowPerPageSaveButton.onClick(async () => {
@@ -24156,7 +22966,7 @@ var MetadataMenuSettingTab = class extends import_obsidian75.PluginSettingTab {
       await this.plugin.saveSettings();
       rowPerPageSaveButton.removeCta();
     });
-    const maxRows = new import_obsidian75.Setting(classFilesSettings).setName("Result per page").setDesc("Number of result per page in table view").addText((text) => {
+    const maxRows = new import_obsidian84.Setting(classFilesSettings).setName("Result per page").setDesc("Number of result per page in table view").addText((text) => {
       text.setValue(`${this.plugin.settings.tableViewMaxRecords}`).onChange(async (value) => {
         this.newTableViewMaxRecords = parseInt(value || `${this.plugin.settings.tableViewMaxRecords}`);
         rowPerPageSaveButton.setCta();
@@ -24166,7 +22976,7 @@ var MetadataMenuSettingTab = class extends import_obsidian75.PluginSettingTab {
     maxRows.settingEl.addClass("narrow-title");
     maxRows.controlEl.addClass("full-width");
     maxRows.settingEl.appendChild(rowPerPageSaveButton.buttonEl);
-    const chooseFileClassAtFileCreation = new import_obsidian75.Setting(classFilesSettings).setName("Add a fileclass after create").setDesc("Select a fileclass at file creation to be added to the file").addToggle((cb) => {
+    const chooseFileClassAtFileCreation = new import_obsidian84.Setting(classFilesSettings).setName("Add a fileclass after create").setDesc("Select a fileclass at file creation to be added to the file").addToggle((cb) => {
       cb.setValue(this.plugin.settings.chooseFileClassAtFileCreation);
       cb.onChange((value) => {
         this.plugin.settings.chooseFileClassAtFileCreation = value;
@@ -24175,7 +22985,7 @@ var MetadataMenuSettingTab = class extends import_obsidian75.PluginSettingTab {
     });
     chooseFileClassAtFileCreation.settingEl.addClass("no-border");
     chooseFileClassAtFileCreation.controlEl.addClass("full-width");
-    const autoInsertFieldsAtFileClassInsertion = new import_obsidian75.Setting(classFilesSettings).setName("Insert fileClass fields").setDesc("Includes fileClass in frontmatter after fileClass choice").addToggle((cb) => {
+    const autoInsertFieldsAtFileClassInsertion = new import_obsidian84.Setting(classFilesSettings).setName("Insert fileClass fields").setDesc("Includes fileClass in frontmatter after fileClass choice").addToggle((cb) => {
       cb.setValue(this.plugin.settings.autoInsertFieldsAtFileClassInsertion);
       cb.onChange((value) => {
         this.plugin.settings.autoInsertFieldsAtFileClassInsertion = value;
@@ -24184,7 +22994,7 @@ var MetadataMenuSettingTab = class extends import_obsidian75.PluginSettingTab {
     });
     autoInsertFieldsAtFileClassInsertion.settingEl.addClass("no-border");
     autoInsertFieldsAtFileClassInsertion.controlEl.addClass("full-width");
-    const showFileClassSelectInModal = new import_obsidian75.Setting(classFilesSettings).setName("Fileclass Select").setDesc("Show fileclass select option in note fields modals").addToggle((cb) => {
+    const showFileClassSelectInModal = new import_obsidian84.Setting(classFilesSettings).setName("Fileclass Select").setDesc("Show fileclass select option in note fields modals").addToggle((cb) => {
       cb.setValue(this.plugin.settings.showFileClassSelectInModal);
       cb.onChange((value) => {
         this.plugin.settings.showFileClassSelectInModal = value;
@@ -24243,7 +23053,7 @@ var MetadataMenuSettingTab = class extends import_obsidian75.PluginSettingTab {
       "Manage globally predefined type and options for a field matching this query",
       true
     );
-    new import_obsidian75.Setting(queryFileClassSettings).setName("Add New Query for fileClass").setDesc("Add a new query and a FileClass that will apply to files matching this query.").addButton((button) => {
+    new import_obsidian84.Setting(queryFileClassSettings).setName("Add New Query for fileClass").setDesc("Add a new query and a FileClass that will apply to files matching this query.").addButton((button) => {
       return button.setTooltip("Add New fileClass query").setButtonText("Add new").setCta().onClick(async () => {
         let modal = new FileClassQuerySettingsModal(this.plugin, queryFileClassSettings);
         modal.open();
@@ -24337,9 +23147,9 @@ var migrateSettingsV4toV5 = async (plugin) => {
 };
 
 // src/suggester/metadataSuggester.ts
-var import_obsidian76 = require("obsidian");
+var import_obsidian85 = require("obsidian");
 var listPrefix = "  - ";
-var ValueSuggest = class extends import_obsidian76.EditorSuggest {
+var ValueSuggest = class extends import_obsidian85.EditorSuggest {
   constructor(plugin) {
     super(plugin.app);
     this.inFrontmatter = false;
@@ -24536,7 +23346,7 @@ var ValueSuggest = class extends import_obsidian76.EditorSuggest {
   }
   async selectSuggestion(suggestion, event) {
     var _a, _b, _c, _d, _e;
-    const activeView = this.plugin.app.workspace.getActiveViewOfType(import_obsidian76.MarkdownView);
+    const activeView = this.plugin.app.workspace.getActiveViewOfType(import_obsidian85.MarkdownView);
     if (!activeView) {
       return;
     }
@@ -24562,7 +23372,7 @@ var ValueSuggest = class extends import_obsidian76.EditorSuggest {
           { line: beginFieldLineNumber, ch: 0 },
           { line: endFieldLineNumber, ch: editor.getLine(endFieldLineNumber).length }
         );
-        let parsedField2 = (0, import_obsidian76.parseYaml)(serializedField);
+        let parsedField2 = (0, import_obsidian85.parseYaml)(serializedField);
         let [attr, pastValues] = Object.entries(parsedField2)[0];
         let newField;
         if (this.field && this.field.getDisplay() === "asList" /* asList */) {
@@ -24624,7 +23434,7 @@ var ValueSuggest = class extends import_obsidian76.EditorSuggest {
           editor.setCursor({ line: endFieldLineNumber2, ch: editor.getLine(endFieldLineNumber2).length });
         }
       } catch (error) {
-        new import_obsidian76.Notice("Frontmatter wrongly formatted", 2e3);
+        new import_obsidian85.Notice("Frontmatter wrongly formatted", 2e3);
         this.close();
         return;
       }
@@ -24666,9 +23476,9 @@ var ValueSuggest = class extends import_obsidian76.EditorSuggest {
 };
 
 // src/options/updateProps.ts
-var import_obsidian77 = require("obsidian");
+var import_obsidian86 = require("obsidian");
 var updateProps = async (plugin, view) => {
-  if (!(view instanceof import_obsidian77.MarkdownView) || !(view.file instanceof import_obsidian77.TFile) || view.file === void 0)
+  if (!(view instanceof import_obsidian86.MarkdownView) || !(view.file instanceof import_obsidian86.TFile) || view.file === void 0)
     return;
   const file = view.file;
   const optionsList = new OptionsList(plugin, file, "ManageAtCursorCommand");
@@ -24690,7 +23500,7 @@ var updateProps = async (plugin, view) => {
     buttonsContainers.forEach((container) => item.containerEl.removeChild(container));
     if (plugin.settings.enableProperties) {
       const btnContainer = item.containerEl.createDiv({ cls: "field-btn-container" });
-      const btn = new import_obsidian77.ButtonComponent(btnContainer);
+      const btn = new import_obsidian86.ButtonComponent(btnContainer);
       btn.setIcon(FieldIcon[pseudoField.type]);
       btn.setClass("property-metadata-menu");
       btn.onClick(() => {
@@ -24708,7 +23518,7 @@ var updateProps = async (plugin, view) => {
     return;
   const fileClasses = plugin.fieldIndex.filesFileClasses.get(file.path);
   fileClasses == null ? void 0 : fileClasses.forEach((fileClass) => {
-    const addFieldButton = new import_obsidian77.ButtonComponent(fileClassButtonsContainer);
+    const addFieldButton = new import_obsidian86.ButtonComponent(fileClassButtonsContainer);
     addFieldButton.setClass("add-field-button");
     addFieldButton.setIcon(fileClass.getIcon());
     addFieldButton.onClick(() => new InsertFieldSuggestModal(plugin, file, -1, false, false).open());
@@ -24721,7 +23531,7 @@ async function updatePropertiesSection(plugin) {
   for (const leaf of leaves) {
     updateProps(plugin, leaf.view);
   }
-  const currentView = plugin.app.workspace.getActiveViewOfType(import_obsidian77.MarkdownView);
+  const currentView = plugin.app.workspace.getActiveViewOfType(import_obsidian86.MarkdownView);
   if (currentView && currentView.file) {
     const file = currentView.file;
     const note = new Note(plugin, file);
@@ -24743,8 +23553,8 @@ async function updatePropertiesSection(plugin) {
 }
 
 // src/fileClass/fileClassFolderButton.ts
-var import_obsidian78 = require("obsidian");
-var FileClassFolderButton = class extends import_obsidian78.Component {
+var import_obsidian87 = require("obsidian");
+var FileClassFolderButton = class extends import_obsidian87.Component {
   constructor(plugin) {
     super();
     this.plugin = plugin;
@@ -24777,7 +23587,7 @@ var FileClassFolderButton = class extends import_obsidian78.Component {
       container.removeChild(btn);
     if (!container.findAll(".fileClass-add-button").length) {
       const addBtn = container.createDiv({ cls: "fileClass-add-button" });
-      (0, import_obsidian78.setIcon)(addBtn, "plus-circle");
+      (0, import_obsidian87.setIcon)(addBtn, "plus-circle");
       addBtn.onclick = (e) => {
         e.preventDefault();
         new AddNewFileClassModal(this.plugin).open();
@@ -24801,11 +23611,11 @@ var FileClassFolderButton = class extends import_obsidian78.Component {
 };
 
 // src/db/DatabaseManager.ts
-var import_obsidian80 = require("obsidian");
+var import_obsidian89 = require("obsidian");
 
 // src/db/StoreManager.ts
-var import_obsidian79 = require("obsidian");
-var StoreManager = class extends import_obsidian79.Component {
+var import_obsidian88 = require("obsidian");
+var StoreManager = class extends import_obsidian88.Component {
   constructor(indexDB, storeName) {
     super();
     this.indexDB = indexDB;
@@ -24922,7 +23732,7 @@ var INDEXES = {
     { name: "fileClassView", fields: "fileClassName", unique: true }
   ]
 };
-var IndexDatabase = class extends import_obsidian80.Component {
+var IndexDatabase = class extends import_obsidian89.Component {
   constructor(plugin) {
     super();
     this.plugin = plugin;
@@ -24961,7 +23771,7 @@ var IndexDatabase = class extends import_obsidian80.Component {
 };
 
 // src/components/FileClassCodeBlockManager.ts
-var import_obsidian81 = require("obsidian");
+var import_obsidian90 = require("obsidian");
 
 // src/fileClass/views/fileClassCodeBlockView.ts
 var FileClassCodeBlockView = class {
@@ -24979,7 +23789,7 @@ var FileClassCodeBlockView = class {
     this.fileClassDataviewTable = new FileClassDataviewTable(this.viewConfiguration, this, fileClass);
   }
   getViewConfig() {
-    var _a, _b;
+    var _a;
     const options2 = this.fileClass.getFileClassOptions();
     const columns = [{
       id: "file",
@@ -24987,8 +23797,8 @@ var FileClassCodeBlockView = class {
       hidden: false,
       position: 0
     }];
-    const fields = ((_a = this.plugin.fieldIndex.fileClassesFields.get(this.fileClass.name)) == null ? void 0 : _a.filter((f) => f.isRoot())) || [];
-    for (const [_index, f] of fields.entries()) {
+    const sortedFields = FileClass.getSortedRootFields(this.plugin, this.fileClass);
+    for (const [_index, f] of sortedFields.entries()) {
       columns.push({
         id: `${this.fileClass.name}____${f.name}`,
         name: f.name,
@@ -25002,7 +23812,7 @@ var FileClassCodeBlockView = class {
       sorters: [],
       columns
     };
-    const partialViewConfig = ((_b = options2.savedViews) == null ? void 0 : _b.find((view) => view.name === this.selectedView)) || defaultConfig;
+    const partialViewConfig = ((_a = options2.savedViews) == null ? void 0 : _a.find((view) => view.name === this.selectedView)) || defaultConfig;
     return {
       children: partialViewConfig.children || [],
       filters: partialViewConfig.filters,
@@ -25025,7 +23835,7 @@ var FileClassCodeBlockView = class {
 };
 
 // src/components/FileClassCodeBlockManager.ts
-var FileClassCodeBlockManager = class extends import_obsidian81.MarkdownRenderChild {
+var FileClassCodeBlockManager = class extends import_obsidian90.MarkdownRenderChild {
   constructor(plugin, containerEl, source, ctx) {
     super(containerEl);
     this.plugin = plugin;
@@ -25049,7 +23859,7 @@ var FileClassCodeBlockManager = class extends import_obsidian81.MarkdownRenderCh
     const tableContainer = container.createDiv({ attr: { id: this.tableId } });
     container.createDiv();
     try {
-      const content = (0, import_obsidian81.parseYaml)(source);
+      const content = (0, import_obsidian90.parseYaml)(source);
       const fileClassName = content[this.plugin.settings.fileClassAlias];
       const selectedView = (_a = content.view) == null ? void 0 : _a.toString();
       this.fileClass = this.plugin.fieldIndex.fileClassesName.get(fileClassName);
@@ -25080,15 +23890,15 @@ var FileClassCodeBlockManager = class extends import_obsidian81.MarkdownRenderCh
 };
 
 // src/components/FileClassCodeBlockListManager.ts
-var import_obsidian82 = require("obsidian");
-var FileClassCodeBlockListManager = class extends import_obsidian82.Component {
+var import_obsidian91 = require("obsidian");
+var FileClassCodeBlockListManager = class extends import_obsidian91.Component {
   constructor(plugin) {
     super();
   }
 };
 
 // main.ts
-var MetadataMenu = class extends import_obsidian83.Plugin {
+var MetadataMenu = class extends import_obsidian92.Plugin {
   constructor() {
     super(...arguments);
     this.presetFields = [];
@@ -25103,7 +23913,7 @@ var MetadataMenu = class extends import_obsidian83.Plugin {
     (window["MetadataMenu"] = this) && this.register(() => delete window["MetadataMenu"]);
     if (!this.app.plugins.enabledPlugins.has("dataview") || //@ts-ignore
     this.app.plugins.plugins["dataview"] && !this.app.plugins.plugins["dataview"].settings.enableDataviewJs) {
-      new import_obsidian83.Notice(
+      new import_obsidian92.Notice(
         `------------------------------------------
 (!) INFO (!) 
 Install and enable dataview and dataviewJS for extra Metadata Menu features
@@ -25135,7 +23945,7 @@ Install and enable dataview and dataviewJS for extra Metadata Menu features
       this.app.vault.on("create", (file) => {
         if (!this.fieldIndex.fileClassesName.size)
           return;
-        if (file instanceof import_obsidian83.TFile && this.settings.chooseFileClassAtFileCreation) {
+        if (file instanceof import_obsidian92.TFile && file.extension === "md" && this.settings.chooseFileClassAtFileCreation) {
           const modal = new AddFileClassToFileModal(this, file);
           modal.open();
         }
@@ -25150,7 +23960,7 @@ Install and enable dataview and dataviewJS for extra Metadata Menu features
     this.registerEvent(
       this.app.workspace.on("metadata-menu:indexed", () => {
         this.indexStatus.setState("indexed");
-        const currentView = this.app.workspace.getActiveViewOfType(import_obsidian83.MarkdownView);
+        const currentView = this.app.workspace.getActiveViewOfType(import_obsidian92.MarkdownView);
         if (currentView)
           this.indexStatus.checkForUpdate(currentView);
         updatePropertiesSection(this);

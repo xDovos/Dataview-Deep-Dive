@@ -17,7 +17,7 @@ group: 1
 
 [[Test data 1]]
 
-[[Test Data 2]]
+[[Test data 2]]
 
 
 

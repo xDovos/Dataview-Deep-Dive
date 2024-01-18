@@ -72,7 +72,7 @@ the example note for the progress bars shown in this note are in [[File Name]]
 ### progress bar on one page with a filter
 
 ```js 
-`$= const setPage = "File Name"; const setFilter = "Text Filter" ; const value = Math.round(((dv.page(setPage).file.tasks.where(t => t.completed).where(t => t.text.includes(setFilter)).length) / (dv.page(setPage).file.tasks).where(t => t.text.includes(setFilter)).length) * 100); "<progress value='" + value + "' max='100'></progress>" + "<span style='font-size:smaller;color:var(--text-muted)'>" + value + "% &nbsp;| &nbsp;" + (dv.page(setPage).file.tasks.where(t => t.text.includes(setFilter)).length - dv.page(setPage).file.tasks.where(t => t.completed).where(t => t.text.includes(setFilter)).length) + " left</span>" `
+`$= const setPage = "File Name"; const setFilter = "Text Filter" ; const value = Math.round(((dv.page(setPage).file.tasks.where(t => t.completed).where(t => t.text.includes(setFilter)).length) / (dv.page(setPage).file.tasks).where(t => t.text.includes(setFilter)).length) * 100); "<progress value='" + value + "' max='100'></progress>" + "<span style='font-size:smaller;color:var(--text-muted)'>" + value + "% &nbsp;| &nbsp;" + (dv.page(setPage).file.tasks.where(t => t.text.includes(setFilter)).length - dv.page(setPage).file.tasks.where(t => t.completed).where(t => t.text.includes(setFilter)).length) + " left</span>" 
 
 ```
 

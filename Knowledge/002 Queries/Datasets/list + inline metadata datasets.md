@@ -111,6 +111,31 @@ group by file.link as File
     - tags:: #file/link, #file/lists 
     - image:: 
 
+## Daily logging
+
+### 2024-01-16
+- [start:: 11:00], [end:: 17:00], [worktime:: 4]
+    - your other list points of the day
+    - some more points
+### 2024-01-17
+- [start:: 12:00], [end:: 18:00], [worktime:: 5]
+    - your other list points of the day 2
+    - some more points 4
+
+
+```dataview
+TABLE rows.L.start, rows.L.end, rows.L.worktime, flat(rows.L.children.text)
+WHERE file.path = this.file.path
+FLATTEN file.lists as L
+WHERE L.start
+WHERE regextest("^\d{4}-\d{2}-\d{2}$" ,meta(L.section).subpath)
+GROUP BY link(meta(L.section).subpath) as Day
+
+```
+
+
+
+
 
 ## Appearances
 

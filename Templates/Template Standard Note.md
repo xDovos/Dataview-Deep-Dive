@@ -9,7 +9,7 @@ status:: `$=return(await self.require.import("Code Modules/modulePB.js.md")).PBS
 ###### Status Tasks
 - [ ] Create the Note
 - [ ] Write the YAML metadata
-- [ ] Write the query
+- [ ] Write the Note
 
 
 # <%tp.file.title%>
