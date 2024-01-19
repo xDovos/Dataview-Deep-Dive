@@ -8,81 +8,30 @@
         "type": "tabs",
         "children": [
           {
-            "id": "fe6400d54a541d3b",
-            "type": "leaf",
-            "pinned": true,
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Templates/Scripts/Appearance query change.md",
-                "mode": "source",
-                "source": false
-              },
-              "pinned": true
-            }
-          },
-          {
-            "id": "3871a756e9ef6913",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Templates/Scripts/Appending headers to the tasks.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "4c264df50ba9030f",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Knowledge/Testing/Untitled 1.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "e2a2a07909e10c11",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Knowledge/002 Queries/Yearly overview of completed tasks inside the notes.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
             "id": "28acbbd381f9054d",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Knowledge/002 Queries/Yearly overview of completed tasks inside the notes.md",
+                "file": "Knowledge/002 Queries/Yearly overview of completed tasks.md",
                 "mode": "source",
                 "source": false
               }
             }
           },
           {
-            "id": "ee2804caa9d1e210",
+            "id": "696798bab384b307",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/all.md",
+                "file": "Knowledge/001 Dataview/DQL/Data Commands/WHERE.md",
                 "mode": "source",
                 "source": false
               }
             }
           }
-        ],
-        "currentTab": 3
+        ]
       }
     ],
     "direction": "vertical"
@@ -140,7 +89,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Knowledge/002 Queries/Yearly overview of completed tasks inside the notes.md",
+                "file": "Knowledge/002 Queries/Yearly overview of completed tasks.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -157,7 +106,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Knowledge/002 Queries/Yearly overview of completed tasks inside the notes.md",
+                "file": "Knowledge/002 Queries/Yearly overview of completed tasks.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -180,7 +129,7 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Knowledge/002 Queries/Yearly overview of completed tasks inside the notes.md"
+                "file": "Knowledge/002 Queries/Yearly overview of completed tasks.md"
               }
             }
           },
@@ -202,7 +151,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Knowledge/002 Queries/Yearly overview of completed tasks inside the notes.md"
+                "file": "Knowledge/002 Queries/Yearly overview of completed tasks.md"
               }
             }
           }
@@ -210,8 +159,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 440.5,
-    "collapsed": true
+    "width": 330.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -223,18 +171,20 @@
       "templater-obsidian:Templater": false
     }
   },
-  "active": "e2a2a07909e10c11",
+  "active": "28acbbd381f9054d",
   "lastOpenFiles": [
+    "Knowledge/002 Queries/Yearly overview of completed tasks.md",
+    "Discord Support/Dataview Queries/DV DVJS TABLE sum row.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/WHERE.md",
+    "Knowledge/Testing/Untitled 1.md",
+    "Templates/Scripts/Appearance query change.md",
+    "Templates/Scripts/Appending headers to the tasks.md",
     "Knowledge/Testing/Untitled.md",
     "Knowledge/002 Queries/Datasets/list + inline metadata datasets.md",
     "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
     "Knowledge/002 Queries/Combining queries.md",
-    "Knowledge/002 Queries/Yearly overview of completed tasks inside the notes.md",
-    "Knowledge/Testing/Untitled 1.md",
     "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/all.md",
     "Discord Support/Dataview Queries/DV DQL TASK ANY contains.md",
-    "Templates/Scripts/Appearance query change.md",
-    "Templates/Scripts/Appending headers to the tasks.md",
     "Knowledge/002 Queries/unsorted queries.md",
     "Knowledge/001 Dataview/DQL/Data Commands/SORT.md",
     "Knowledge/002 Queries/Datasets/YAML Stuff.md",
@@ -249,8 +199,6 @@
     "Journal/Daily/2023/2023-08-10.md",
     "Journal/Daily/2023/2023-08-08.md",
     "Journal/Daily/2023/2023-08-07.md",
-    "Journal/Daily/2023/2023-08-06.md",
-    "fileClasses/Daily.md",
     "Raw Data/results.json",
     "Raw Data/results10mil.json",
     "Raw Data/ThreeInTen CSVData.csv",
