@@ -109,6 +109,22 @@ flatten [file.link + " @ " + text] AS visual
 LIMIT 5
 ```
 
+
+## Metadatacache Sections.
+
+```js dataviewjs
+function contentCheck(name) {
+    const note = dv.page(name)
+    if (!note){ return false}
+    const tfile = app.vault.getAbstractFileByPath(note.file.path)
+    const {sections} = app.metadataCache.getFileCache(tfile);
+    console.log(sections)
+    if (!sections){ return false}
+    return sections.length == 1 && sections[0].type == "yaml" ? true : false
+}
+console.log( contentCheck("how dataview works"))
+```
+
 ## Styling of DQL table outputs and Projects and subtasks based on task parent + children
 
 - [ ] Project 1
@@ -167,11 +183,11 @@ for(let group of pages){
 
 ## markdown file text embedding into a table without link embedding
 
-```dataviewjs
+```js dataviewjs
 
 async function content(path){
     const text = await dv.io.load(path);
-    const headerToExtract = "## activity logging";
+    const headerToExtract = "## Log";
     const regex = new RegExp(`${headerToExtract}([\\s\\S]*?)(?=#|$)`, "g");
 
     let match;
@@ -182,10 +198,48 @@ async function content(path){
     }
     return extractedContent
 }
-const pages = dv.pages().where(t=> t.file.path == dv.current().file.path);
+const pages = dv.pages(' "Journal/Daily" ');
 const data = await Promise.all(pages.map(async t=> [t.file.link, dv.paragraph(await content(t.file.path))]));
 //console.log(data) //scary console.log. in this case it logs "p" an obsidian internal variable or so.
 dv.table(["link", "content"], data)
+```
+
+```dataviewjs
+
+// grab all notes you want included
+const notesForList = dv.pages('"Journal"')
+
+// Header name; note that the script assumes this is UNIQUE in the note
+const headerName = "log"
+
+const data = await Promise.all(notesForList.map(async (note) => {
+  // Obsidian API: make a 'TFile'
+    const tfile = app.vault.getAbstractFileByPath(note.file.path)
+
+    // Find the exact position of the document to "display"
+    // Obsidian API: retrieve headings and sections
+    const { headings, sections } = app.metadataCache.getFileCache(tfile);
+
+    const wantedHeader = headings.filter((h) => h.heading === headerName)[0]
+    const fromHere = wantedHeader.position?.start?.line
+    const nextHeaderIndex = headings.indexOf(wantedHeader) + 1
+    const toHere = headings[nextHeaderIndex]?.position?.start?.line ?? undefined
+
+    // Read the ENTIRE file from cache
+    const rawContents = await app.vault.cachedRead(tfile)
+
+    // We now the position, grab it from the content
+    const excerpt = rawContents.split("\n").slice(fromHere, toHere).join("\n")
+
+    // Now, put everything into an "item" to display in a list
+    const result = `[[${note.file.path}|${note.file.name}]]\n${excerpt}`
+    
+    return result
+})
+)
+// TODO: i hate promises, this doesn't work
+dv.paragraph(data)
+
 ```
 
 ## Seeded RNG testing
@@ -514,6 +568,9 @@ const hour = time.toFormat("H");
 const hourWord = hour > 16 ? hour < 20 ? "Evening" : "Night" : hour < 4 ? "Night" : hour < 12 ? "Morning" : "Afternoon";
 dv.header(1,"it\'s " + time.toFormat("cccc, MMMM dd, yyyy 'at' t'.'"))
 dv.header(2, "Good "+ hourWord + ", Rob" )
+
+dv.paragraph("<center style='font-size:32px;'>it\'s " + time.toFormat("cccc, MMMM dd, yyyy 'at' t'.'")+"</center>")
+
 ```
 
 ## Calendar

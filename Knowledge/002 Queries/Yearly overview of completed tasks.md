@@ -78,7 +78,7 @@ let data = []
 // an array that is x long and holds the values from 0 to x - 1
 const indexA = Array.from({ length: 32 }, (_, index) => index)
 let header = indexA.map(a=> String(a)) //the table header array needs to hold only strings as values or it will bug out the renderer.
-header[0] = "Month"
+header[0] = "Day"
 
 //getting all tasks that are completed and group them by month
 const tasksMonths = dv.pages().file.tasks?.where(t=> t.completed).groupBy(t=> t.completion?.toFormat("yyyy-MM")).where(t => t.key)
@@ -111,7 +111,7 @@ dv.paragraph(md)
 >// an array that is x long and holds the values from 0 to x - 1
 >const indexA = Array.from({ length: 32 }, (_, index) => index)
 >let header = indexA.map(a=> String(a)) //the table header array needs to hold only strings as values or it will bug out the renderer.
->header[0] = "Month"
+>header[0] = "Day"
 >
 >//getting all tasks that are completed and group them by month
 >const tasksMonths = dv.pages().file.tasks?.where(t=> t.completed).groupBy(t=> t.completion?.toFormat("yyyy-MM")).where(t => t.key)

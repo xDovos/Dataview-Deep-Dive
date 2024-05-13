@@ -55,6 +55,12 @@ status::  `$= const setPage = "Progress bar"; const setFilter = "Status Tasks" ;
         - [ ] Write the Query Metadata
 
 
+testlink:: [[Progress bar]]
+```dataviewjs
+console.log(dv.current().testlink)
+console.log(dv.func.link("Progress bar"))
+console.log(dv.current().testlink.path == dv.func.link("Progress bar").path)
+```
 
 # Progress bar
 

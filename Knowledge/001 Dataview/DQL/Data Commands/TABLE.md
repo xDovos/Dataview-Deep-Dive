@@ -20,7 +20,7 @@ Table declares what type of query you get as result. there is also [[Knowledge/0
 i find that TABLE has the best rendering look and most of the queries inside the vault will be rendered as tables.
 
 
-## DQL Overview
+## TABLE Overview
 
 ```js 
 TABLE flat(filter(rows.L, (t) => t.text = "Query meta").children.text), embed(filter(flat(filter(rows.L, (t) => t.text = "Query meta").children), (t2) => t2.image).image)[0]

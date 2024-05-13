@@ -6,6 +6,7 @@
     "Dataview": "date",
     "DOB": "date",
     "Website": "multitext",
-    "array1": "number"
+    "array1": "number",
+    "float": "number"
   }
 }

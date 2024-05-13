@@ -1,9 +1,11 @@
 ---
-aliases: []
+aliases: 
 Type: MOC
+test: "[[Vault#Intro]]"
 ---
 status::  `$= const setPage = "Vault"; const setFilter = "Status Tasks" ; const value = Math.round(((dv.page(setPage).file.tasks.where(t => t.completed).where(t => String(t.section).includes(setFilter)).length) / (dv.page(setPage).file.tasks).where(t => String(t.section).includes(setFilter)).length) * 100); "<progress value='" + value + "' max='100'></progress>" + "<span style='font-size:smaller;color:var(--text-muted)'>" + value + "% &nbsp;| &nbsp;" + (dv.page(setPage).file.tasks.where(t => String(t.section).includes(setFilter)).length - dv.page(setPage).file.tasks.where(t => t.completed).where(t => String(t.section).includes(setFilter)).length) + " left</span>" `
 VaultNotesOverview:: `$=return(await self.require.import("Code Modules/modulePB.js.md")).PBOverviewHeader(dv, "", "" )`
+
 
 ###### Status Tasks
 - [x] Write the Intro ✅ 2023-08-06
@@ -79,6 +81,7 @@ This dvjs query requires the [[Plugin Heatmap Calendar]] plugin and shows how ma
 
 ```js dataviewjs
 const calendarData = {
+    year: "2023",
     colors: {
         orange:      ["#ffa244", "#fd7f00", "#dd6f00", "#bf6000", "#9b4e00"],
         },
@@ -100,6 +103,7 @@ renderHeatmapCalendar(this.container, calendarData)
 >[!info]+ Rendered
 >```dataviewjs
 >const calendarData = {
+>   year: 2023,
 >   colors: {
 >      orange:      ["#ffa244", "#fd7f00", "#dd6f00", "#bf6000", "#9b4e00"],
 >     },
@@ -130,6 +134,7 @@ renderHeatmapCalendar(this.container, calendarData)
 
 ```js dataviewjs
 const calendarData = {
+    year: 2023,
     colors: {
         green: ["#009d0b", "#068806", "#087303", "#085e01", "#074b00"],
         
@@ -152,6 +157,7 @@ renderHeatmapCalendar(this.container, calendarData)
 >[!info]+ Rendered
 >```dataviewjs
 >const calendarData = {
+>   year: 2023,
 >   colors: {
 >      green: ["#009d0b", "#068806", "#087303", "#085e01", "#074b00"],
 >        

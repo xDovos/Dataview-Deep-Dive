@@ -1,8 +1,12 @@
 ---
-person: [
-    {"firstname": "Peter", "lastname": "Friz", "age": 24},
-    {"firstname": "George", "lastname": "Lucas", "age": 54}
-]
+person:
+  - firstname: Peter
+    lastname: Friz
+    age: 24
+  - firstname: George
+    lastname: Lucas
+    age: 54
+test: "[[Vault#Intro]]"
 ---
 
 
@@ -14,3 +18,8 @@ Flatten person as person
 
 
 modal forms plugin
+
+
+```dataviewjs
+console.log(dv.pages().groupBy(t=> t.file.folder))
+```

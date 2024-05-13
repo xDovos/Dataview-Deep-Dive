@@ -42,7 +42,7 @@ the Genres are an example of how to add values to it. note: upper/lower case doe
 
 
 
-## DQL Overview
+## SORT Overview
 
 ```js 
 TABLE flat(filter(rows.L, (t) => t.text = "Query meta").children.text), embed(filter(flat(filter(rows.L, (t) => t.text = "Query meta").children), (t2) => t2.image).image)[0]

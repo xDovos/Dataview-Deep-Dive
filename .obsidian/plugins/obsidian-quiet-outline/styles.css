@@ -120,6 +120,9 @@
 .n-tree__empty {
   display: none;
 }
+.canvas-node .markdown-embed-content .is-flashing {
+  mix-blend-mode: normal;
+}
 
 /* main.css */
 .quiet-outline .n-tree .n-tree-node-indent {
@@ -154,6 +157,17 @@
 }
 .n-tree-node.located p {
   color: var(--8de97876-locatedColor);
+}
+.quiet-outline .n-tree .n-tree-node .n-tree-node-content .n-tree-node-content__prefix {
+  margin-right: 0;
+}
+.quiet-outline .n-tree .n-tree-node .n-tree-node-content .n-tree-node-content__prefix > *:last-child {
+  margin-right: 8px;
+}
+.n-tree-node-switcher__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* src/main.css */

@@ -22,7 +22,7 @@ FROM in itself is optional and not using it is equal to FROM "" and chooses all 
 FROM HAS to be on the first line after the headers 
 
 
-## DQL Overview
+## FROM Overview
 
 ```js 
 TABLE flat(filter(rows.L, (t) => t.text = "Query meta").children.text), embed(filter(flat(filter(rows.L, (t) => t.text = "Query meta").children), (t2) => t2.image).image)[0]

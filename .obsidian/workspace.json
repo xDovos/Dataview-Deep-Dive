@@ -4,28 +4,16 @@
     "type": "split",
     "children": [
       {
-        "id": "7a34f736b83d1ca3",
+        "id": "731f5f6939653ef0",
         "type": "tabs",
         "children": [
           {
-            "id": "28acbbd381f9054d",
+            "id": "ca8080c2bb975b4b",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Knowledge/002 Queries/Yearly overview of completed tasks.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "696798bab384b307",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Knowledge/001 Dataview/DQL/Data Commands/WHERE.md",
+                "file": "Knowledge/002 Queries/tasks inside tables.md",
                 "mode": "source",
                 "source": false
               }
@@ -60,7 +48,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "Array",
+                "query": "",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -89,7 +77,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Knowledge/002 Queries/Yearly overview of completed tasks.md",
+                "file": "Knowledge/002 Queries/tasks inside tables.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -106,7 +94,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Knowledge/002 Queries/Yearly overview of completed tasks.md",
+                "file": "Knowledge/002 Queries/tasks inside tables.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -129,7 +117,7 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Knowledge/002 Queries/Yearly overview of completed tasks.md"
+                "file": "Knowledge/002 Queries/tasks inside tables.md"
               }
             }
           },
@@ -151,54 +139,64 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Knowledge/002 Queries/Yearly overview of completed tasks.md"
+                "file": "Knowledge/002 Queries/tasks inside tables.md"
               }
             }
+          },
+          {
+            "id": "c72e8c182ae9d669",
+            "type": "leaf",
+            "state": {
+              "type": "quiet-outline",
+              "state": {}
+            }
           }
-        ]
+        ],
+        "currentTab": 6
       }
     ],
     "direction": "horizontal",
-    "width": 330.5
+    "width": 329.5
   },
   "left-ribbon": {
     "hiddenItems": {
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
       "command-palette:Open command palette": false,
+      "templater-obsidian:Templater": false,
       "darlal-switcher-plus:Open in Headings Mode": false,
-      "darlal-switcher-plus:Open Symbols for the active editor": false,
-      "templater-obsidian:Templater": false
+      "darlal-switcher-plus:Open Symbols for the active editor": false
     }
   },
-  "active": "28acbbd381f9054d",
+  "active": "ca8080c2bb975b4b",
   "lastOpenFiles": [
-    "Knowledge/002 Queries/Yearly overview of completed tasks.md",
-    "Discord Support/Dataview Queries/DV DVJS TABLE sum row.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/WHERE.md",
-    "Knowledge/Testing/Untitled 1.md",
-    "Templates/Scripts/Appearance query change.md",
-    "Templates/Scripts/Appending headers to the tasks.md",
-    "Knowledge/Testing/Untitled.md",
-    "Knowledge/002 Queries/Datasets/list + inline metadata datasets.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
-    "Knowledge/002 Queries/Combining queries.md",
-    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations/all.md",
-    "Discord Support/Dataview Queries/DV DQL TASK ANY contains.md",
-    "Knowledge/002 Queries/unsorted queries.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/SORT.md",
-    "Knowledge/002 Queries/Datasets/YAML Stuff.md",
+    "Knowledge/002 Queries/Progress bar.md",
+    "Knowledge/002 Queries/tasks inside tables.md",
+    "Knowledge/002 Queries/DVJS with custom Functions.md",
+    "Knowledge/Testing/testing.md",
+    "Knowledge/000 MOC/Dataview Overview.md",
+    "Knowledge/000 MOC/MOC People.md",
+    "Knowledge/000 MOC/Movies.md",
+    "Archive/1 Lottery games Script broken.md",
+    "Journal/Weekly/2023/2023-W31.md",
+    "Discord Support/Dataview Data/Tests/👍📚 Books.md",
+    "Knowledge/002 Queries/Better Word count.md",
     "Knowledge/Testing/Untitled 1 1.md",
-    "Knowledge/002 Queries/ThreeInTen Analysis.md",
-    "Raw Data/ThreeInTen Data.md",
-    "Journal/Monthly/2023/2023-M09.md",
-    "Journal/Daily/2023/2023-09-15.md",
-    "Journal/Daily/2023/2023-08-30.md",
-    "Journal/Daily/2023/2023-08-28.md",
-    "Journal/Daily/2023/2023-08-12.md",
-    "Journal/Daily/2023/2023-08-10.md",
-    "Journal/Daily/2023/2023-08-08.md",
-    "Journal/Daily/2023/2023-08-07.md",
+    "Knowledge/002 Queries/Amount of inlinks and outlinks.md",
+    "Knowledge/002 Queries/unsorted queries.md",
+    "Vault.md",
+    "Untitled.md",
+    "tests.md",
+    "Knowledge/002 Queries/Yearly overview of completed tasks.md",
+    "Knowledge/002 Queries/Templater with dataview.md",
+    "Templates/Scripts/Appending headers to the tasks.md",
+    "Templates/Scripts/Dataview to csv converter.md",
+    "Templates/Scripts/Player character sheet creation .md",
+    "Templates/Scripts/Scipt PC sheet analyse.md",
+    "Templates/Scripts/Appearance query change.md",
+    "Knowledge/Testing/Untitled.md",
+    "Knowledge/Testing/Untitled 1.md",
+    "Vault Walking",
     "Raw Data/results.json",
     "Raw Data/results10mil.json",
     "Raw Data/ThreeInTen CSVData.csv",
@@ -210,7 +208,6 @@
     "Knowledge/001 Dataview/DQL/Functions/Utility",
     "Knowledge/001 Dataview/DQL/Functions/String Operations",
     "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations",
-    "Knowledge/001 Dataview/DQL/Functions/Numeric Operations",
     "Attachments/Query Renderings/Grouping of groups in dvjs Elements.png",
     "Canvas/Movie Canvas/Movies.canvas",
     "Canvas/School vault setup.canvas",

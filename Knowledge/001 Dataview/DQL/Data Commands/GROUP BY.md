@@ -24,7 +24,7 @@ after you have used group by you need to use "rows." before each metadata field 
 
 to read more about the background data of group by then read through the [[DataArray.groupBy]] note. it goes into more detail of what is actually happening.
 
-## DQL Overview
+## GROUP BY Overview
 
 ```js 
 TABLE flat(filter(rows.L, (t) => t.text = "Query meta").children.text), embed(filter(flat(filter(rows.L, (t) => t.text = "Query meta").children), (t2) => t2.image).image)[0]

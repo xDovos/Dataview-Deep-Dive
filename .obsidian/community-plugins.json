@@ -13,5 +13,6 @@
   "modules",
   "emoji-shortcodes",
   "cm-editor-syntax-highlight-obsidian",
-  "obsidian-style-settings"
+  "obsidian-style-settings",
+  "obsidian-meta-bind-plugin"
 ]

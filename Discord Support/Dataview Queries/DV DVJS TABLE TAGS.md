@@ -5,7 +5,6 @@ tags: [DV/DVJS, DV/Query]
 self: "[[DV DVJS TABLE TAGS#DV DVJS TABLE TAGS 2 column]]"
 ---
 
-
 ## DV DVJS TABLE TAGS 2 column
 
 ```dataviewjs

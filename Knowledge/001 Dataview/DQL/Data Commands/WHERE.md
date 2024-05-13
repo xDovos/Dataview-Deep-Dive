@@ -38,7 +38,7 @@ one of the most important functions for the WHERE is [[contains]]
 >[!hint]- 
 >In some cases you want to use the filter() function inside the header to filter an Array without affecting the remaining data. more to that here [[filter]]
 
-## DQL Overview
+## WHERE Overview
 
 ```js 
 TABLE flat(filter(rows.L, (t) => t.text = "Query meta").children.text), embed(filter(flat(filter(rows.L, (t) => t.text = "Query meta").children), (t2) => t2.image).image)[0]
