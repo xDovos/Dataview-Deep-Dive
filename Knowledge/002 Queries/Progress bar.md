@@ -247,7 +247,7 @@ dv.table(["Name", "Modified", "progress bar"], data)
 ```dataviewjs
 function newBar(start, end, now){
     const value = Number(((now- start)*100)/(end-start)).toFixed("2")
-    const remTime = Duration.fromMillis(end-now).rescale().toHuman({ unitDisplay: "long" }).split(",").slice(0,4)
+    const remTime = dv.luxon.Duration.fromMillis(end-now).rescale().toHuman({ unitDisplay: "long" }).split(",").slice(0,4)
     return "<progress value='" + value + "' max='100'></progress>" + 
     	"<span>" + value + "% &nbsp;| &nbsp;" + remTime + " left</span>"
 }
@@ -263,7 +263,7 @@ data.push(["Day", newBar(dv.date("yesterday").toMillis(), dv.date("tomorrow").to
 data.push(["Week", newBar(dv.date("sow"), dv.date("eow"), dv.date("now"))])
 data.push(["Month", newBar(dv.date("som"), dv.date("eom"), dv.date("now"))])
 data.push(["Year", newBar(dv.date("soy"), dv.date("eoy"), dv.date("now"))])
-data.push(["BDay", newBar(dv.date("2023-03-04").toMillis(), dv.date("2024-03-04").toMillis(), dv.date("now"))])
+data.push(["BDay", newBar(dv.date("2024-03-04").toMillis(), dv.date("2025-03-04").toMillis(), dv.date("now"))])
 data.push(["Live", liveBar(dv.date("1999-03-04").toMillis(), dv.date("today").toMillis(), dv.date("today").toMillis())])
 
 dv.table(["Name", "Bar"], data)

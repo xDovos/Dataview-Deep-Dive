@@ -13,7 +13,45 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Knowledge/002 Queries/tasks inside tables.md",
+                "file": "Knowledge/003 Datacore/Testing/first datacore testing.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "f8524326975f2f1a",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Knowledge/003 Datacore/Testing/test2.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "b2ca946451facceb",
+            "type": "leaf",
+            "state": {
+              "type": "modules:documentation",
+              "state": {
+                "modules:documentation": {
+                  "data": "# obsidian-modules <!-- markdownlint-disable MD024 -->\n\n## 2.4.4\n\n### Patch Changes\n\n- c714551: Nothing changed, but old files were wrongly uploaded to v2.4.3. Fixes [GH#15](https://github.com/polyipseity/obsidian-modules/issues/15).\n\n## 2.4.3\n\n### Patch Changes\n\n- 4dcc45d: (63711193053ae1b850d816b84244f9152b53a407) Fix requiring `@capacitor`.\n\n## 2.4.2\n\n### Patch Changes\n\n- 482abdb: Update dependencies.\n\n## 2.4.1\n\n### Patch Changes\n\n- f59c264: Properly detects TypeScript extensions. Fixes [GH#7](https://github.com/polyipseity/obsidian-modules/issues/7), which is about failing to import TypeScript modules on newer versions of Obsidian. ([GH#8](https://github.com/polyipseity/obsidian-modules/pull/8) by [@mnaoumov](https://github.com/mnaoumov))\n- 976e1aa: Improve error message for unresolved module and loading timeout. ([GH#12](https://github.com/polyipseity/obsidian-modules/pull/12) by [@mnaoumov](https://github.com/mnaoumov))\n\n## 2.4.0\n\n### Minor Changes\n\n- 45f7560: Add startup modules.\n- 24dfc8d: Add `Require#onInvalidate`.\n\n### Patch Changes\n\n- de069e6: Provide `app` to avoid using the deprecated global `app`. For users, nothing needs to be changed.\n- dbef51c: Fix importing from external links not working with custom require name.\n\n## 2.3.0\n\nNo more console spamming and unchecked `data.json` growth!\n\n### Minor Changes\n\n- d724fef: Move settings `recovery` and `lastReadChangelogVersion` to `localStorage`. (6d612c570926387ee6b5991475cb993517a39d45)\n- 307489d: Replace some `Record`s with `Map`s. (<https://2ality.com/2012/01/objects-as-maps.html>)\n\n### Patch Changes\n\n- b496460: Remove debug statements. Addresses [GH#5](https://github.com/polyipseity/obsidian-modules/issues/5). (+f9fc1874e2c0b0b6c486ae6a13e52bf09cef588d)\n\n## 2.2.0\n\n### Minor Changes\n\n- 3b251be: Add cwd detection for `dv.view` in Dataview.\n- ef032bf: Add cwd detection for Templater user scripts.\n- fdbee2f: Add cwd detection for canvases.\n- 2fd4dc4: Change the type and meaning of `null` and `undefined` for working directory. This allows overriding the working directory with no working directory in `CommonOptions`.\n- 5fbad90: Always change the cwd context in preview and editor.\n\n### Patch Changes\n\n- 92b9215: Fix context detection for Templater templates.\n- 004ed2e: Fix weird behaviors if the vault has more than 1000 files. Fixes [GH#4](https://github.com/polyipseity/obsidian-modules/issues/4).\n\n## 2.1.0\n\n### Minor Changes\n\n- 9a7c8b6: Add command \"Clear cache\".\n- 58abf99: Make the public `invalidate` invalidate more things.\n\n### Patch Changes\n\n- fdbca01: Reduce memory usage by up to 75% for preloaded files.\n- 663d9eb: Fix canvas rendering nothing. Fixes [GH#2](https://github.com/polyipseity/obsidian-modules/issues/2).\n\n## 2.0.0\n\n### Major Changes\n\n- 0c567c9: Add TypeScript support.\n\n### Minor Changes\n\n- 97eca08: Add setting \"Require name\".\n- 24ed484: Move more work to workers and improve code.\n- 459125e: Add setting \"Markdown code block languages to load\".\n- a0bea02: Add support for importing external modules via HTTP and HTTPS.\n- 4d79665: Add setting \"Preloading rules\".\n- ccfbf35: Add setting \"Preloaded external links\".\n- f36db52: Use workers to transpile TypeScript if async import is used.\n- 26155df: Add setting \"Expose internal modules\". Cherry-picked from `d22f7bf6182272e3e0058c328ed42ec3039de184`, which is from `obsidian-terminal`.\n- fd1f08c: Add setting `Expose internal modules`.\n- 47c5f65: Allow importing a loading module multiple times. (Deadlocks may result though.)\n- 9b43345: Implement source mapping. Sources are placed under `modules/`.\n- c944a54: Rewrite dependency handling.\n- a85b3b7: Add setting \"Enable external links\".\n- fbcf7d2: Add relative path support for Templater.\n- 0d9ed0f: Make importing from external CDNs work.\n- d0adec9: Add setting \"`import` timeout\".\n\n### Patch Changes\n\n- b5f2d98: Assign `Symbol.toStringTag` to modules.\n- 24cbb1c: Respect existing source maps when source mapping.\n- a286c55: Define `process` so that React can load on mobile.\n- c3a689e: Limit the number of concurrent requests to 6.\n- fa98881: Compress the worker to reduce bundle size.\n- 108639c: Fix plugin potentially failing to load. This may happen if `Community plugins > Debug startup time` is disabled. When it is disabled, Obsidian removes source maps, which erraneously removes JavaScript strings intentionally containinig source map-like content.\n- e06bcf1: Add async `Transpile.atranspile`.\n- b12e8ec: Move parsing to workers.\n- 74c7da3: Prefix source map location with plugin ID.\n\n## 1.1.0\n\n### Minor Changes\n\n- 8e538e7: Add `cwd` option to `require` and `require.import` to manually provide context.\n\n### Patch Changes\n\n- b3791a4: Create `AbstractFileResolve#aresolvePath` so that `metadataCache` is awaited for in async resolve.\n\n## 1.0.2\n\n### Patch Changes\n\n- 48ee70f: Make the `require` patch more compatible with other `require` patches.\n\n## 1.0.1\n\n### Patch Changes\n\n- ab7c316: Fix `require` not working at all.\n- 3f0f57b: Fix dependency tracking, especially circular ones.\n\n## 1.0.0\n\n### Major Changes\n\n- 879a4d6: Implement basic functionalities: vault path resolving, caching, module loading, `require` patching, and an API.\n\n### Minor Changes\n\n- 5fbc6b5: Implement resolving relative paths.\n- ce395a7: Add `Resolve#aresolve` to support resolving files on-demand, making `require.import` support loading any files.\n- c9d0d61: Implement dependency tracking so that modules are transitively reloaded.\n- b37eb32: Implement resolving Markdown links and wikilinks.\n- 7120162: Implement Markdown-to-JavaScript transpiler.\n\n### Patch Changes\n\n- 42f93f2: Remove arbitrary restrictions for resolving vault paths and relative paths.\n- ed74c49: Write usage guide.\n",
+                  "displayTextI18nKey": "translation:generic.documentations.changelog",
+                  "iconI18nKey": "asset:generic.documentations.changelog-icon"
+                }
+              }
+            }
+          },
+          {
+            "id": "0f1adb8c9f1f6ec0",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Vault.md",
                 "mode": "source",
                 "source": false
               }
@@ -29,7 +67,7 @@
     "type": "split",
     "children": [
       {
-        "id": "8b9c0d992891392a",
+        "id": "748d292239b082e2",
         "type": "tabs",
         "children": [
           {
@@ -61,7 +99,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 331.5
+    "width": 329.5
   },
   "right": {
     "id": "ecef1c29964ce48c",
@@ -77,7 +115,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Knowledge/002 Queries/tasks inside tables.md",
+                "file": "Knowledge/003 Datacore/Testing/first datacore testing.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -94,7 +132,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Knowledge/002 Queries/tasks inside tables.md",
+                "file": "Knowledge/003 Datacore/Testing/first datacore testing.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -117,7 +155,7 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Knowledge/002 Queries/tasks inside tables.md"
+                "file": "Knowledge/003 Datacore/Testing/first datacore testing.md"
               }
             }
           },
@@ -139,12 +177,12 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Knowledge/002 Queries/tasks inside tables.md"
+                "file": "Knowledge/003 Datacore/Testing/first datacore testing.md"
               }
             }
           },
           {
-            "id": "c72e8c182ae9d669",
+            "id": "8fc97c01fb4a691b",
             "type": "leaf",
             "state": {
               "type": "quiet-outline",
@@ -156,46 +194,49 @@
       }
     ],
     "direction": "horizontal",
-    "width": 329.5
+    "width": 453.5
   },
   "left-ribbon": {
     "hiddenItems": {
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
       "command-palette:Open command palette": false,
-      "templater-obsidian:Templater": false,
+      "obsidian42-brat:BRAT": false,
       "darlal-switcher-plus:Open in Headings Mode": false,
-      "darlal-switcher-plus:Open Symbols for the active editor": false
+      "darlal-switcher-plus:Open Symbols for the active editor": false,
+      "templater-obsidian:Templater": false
     }
   },
-  "active": "ca8080c2bb975b4b",
+  "active": "6be23f01fafe8381",
   "lastOpenFiles": [
-    "Knowledge/002 Queries/Progress bar.md",
-    "Knowledge/002 Queries/tasks inside tables.md",
+    "Knowledge/003 Datacore/Testing/test2.md",
+    "Knowledge/003 Datacore/Testing/first datacore testing.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/TABLE.md",
+    "Knowledge/002 Queries/unsorted queries.md",
+    "Knowledge/002 Queries/All properties and values.md",
+    "Knowledge/002 Queries/Amount of inlinks and outlinks.md",
+    "Knowledge/002 Queries/Combining queries.md",
     "Knowledge/002 Queries/DVJS with custom Functions.md",
+    "Knowledge/002 Queries/Obsidian Charts Queries.md",
+    "Knowledge/002 Queries/Progress bar.md",
+    "Knowledge/002 Queries/Query switching.md",
+    "Knowledge/001 Dataview/How dataview works.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
+    "Vault.md",
+    "Knowledge/003 Datacore/Testing",
+    "Knowledge/003 Datacore",
+    "Knowledge/People/@Danny Hatcher.md",
+    "Templates/Template Standard Note.md",
+    "Templates/Template People.md",
+    "Templates/Scripts/Appending headers to the tasks.md",
+    "Templates/Scripts/Appearance query change.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/FROM.md",
+    "Code Modules/modulePB.js.md",
+    "Knowledge/002 Queries/tasks inside tables.md",
+    "Knowledge/002 Queries/Yearly overview of completed tasks 1.md",
+    "Knowledge/002 Queries/Yearly overview of completed tasks.md",
     "Knowledge/Testing/testing.md",
     "Knowledge/000 MOC/Dataview Overview.md",
-    "Knowledge/000 MOC/MOC People.md",
-    "Knowledge/000 MOC/Movies.md",
-    "Archive/1 Lottery games Script broken.md",
-    "Journal/Weekly/2023/2023-W31.md",
-    "Discord Support/Dataview Data/Tests/👍📚 Books.md",
-    "Knowledge/002 Queries/Better Word count.md",
-    "Knowledge/Testing/Untitled 1 1.md",
-    "Knowledge/002 Queries/Amount of inlinks and outlinks.md",
-    "Knowledge/002 Queries/unsorted queries.md",
-    "Vault.md",
-    "Untitled.md",
-    "tests.md",
-    "Knowledge/002 Queries/Yearly overview of completed tasks.md",
-    "Knowledge/002 Queries/Templater with dataview.md",
-    "Templates/Scripts/Appending headers to the tasks.md",
-    "Templates/Scripts/Dataview to csv converter.md",
-    "Templates/Scripts/Player character sheet creation .md",
-    "Templates/Scripts/Scipt PC sheet analyse.md",
-    "Templates/Scripts/Appearance query change.md",
-    "Knowledge/Testing/Untitled.md",
-    "Knowledge/Testing/Untitled 1.md",
     "Vault Walking",
     "Raw Data/results.json",
     "Raw Data/results10mil.json",
@@ -206,8 +247,6 @@
     "Knowledge/Testing",
     "Knowledge/002 Queries/Datasets",
     "Knowledge/001 Dataview/DQL/Functions/Utility",
-    "Knowledge/001 Dataview/DQL/Functions/String Operations",
-    "Knowledge/001 Dataview/DQL/Functions/Object, Arrays and String Operations",
     "Attachments/Query Renderings/Grouping of groups in dvjs Elements.png",
     "Canvas/Movie Canvas/Movies.canvas",
     "Canvas/School vault setup.canvas",

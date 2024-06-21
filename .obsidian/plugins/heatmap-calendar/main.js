@@ -179,10 +179,26 @@ var HeatmapCalendarSettingsTab = class extends import_obsidian.PluginSettingTab 
       return false;
     }
   }
+  displayWeekStartDaySettings() {
+    const { containerEl } = this;
+    new import_obsidian.Setting(containerEl).setName("Week Start Day").setDesc("Select the day on which your week starts.").addDropdown((dropdown) => dropdown.addOptions({
+      0: "Sunday",
+      1: "Monday",
+      2: "Tuesday",
+      3: "Wednesday",
+      4: "Thursday",
+      5: "Friday",
+      6: "Saturday"
+    }).setValue(this.plugin.settings.weekStartDay.toString()).onChange((value) => __async(this, null, function* () {
+      this.plugin.settings.weekStartDay = +value;
+      yield this.plugin.saveSettings();
+    })));
+  }
   display() {
     const { containerEl } = this;
     containerEl.empty();
     containerEl.createEl("h2", { text: "Heatmap Calendar Settings" });
+    this.displayWeekStartDaySettings();
     this.displayColorSettings();
     console.log("settings", this.plugin.settings);
   }
@@ -198,7 +214,8 @@ var DEFAULT_SETTINGS = {
   showCurrentDayBorder: true,
   defaultEntryIntensity: 4,
   intensityScaleStart: 1,
-  intensityScaleEnd: 5
+  intensityScaleEnd: 5,
+  weekStartDay: 1
 };
 var HeatmapCalendar = class extends import_obsidian2.Plugin {
   getHowManyDaysIntoYear(date) {
@@ -219,12 +236,15 @@ var HeatmapCalendar = class extends import_obsidian2.Plugin {
     const mapped = (current - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
     return this.clamp(mapped, outMin, outMax);
   }
+  getWeekdayShort(dayNumber) {
+    return new Date(1970, 0, dayNumber + this.settings.weekStartDay + 4).toLocaleDateString("en-US", { weekday: "short" });
+  }
   onload() {
     return __async(this, null, function* () {
       yield this.loadSettings();
       this.addSettingTab(new HeatmapCalendarSettingsTab(this.app, this));
       window.renderHeatmapCalendar = (el, calendarData) => {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k;
         const year = (_a = calendarData.year) != null ? _a : this.settings.year;
         const colors = typeof calendarData.colors === "string" ? this.settings.colors[calendarData.colors] ? { [calendarData.colors]: this.settings.colors[calendarData.colors] } : this.settings.colors : (_b = calendarData.colors) != null ? _b : this.settings.colors;
         this.removeHtmlElementsNotInYear(calendarData.entries, year);
@@ -251,7 +271,7 @@ var HeatmapCalendar = class extends import_obsidian2.Plugin {
           mappedEntries[this.getHowManyDaysIntoYear(new Date(e.date))] = newEntry;
         });
         const firstDayOfYear = new Date(Date.UTC(year, 0, 1));
-        let numberOfEmptyDaysBeforeYearBegins = (firstDayOfYear.getUTCDay() + 6) % 7;
+        let numberOfEmptyDaysBeforeYearBegins = (firstDayOfYear.getUTCDay() + 7 - this.settings.weekStartDay) % 7;
         const boxes = [];
         while (numberOfEmptyDaysBeforeYearBegins) {
           boxes.push({ backgroundColor: "transparent" });
@@ -264,10 +284,13 @@ var HeatmapCalendar = class extends import_obsidian2.Plugin {
           const box = {
             classNames: []
           };
+          const currentDate = new Date(year, 0, day);
+          const month = currentDate.toLocaleString("en-us", { month: "short" });
+          (_h = box.classNames) == null ? void 0 : _h.push(`month-${month.toLowerCase()}`);
           if (day === todaysDayNumberLocal && showCurrentDayBorder)
-            (_h = box.classNames) == null ? void 0 : _h.push("today");
+            (_i = box.classNames) == null ? void 0 : _i.push("today");
           if (mappedEntries[day]) {
-            (_i = box.classNames) == null ? void 0 : _i.push("hasData");
+            (_j = box.classNames) == null ? void 0 : _j.push("hasData");
             const entry = mappedEntries[day];
             box.date = entry.date;
             if (entry.content)
@@ -275,7 +298,7 @@ var HeatmapCalendar = class extends import_obsidian2.Plugin {
             const currentDayColors = entry.color ? colors[entry.color] : colors[Object.keys(colors)[0]];
             box.backgroundColor = currentDayColors[entry.intensity - 1];
           } else
-            (_j = box.classNames) == null ? void 0 : _j.push("isEmpty");
+            (_k = box.classNames) == null ? void 0 : _k.push("isEmpty");
           boxes.push(box);
         }
         const heatmapCalendarGraphDiv = createDiv({
@@ -307,13 +330,9 @@ var HeatmapCalendar = class extends import_obsidian2.Plugin {
           cls: "heatmap-calendar-days",
           parent: heatmapCalendarGraphDiv
         });
-        createEl("li", { text: "Mon", parent: heatmapCalendarDaysUl });
-        createEl("li", { text: "Tue", parent: heatmapCalendarDaysUl });
-        createEl("li", { text: "Wed", parent: heatmapCalendarDaysUl });
-        createEl("li", { text: "Thu", parent: heatmapCalendarDaysUl });
-        createEl("li", { text: "Fri", parent: heatmapCalendarDaysUl });
-        createEl("li", { text: "Sat", parent: heatmapCalendarDaysUl });
-        createEl("li", { text: "Sun", parent: heatmapCalendarDaysUl });
+        for (let i = 0; i < 7; i++) {
+          createEl("li", { text: this.getWeekdayShort(i), parent: heatmapCalendarDaysUl });
+        }
         const heatmapCalendarBoxesUl = createEl("ul", {
           cls: "heatmap-calendar-boxes",
           parent: heatmapCalendarGraphDiv
