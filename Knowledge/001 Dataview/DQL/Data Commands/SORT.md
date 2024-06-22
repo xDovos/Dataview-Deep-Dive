@@ -40,8 +40,6 @@ SORT default(((x) => {
 where "field_to_sort" is the field you want to sort by.
 the Genres are an example of how to add values to it. note: upper/lower case does matter.
 
-
-
 ## SORT Overview
 
 ```js 

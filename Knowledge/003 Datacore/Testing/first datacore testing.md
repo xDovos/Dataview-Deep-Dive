@@ -6,8 +6,25 @@ MOC:
 
 status:: `$=return(await self.require.import("Code Modules/modulePB.js.md")).PBSingleNoteHeader(dv, "first datacore testing", "Status Tasks")`
 
+
+```datacorejsx
+return function View() {
+    const current = dc.useCurrentFile();
+    //const tasks = dc.useQuery(`@task and $completed`)
+    const allTasks = current.$sections.filter(s => s.$title == "Status Tasks").map(s => s.$blocks).flat().filter(b => b.$type == "list").map(l => l.$elements).flat();
+    const completedTasks = allTasks.filter(t => t.$completed).length;
+    return (
+        <span style="margin: 4px; padding: 4px;">
+            <progress value ={completedTasks} max ={allTasks.length}/>
+            {Math.round(completedTasks / allTasks.length * 100 )}% | {allTasks.length - completedTasks} left
+        </span>
+    );
+}
+```
+
+
 ###### Status Tasks
-- [ ] Create the Note
+- [x] Create the Note ✅ 2024-06-22
 - [ ] Write the YAML metadata
 - [ ] Write the Note
 
@@ -151,7 +168,7 @@ return function View() {
 }
 ```
 
-```datacorejsx
+```sdatacorejsx
 return function View() {
     const current = dc.useCurrentFile();
     const incoming = dc.useQuery(`@page and linksto(id("${current.$path}"))`).filter(entry => entry.$link);
@@ -185,11 +202,12 @@ return function View() {
 ```
 
 
+
 [[Progress bar]]
 [[DVJS with custom Functions]]
 
 
-```datacorejsx
+```sdatacorejsx
 // Config header and also query string here.
 // Support sort and also filter box.
 const query = `@page and #game `;

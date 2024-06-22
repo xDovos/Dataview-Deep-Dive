@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Knowledge/003 Datacore/Testing/first datacore testing.md",
+                "file": "Knowledge/002 Queries/Progress bar.md",
                 "mode": "source",
                 "source": false
               }
@@ -115,7 +115,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Knowledge/003 Datacore/Testing/first datacore testing.md",
+                "file": "Knowledge/002 Queries/Progress bar.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -132,7 +132,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Knowledge/003 Datacore/Testing/first datacore testing.md",
+                "file": "Knowledge/002 Queries/Progress bar.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -155,7 +155,7 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Knowledge/003 Datacore/Testing/first datacore testing.md"
+                "file": "Knowledge/002 Queries/Progress bar.md"
               }
             }
           },
@@ -177,7 +177,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Knowledge/003 Datacore/Testing/first datacore testing.md"
+                "file": "Knowledge/002 Queries/Progress bar.md"
               }
             }
           },
@@ -207,10 +207,28 @@
       "templater-obsidian:Templater": false
     }
   },
-  "active": "6be23f01fafe8381",
+  "active": "ca8080c2bb975b4b",
   "lastOpenFiles": [
-    "Knowledge/003 Datacore/Testing/test2.md",
+    "Knowledge/000 MOC/MOC People.md",
+    "Knowledge/000 MOC/Movies.md",
+    "Knowledge/000 MOC/Dataview Overview.md",
+    "Knowledge/001 Dataview/DQL/DQL.md",
+    "Vault.md",
     "Knowledge/003 Datacore/Testing/first datacore testing.md",
+    "Knowledge/001 Dataview/How dataview works.md",
+    "Knowledge/002 Queries/Progress bar.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/LIST.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/SORT.md",
+    "Knowledge/003 Datacore/Testing/test2.md",
+    "Templates/Template Standard Note.md",
+    "Data/Receips/Bread.md",
+    "Data/Ingredients/Water.md",
+    "Knowledge/001 Dataview/DQL/Data Commands/GROUP BY.md",
+    "Knowledge/001 Dataview/DQL/Functions/Utility/meta.md",
+    "Data/Ingredients",
+    "Data/Receips",
+    "Data",
     "Knowledge/001 Dataview/DQL/Data Commands/TABLE.md",
     "Knowledge/002 Queries/unsorted queries.md",
     "Knowledge/002 Queries/All properties and values.md",
@@ -218,25 +236,10 @@
     "Knowledge/002 Queries/Combining queries.md",
     "Knowledge/002 Queries/DVJS with custom Functions.md",
     "Knowledge/002 Queries/Obsidian Charts Queries.md",
-    "Knowledge/002 Queries/Progress bar.md",
     "Knowledge/002 Queries/Query switching.md",
-    "Knowledge/001 Dataview/How dataview works.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
-    "Vault.md",
     "Knowledge/003 Datacore/Testing",
     "Knowledge/003 Datacore",
     "Knowledge/People/@Danny Hatcher.md",
-    "Templates/Template Standard Note.md",
-    "Templates/Template People.md",
-    "Templates/Scripts/Appending headers to the tasks.md",
-    "Templates/Scripts/Appearance query change.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/FROM.md",
-    "Code Modules/modulePB.js.md",
-    "Knowledge/002 Queries/tasks inside tables.md",
-    "Knowledge/002 Queries/Yearly overview of completed tasks 1.md",
-    "Knowledge/002 Queries/Yearly overview of completed tasks.md",
-    "Knowledge/Testing/testing.md",
-    "Knowledge/000 MOC/Dataview Overview.md",
     "Vault Walking",
     "Raw Data/results.json",
     "Raw Data/results10mil.json",
@@ -244,9 +247,6 @@
     "Raw Data/data.csv",
     "Pasted image 20231122040741.png",
     "Pasted image 20231103153020.png",
-    "Knowledge/Testing",
-    "Knowledge/002 Queries/Datasets",
-    "Knowledge/001 Dataview/DQL/Functions/Utility",
     "Attachments/Query Renderings/Grouping of groups in dvjs Elements.png",
     "Canvas/Movie Canvas/Movies.canvas",
     "Canvas/School vault setup.canvas",
