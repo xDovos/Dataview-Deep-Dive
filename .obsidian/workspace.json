@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Knowledge/002 Queries/Progress bar.md",
+                "file": "Knowledge/003 Datacore/Testing/first datacore testing.md",
                 "mode": "source",
                 "source": false
               }
@@ -51,13 +51,38 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Vault.md",
+                "file": "Knowledge/002 Queries/Dataview/Side bar query note.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "c88770245c982737",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Knowledge/003 Datacore/Testing/Nested Metadata.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "29d83effe8d9b17f",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Knowledge/002 Queries/Dataview/DVJS with custom Functions.md",
                 "mode": "source",
                 "source": false
               }
             }
           }
-        ]
+        ],
+        "currentTab": 4
       }
     ],
     "direction": "vertical"
@@ -115,7 +140,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Knowledge/002 Queries/Progress bar.md",
+                "file": "Knowledge/003 Datacore/Testing/Nested Metadata.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -132,7 +157,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Knowledge/002 Queries/Progress bar.md",
+                "file": "Knowledge/003 Datacore/Testing/Nested Metadata.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -155,7 +180,7 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Knowledge/002 Queries/Progress bar.md"
+                "file": "Knowledge/003 Datacore/Testing/Nested Metadata.md"
               }
             }
           },
@@ -177,24 +202,17 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Knowledge/002 Queries/Progress bar.md"
+                "file": "Knowledge/003 Datacore/Testing/Nested Metadata.md"
               }
-            }
-          },
-          {
-            "id": "8fc97c01fb4a691b",
-            "type": "leaf",
-            "state": {
-              "type": "quiet-outline",
-              "state": {}
             }
           }
         ],
-        "currentTab": 6
+        "currentTab": 5
       }
     ],
     "direction": "horizontal",
-    "width": 453.5
+    "width": 453.5,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -207,44 +225,44 @@
       "templater-obsidian:Templater": false
     }
   },
-  "active": "ca8080c2bb975b4b",
+  "active": "c88770245c982737",
   "lastOpenFiles": [
+    "Knowledge/003 Datacore/Testing/first datacore testing.md",
+    "Knowledge/003 Datacore/Testing/Nested Metadata.md",
+    "Knowledge/002 Queries/Dataview/unsorted queries.md",
+    "Knowledge/002 Queries/Dataview/All properties and values.md",
+    "Knowledge/002 Queries/Dataview/Rendering Lines With tags.md",
+    "Knowledge/002 Queries/Dataview/DVJS with custom Functions.md",
+    "Vault.md",
+    "Knowledge/002 Queries/Dataview/Yearly overview of completed tasks.md",
+    "Knowledge/002 Queries/Dataview/ThreeInTen Analysis.md",
+    "Knowledge/002 Queries/Dataview/Templater with dataview.md",
+    "Knowledge/002 Queries/Dataview/tasks inside tables.md",
+    "Knowledge/002 Queries/Dataview/Tasks Completion date.md",
+    "Knowledge/002 Queries/Dataview/Side bar query note.md",
+    "Knowledge/002 Queries/Dataview/Query switching.md",
+    "Knowledge/002 Queries/Dataview/Query Query.md",
+    "Knowledge/002 Queries/Dataview/Progress bar.md",
+    "Knowledge/002 Queries/Dataview/Obsidian Charts Queries.md",
+    "Knowledge/002 Queries/Dataview/Combining queries.md",
+    "Knowledge/002 Queries/Dataview/Better Word count.md",
+    "Knowledge/002 Queries/Dataview/Amount of inlinks and outlinks.md",
+    "Knowledge/002 Queries/Dataview",
+    "Data/Food/Baked",
+    "Data/Food/Vegetables",
+    "Data/Food/Fruids",
+    "Data/Ingredients/Ingredient Water.md",
+    "Data/Receips/Recipe Bread.md",
+    "Knowledge/002 Queries/Progress bar.md",
     "Knowledge/000 MOC/MOC People.md",
     "Knowledge/000 MOC/Movies.md",
     "Knowledge/000 MOC/Dataview Overview.md",
-    "Knowledge/001 Dataview/DQL/DQL.md",
-    "Vault.md",
-    "Knowledge/003 Datacore/Testing/first datacore testing.md",
-    "Knowledge/001 Dataview/How dataview works.md",
-    "Knowledge/002 Queries/Progress bar.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/FLATTEN.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/LIST.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/SORT.md",
-    "Knowledge/003 Datacore/Testing/test2.md",
-    "Templates/Template Standard Note.md",
-    "Data/Receips/Bread.md",
-    "Data/Ingredients/Water.md",
-    "Knowledge/001 Dataview/DQL/Data Commands/GROUP BY.md",
-    "Knowledge/001 Dataview/DQL/Functions/Utility/meta.md",
-    "Data/Ingredients",
+    "Data/Food",
     "Data/Receips",
     "Data",
-    "Knowledge/001 Dataview/DQL/Data Commands/TABLE.md",
-    "Knowledge/002 Queries/unsorted queries.md",
-    "Knowledge/002 Queries/All properties and values.md",
-    "Knowledge/002 Queries/Amount of inlinks and outlinks.md",
-    "Knowledge/002 Queries/Combining queries.md",
-    "Knowledge/002 Queries/DVJS with custom Functions.md",
-    "Knowledge/002 Queries/Obsidian Charts Queries.md",
-    "Knowledge/002 Queries/Query switching.md",
     "Knowledge/003 Datacore/Testing",
     "Knowledge/003 Datacore",
-    "Knowledge/People/@Danny Hatcher.md",
     "Vault Walking",
-    "Raw Data/results.json",
-    "Raw Data/results10mil.json",
-    "Raw Data/ThreeInTen CSVData.csv",
-    "Raw Data/data.csv",
     "Pasted image 20231122040741.png",
     "Pasted image 20231103153020.png",
     "Attachments/Query Renderings/Grouping of groups in dvjs Elements.png",

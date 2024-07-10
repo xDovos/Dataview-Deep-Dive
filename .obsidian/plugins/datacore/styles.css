@@ -1,4 +1,22 @@
-/* src/styles/errors.css */
+/* src/api/ui/embed.css */
+.datacore-span-embed {
+  position: relative;
+  padding: 1px 8px 1px 8px;
+  margin: 4px 0px 4px 0px;
+  background-color: var(--color-base-25);
+}
+.datacore-embed-source {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding-left: 4px;
+  padding-right: 4px;
+  background-color: var(--background-secondary-alt);
+  color: var(--text-faint);
+  font-size: var(--font-smallest);
+}
+
+/* src/ui/errors.css */
 .datacore-error-retry {
   margin-top: 1em;
   text-align: center;
@@ -16,6 +34,22 @@
   text-align: center;
 }
 .datacore-error-message {
+  color: var(--text-muted);
+  text-align: center;
+}
+.datacore-loading-boundary {
+  width: 100%;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 4px dashed var(--background-secondary);
+}
+.datacore-loading-title {
+  text-align: center;
+}
+.datacore-loading-content {
   color: var(--text-muted);
   text-align: center;
 }
@@ -96,6 +130,67 @@
   margin-top: 2px;
   margin-bottom: 2px;
 }
+.dc-checkbox {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  margin: 4px 0;
+  font-size: 16px;
+}
+.dc-checkbox input[type=checkbox] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+.dc-checkbox:hover {
+  opacity: 0.8;
+}
+.dc-checkbox input[type=checkbox]:focus {
+  outline: none;
+  box-shadow: var(--shadow-s);
+}
+.dc-checkbox-disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.dc-checkbox-disabled input[type=checkbox] {
+  cursor: not-allowed;
+}
+.dc-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  transition: background 0.3s;
+}
+.dc-switch.dc-switch-disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.dc-icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* src/api/ui/views/paging.css */
+.dc-paging-control {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+.dc-paging-control-page {
+  padding: 0.5em;
+  margin: 0.5em;
+  border-radius: 0.25em;
+  cursor: pointer;
+  background-color: none;
+}
+.dc-paging-control-page:hover {
+  background-color: var(--text-selection) !important;
+}
+.dc-paging-control-page-active {
+  background-color: var(--text-selection) !important;
+}
 
 /* src/api/ui/views/table.css */
 .datacore-table {
@@ -145,24 +240,9 @@
   flex-grow: 1;
 }
 
-/* src/api/ui/views/paging.css */
-.dc-paging-control {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/* src/api/ui/views/callout.css */
+.datacore .callout-content {
+  transition: all 100ms cubic-bezier(0.02, 0.01, 0.47, 1);
   margin-top: 10px;
-}
-.dc-paging-control-page {
-  padding: 0.5em;
-  margin: 0.5em;
-  border-radius: 0.25em;
-  cursor: pointer;
-  background-color: none;
-}
-.dc-paging-control-page:hover {
-  background-color: var(--text-selection) !important;
-}
-.dc-paging-control-page-active {
-  background-color: var(--text-selection) !important;
+  margin-bottom: 10px;
 }
